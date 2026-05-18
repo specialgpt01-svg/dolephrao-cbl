@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>LOFT LEARN | สกร.อำเภอพร้าว</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Cropper.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'navy-deep': '#0B0742',
+            'navy-dk':   '#120C6E',
+            'blue-app':  '#5E72EB',
+            'coral':     '#FF9190',
+            'peach':     '#FDC094',
+            'gold':      '#FFD700',
+          },
+          fontFamily: { prompt: ['Prompt','sans-serif'] }
+        }
+      },
+      corePlugins: { preflight: false }
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ─── Top-right Buttons ─────────────────────────────── -->
+  <div id="system-top-right-actions"
+       class="hidden fixed top-4 right-4 z-[9999] flex gap-2"
+       style="display:none;">
+    <button class="icon-btn btn-theme" onclick="toggleTheme()" title="สลับธีม">
+      <i class="fas fa-moon"></i>
+    </button>
+    <button class="icon-btn btn-logout" onclick="logout()" title="ออกจากระบบ">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LOGIN PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="login-page" class="page-section">
+    <div class="loft-card">
+      <!-- Game mascot / logo -->
+      <div class="text-center mb-4">
+        <div class="login-logo">🎮</div>
+        <h2 class="text-2xl font-black tracking-wide mb-1">LOFT LEARN</h2>
+        <p class="text-muted text-sm">สกร.อำเภอพร้าว &nbsp;·&nbsp; เรียนรู้ชุมชน</p>
+      </div>
+
+      <!-- Decorative divider -->
+      <div class="flex items-center gap-2 mb-5">
+        <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(94,114,235,.4))"></div>
+        <span class="text-xs font-bold tracking-widest" style="color:var(--coral)">SIGN IN</span>
+        <div class="flex-1 h-px" style="background:linear-gradient(270deg,transparent,rgba(94,114,235,.4))"></div>
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-mobile-alt"></i>
+        <input type="tel" id="login-phone" placeholder="เบอร์โทรศัพท์ 10 หลัก" maxlength="10">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="login-password" placeholder="รหัสผ่าน">
+      </div>
+      <button class="btn-primary w-100 mt-4" onclick="handleLogin()">
+        <i class="fas fa-gamepad mr-2"></i>เข้าสู่ระบบ
+      </button>
+      <p class="text-center mt-3 text-sm" style="color:var(--text-soft)">
+        ยังไม่มีบัญชี?
+        <a href="#" onclick="showPage('register-page')" class="font-bold" style="color:var(--coral)">
+          สมัครสมาชิก <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       REGISTER PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="register-page" class="page-section" style="display:none;">
+    <div class="loft-card">
+      <div class="text-center mb-5">
+        <div class="login-logo">🌟</div>
+        <h2 class="text-2xl font-black mb-1">สร้างบัญชีใหม่</h2>
+        <p class="text-muted text-sm">เปิดโลกการเรียนรู้ในชุมชน</p>
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="reg-fullname" placeholder="ชื่อ – นามสกุล">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-mobile-alt"></i>
+        <input type="tel" id="reg-phone" placeholder="เบอร์โทรศัพท์" maxlength="10">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-map-marker-alt"></i>
+        <select id="reg-tambon">
+          <option value="">— เลือกตำบลของคุณ —</option>
+          <option value="เวียง">เวียง</option>
+          <option value="ทุ่งหลวง">ทุ่งหลวง</option>
+          <option value="ป่าตุ้ม">ป่าตุ้ม</option>
+          <option value="ป่าไหน่">ป่าไหน่</option>
+          <option value="สันทราย">สันทราย</option>
+          <option value="บ้านโป่ง">บ้านโป่ง</option>
+          <option value="น้ำแพร่">น้ำแพร่</option>
+          <option value="เขื่อนผาก">เขื่อนผาก</option>
+          <option value="แม่แวน">แม่แวน</option>
+          <option value="แม่ปั๋ง">แม่ปั๋ง</option>
+          <option value="โหล่งขอด">โหล่งขอด</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่าน">
+      </div>
+      <button class="btn-primary w-100 mt-4" onclick="handleRegister()">
+        <i class="fas fa-rocket mr-2"></i>สมัครสมาชิก
+      </button>
+      <p class="text-center mt-3 text-sm" style="color:var(--text-soft)">
+        มีบัญชีแล้ว?
+        <a href="#" onclick="showPage('login-page')" class="font-bold" style="color:var(--coral)">
+          เข้าสู่ระบบ <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HOME PAGE — Agency Activities
+  ═══════════════════════════════════════════════════════ -->
+  <div id="home-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <h3><i class="fas fa-bullhorn mr-2" style="color:var(--peach)"></i>ข่าวและกิจกรรม กศน.อำเภอพร้าว</h3>
+      <div class="user-badge" id="header-user-name">
+        <i class="fas fa-user-circle mr-1" style="color:var(--coral)"></i>User
+      </div>
+    </div>
+
+    <div class="px-4 mt-4 pb-4">
+      <div class="loft-card" style="margin:0 0 16px;">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fas fa-star" style="color:var(--gold)"></i>
+          <h4 class="font-bold text-white">กิจกรรมเด่นของหน่วยงาน</h4>
+        </div>
+        <div id="home-featured-container">
+          <div class="text-center text-muted py-3">
+            <i class="fas fa-circle-notch fa-spin mr-1" style="color:var(--primary)"></i> กำลังโหลดกิจกรรมเด่น...
+          </div>
+        </div>
+      </div>
+
+      <div class="loft-card" style="margin:0;">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-calendar-alt" style="color:var(--coral)"></i>
+            <h4 class="font-bold text-white">กิจกรรมรายไตรมาส</h4>
+          </div>
+          <span id="home-quarter-label" class="user-badge" style="padding:4px 10px;">Q1/2569</span>
+        </div>
+
+        <div class="flex gap-2 mb-3">
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-calendar-day"></i>
+            <select id="home-month-filter" onchange="onHomeFilterChange()">
+              <option value="">เลือกเดือน</option>
+              <option value="0">มกราคม</option>
+              <option value="1">กุมภาพันธ์</option>
+              <option value="2">มีนาคม</option>
+              <option value="3">เมษายน</option>
+              <option value="4">พฤษภาคม</option>
+              <option value="5">มิถุนายน</option>
+              <option value="6">กรกฎาคม</option>
+              <option value="7">สิงหาคม</option>
+              <option value="8">กันยายน</option>
+              <option value="9">ตุลาคม</option>
+              <option value="10">พฤศจิกายน</option>
+              <option value="11">ธันวาคม</option>
+            </select>
+          </div>
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-filter"></i>
+            <select id="home-area-filter" onchange="renderHomeActivities()">
+              <option value="">ทุกพื้นที่</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="home-activities-container">
+          <div class="text-center text-muted py-3">
+            <i class="fas fa-circle-notch fa-spin mr-1" style="color:var(--primary)"></i> กำลังโหลดกิจกรรม...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAP PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="map-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center;">
+      <h3><i class="fas fa-globe-asia mr-2" style="color:var(--peach)"></i>แผนที่แหล่งเรียนรู้</h3>
+    </div>
+    <div id="overall-map" style="width:100%; height:calc(100vh - 140px); z-index:1;"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       DETAIL PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="detail-page" class="page-section" style="display:none;">
+    <div class="back-button" onclick="showPage('home-page')">
+      <i class="fas fa-chevron-left"></i> ย้อนกลับ
+    </div>
+    <div id="detail-cover" class="detail-cover"
+         style="background-image:url('https://via.placeholder.com/500x300');">
+      <div class="detail-title-overlay">
+        <span class="tambon-badge" id="detail-tambon">ตำบล...</span>
+        <h2 id="detail-title" class="text-white font-black text-xl mt-1">ชื่อแหล่งเรียนรู้</h2>
+      </div>
+    </div>
+    <div class="detail-content-area" id="detail-content-container">
+      <div class="flex flex-col items-center gap-3 mt-10" style="color:var(--text-soft)">
+        <i class="fas fa-circle-notch fa-spin text-3xl" style="color:var(--primary)"></i>
+        <p>กำลังโหลดเนื้อหา…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       QUIZ PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="quiz-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <h3><i class="fas fa-brain mr-2" style="color:var(--peach)"></i>แบบทดสอบ</h3>
+      <button class="back-button" style="position:relative;top:0;left:0;padding:6px 14px;font-size:.8rem;"
+              onclick="showPage('detail-page')">
+        <i class="fas fa-times"></i> ออก
+      </button>
+    </div>
+
+    <div class="quiz-container">
+      <!-- Progress bar -->
+      <div class="progress-container">
+        <div id="quiz-progress-bar" class="progress-bar"></div>
+      </div>
+
+      <!-- Counter badge -->
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-muted text-sm">ข้อที่ <strong id="current-q-num" class="text-white">1</strong></span>
+        <span class="text-muted text-sm">จาก <strong id="total-q-num" class="text-white">10</strong></span>
+      </div>
+
+      <!-- Question -->
+      <div class="question-box">
+        <h3 id="quiz-question">คำถามจะแสดงที่นี่?</h3>
+      </div>
+
+      <!-- Choices -->
+      <div class="choices-container">
+        <button class="choice-btn" onclick="selectChoice('A',this)" id="choice-A">
+          <span class="choice-letter">ก</span> ตัวเลือก A
+        </button>
+        <button class="choice-btn" onclick="selectChoice('B',this)" id="choice-B">
+          <span class="choice-letter">ข</span> ตัวเลือก B
+        </button>
+        <button class="choice-btn" onclick="selectChoice('C',this)" id="choice-C">
+          <span class="choice-letter">ค</span> ตัวเลือก C
+        </button>
+        <button class="choice-btn" onclick="selectChoice('D',this)" id="choice-D">
+          <span class="choice-letter">ง</span> ตัวเลือก D
+        </button>
+      </div>
+
+      <button class="btn-primary w-100 mt-5" id="btn-next-question"
+              onclick="nextQuestion()" disabled style="opacity:.45;">
+        <i class="fas fa-check-circle mr-2"></i>ยืนยันคำตอบ
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       RESULT PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="result-page" class="page-section" style="display:none;">
+    <div class="loft-card text-center" style="margin-top:16vh;">
+      <div id="result-icon" class="text-6xl mb-4" style="animation:bounce 1s ease infinite">🏆</div>
+      <h2 id="result-title" class="text-3xl font-black text-white mb-2">สอบผ่าน!</h2>
+      <p class="text-muted mb-2">คะแนนที่คุณทำได้</p>
+      <div class="my-3" style="font-size:3rem;font-weight:900;color:var(--gold);text-shadow:0 0 30px var(--gold-glow)">
+        <span id="result-score">8</span><span style="font-size:1.5rem;color:var(--text-soft)">/10</span>
+      </div>
+      <p id="result-message" class="text-muted mb-6">คุณได้รับ 100 แต้มสะสม 🎉</p>
+      <button class="btn-primary w-100 mb-3" onclick="showPage('home-page')">
+        <i class="fas fa-home mr-2"></i>กลับหน้าหลัก
+      </button>
+      <button id="btn-retry" class="btn-primary w-100"
+              style="background:rgba(94,114,235,.18);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+              onclick="showPage('detail-page')">
+        <i class="fas fa-redo mr-2"></i>ทบทวนเนื้อหา
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LOG PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="log-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center;">
+      <h3><i class="fas fa-book-open mr-2" style="color:var(--peach)"></i>บันทึกการเรียนรู้</h3>
+    </div>
+
+    <div class="px-4 mt-4 pb-4">
+      <!-- Submit new log -->
+      <div class="loft-card" style="margin:0 0 16px;">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base"
+               style="background:linear-gradient(135deg,var(--primary),var(--coral));box-shadow:var(--shadow-btn)">
+            <i class="fas fa-plus text-white"></i>
+          </div>
+          <h4 class="font-bold" style="color:var(--primary)">ส่งบันทึกกิจกรรมใหม่</h4>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-bookmark"></i>
+          <input type="text" id="log-activity-name" placeholder="ชื่อกิจกรรม / หนังสือที่อ่าน">
+        </div>
+        <div class="mb-3">
+          <textarea id="log-description"
+                    placeholder="เล่าสิ่งที่คุณได้เรียนรู้…" rows="4"></textarea>
+        </div>
+        <button class="btn-primary w-100" onclick="submitLog()">
+          <i class="fas fa-paper-plane mr-2"></i>ส่งให้ครูตรวจ
+        </button>
+      </div>
+
+      <!-- History -->
+      <div class="loft-card" style="margin:0;">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
+               style="background:var(--glass);border:1px solid var(--card-border)">
+            <i class="fas fa-history" style="color:var(--coral)"></i>
+          </div>
+          <h4 class="font-bold text-white">ประวัติการยื่นกิจกรรม</h4>
+        </div>
+
+        <!-- Date filter -->
+        <div class="flex items-center gap-2 mb-4">
+          <input type="date" id="log-start-date"
+                 class="flex-1 rounded-xl px-3 py-2 text-sm font-prompt outline-none"
+                 style="background:var(--input-bg);color:var(--text);border:1.5px solid var(--input-border);">
+          <span class="text-muted text-xs font-bold">ถึง</span>
+          <input type="date" id="log-end-date"
+                 class="flex-1 rounded-xl px-3 py-2 text-sm font-prompt outline-none"
+                 style="background:var(--input-bg);color:var(--text);border:1.5px solid var(--input-border);">
+          <button class="icon-btn btn-theme flex-shrink-0" onclick="loadMyLogs(1)">
+            <i class="fas fa-search text-sm"></i>
+          </button>
+        </div>
+
+        <div id="log-history-container">
+          <div class="text-center text-muted py-5">
+            <i class="fas fa-circle-notch fa-spin text-2xl block mb-2" style="color:var(--primary)"></i>
+            กำลังโหลดประวัติ…
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-between items-center mt-4">
+          <button id="btn-log-prev" onclick="changeLogPage(-1)"
+                  class="btn-primary"
+                  style="padding:6px 14px;border-radius:10px;font-size:.8rem;background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);">
+            <i class="fas fa-chevron-left mr-1"></i>ก่อนหน้า
+          </button>
+          <span id="log-page-info" class="text-muted text-xs">หน้า 1/1</span>
+          <button id="btn-log-next" onclick="changeLogPage(1)"
+                  class="btn-primary"
+                  style="padding:6px 14px;border-radius:10px;font-size:.8rem;background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);">
+            ถัดไป<i class="fas fa-chevron-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       APPROVE PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="approve-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <h3><i class="fas fa-clipboard-check mr-2" style="color:var(--peach)"></i>ตรวจงานนักศึกษา</h3>
+      <span class="user-badge" id="teacher-tambon-badge">ตำบล…</span>
+    </div>
+    <div class="px-4 mt-4">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-clock" style="color:var(--gold)"></i>
+        <h4 class="font-bold text-white">งานที่รอการอนุมัติ</h4>
+      </div>
+      <div id="pending-list-container">
+        <div class="flex flex-col items-center gap-2 mt-10 text-center" style="color:var(--text-soft)">
+          <i class="fas fa-circle-notch fa-spin text-3xl" style="color:var(--primary)"></i>
+          <p>กำลังค้นหางาน…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       DASHBOARD PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="dashboard-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center;">
+      <h3><i class="fas fa-chart-line mr-2" style="color:var(--peach)"></i>แดชบอร์ดภาพรวม</h3>
+    </div>
+
+    <div class="px-4 mt-4 pb-4">
+      <!-- Filter -->
+      <div class="input-group" style="margin-bottom:16px;">
+        <i class="fas fa-filter" style="top:50%;transform:translateY(-50%)"></i>
+        <select id="dash-tambon-filter" onchange="loadDashboard()" style="padding-left:44px;">
+          <option value="ทั้งหมด">🌍 ดูผลรวมทุกตำบล</option>
+          <option value="เวียง">เวียง</option>
+          <option value="ทุ่งหลวง">ทุ่งหลวง</option>
+          <option value="ป่าตุ้ม">ป่าตุ้ม</option>
+          <option value="ป่าไหน่">ป่าไหน่</option>
+          <option value="สันทราย">สันทราย</option>
+          <option value="บ้านโป่ง">บ้านโป่ง</option>
+          <option value="น้ำแพร่">น้ำแพร่</option>
+          <option value="เขื่อนผาก">เขื่อนผาก</option>
+          <option value="แม่แวน">แม่แวน</option>
+          <option value="แม่ปั๋ง">แม่ปั๋ง</option>
+          <option value="โหล่งขอด">โหล่งขอด</option>
+        </select>
+      </div>
+
+      <!-- Stats card -->
+      <div class="loft-card text-center mb-4" style="margin:0 0 16px;">
+        <p class="text-muted text-sm mb-1">จำนวนนักเรียนรู้ในพื้นที่</p>
+        <div class="font-black leading-none mb-1"
+             id="dash-total-users"
+             style="font-size:3.5rem;color:var(--primary);text-shadow:0 0 30px var(--primary-glow)">0</div>
+        <p class="text-muted text-xs font-bold tracking-wider">PLAYERS</p>
+      </div>
+
+      <!-- Ranking -->
+      <div class="loft-card" style="margin:0;">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fas fa-sort-amount-up" style="color:var(--gold)"></i>
+          <h4 class="font-bold text-white">10 อันดับคะแนนยอดเยี่ยม</h4>
+        </div>
+        <p class="text-muted text-xs mb-3">🎮 อ้างอิงระดับจากระบบ ROV / Arena</p>
+        <div id="dash-ranking-container" style="max-height:380px;overflow-y:auto;padding-right:4px;">
+          <div class="text-center py-4" style="color:var(--text-soft)">
+            <i class="fas fa-circle-notch fa-spin" style="color:var(--primary)"></i>
+            กำลังประมวลผล…
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ADMIN PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="admin-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <h3><i class="fas fa-tools mr-2" style="color:var(--peach)"></i>หน้าหลังบ้าน</h3>
+      <span class="user-badge">Admin</span>
+    </div>
+
+    <!-- Admin Tabs Navigation -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('sources')">
+        <i class="fas fa-map-location-dot"></i>
+        <span>แหล่งเรียนรู้</span>
+      </button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('bases')">
+        <i class="fas fa-layer-group"></i>
+        <span>ฐานการเรียนรู้</span>
+      </button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('quizzes')">
+        <i class="fas fa-question-circle"></i>
+        <span>แบบทดสอบ</span>
+      </button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('activities')">
+        <i class="fas fa-calendar-star"></i>
+        <span>กิจกรรม</span>
+      </button>
+    </div>
+
+    <div class="px-4 mt-2 pb-4">
+      <!-- TAB: Sources -->
+      <div id="admin-tab-sources" class="admin-tab-content active">
+        <div class="loft-card admin-card" style="margin:0 0 16px;">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-edit" style="color:var(--primary)"></i>
+            <h4 class="font-bold text-white">เพิ่ม / แก้ไขแหล่งเรียนรู้</h4>
+          </div>
+          <!-- Form content same as before -->
+
+        <div class="input-group">
+          <i class="fas fa-hashtag"></i>
+          <input type="text" id="admin-source-id" placeholder="รหัสแหล่งเรียนรู้" value="(ระบบสร้างอัตโนมัติ)" readonly>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-book"></i>
+          <input type="text" id="admin-source-name" placeholder="ชื่อแหล่งเรียนรู้">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-map-pin"></i>
+          <select id="admin-source-tambon">
+            <option value="">— เลือกตำบล —</option>
+            <option value="เวียง">เวียง</option>
+            <option value="ทุ่งหลวง">ทุ่งหลวง</option>
+            <option value="ป่าตุ้ม">ป่าตุ้ม</option>
+            <option value="ป่าไหน่">ป่าไหน่</option>
+            <option value="สันทราย">สันทราย</option>
+            <option value="บ้านโป่ง">บ้านโป่ง</option>
+            <option value="น้ำแพร่">น้ำแพร่</option>
+            <option value="เขื่อนผาก">เขื่อนผาก</option>
+            <option value="แม่แวน">แม่แวน</option>
+            <option value="แม่ปั๋ง">แม่ปั๋ง</option>
+            <option value="โหล่งขอด">โหล่งขอด</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-image"></i>
+          <input type="text" id="admin-source-cover" placeholder="URL รูปปก">
+        </div>
+        <div class="flex gap-2 mb-3">
+          <input type="file" id="admin-source-cover-file" accept="image/*" style="display:none;" onchange="handleSourceImageUpload(this)">
+          <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="document.getElementById('admin-source-cover-file').click()">
+            <i class="fas fa-upload mr-1"></i>อัปโหลดรูปปก
+          </button>
+          <div id="admin-source-preview" style="width:50px; height:50px; border-radius:8px; background-size:cover; background-position:center; border:1px solid var(--card-border); display:none;"></div>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-location-arrow"></i>
+          <input type="text" id="admin-source-coord" placeholder="พิกัดสถานที่ เช่น 19.346402439253406, 99.2004815317497">
+        </div>
+
+        <textarea id="admin-history" rows="3" placeholder="จุดประสงค์การเรียนรู้"></textarea>
+        <textarea id="admin-result" rows="3" placeholder="เนื้อหา" style="margin-top:10px;"></textarea>
+        <textarea id="admin-contact" rows="2" placeholder="ข้อมูลติดต่อ" style="margin-top:10px;"></textarea>
+
+        <div class="input-group" style="margin-top:10px;">
+          <i class="fas fa-images"></i>
+          <input type="text" id="admin-gallery" placeholder="ลิงก์แกลอรีรูปภาพ">
+        </div>
+        <div class="input-group">
+          <i class="fab fa-youtube"></i>
+          <input type="text" id="admin-external" placeholder="ลิงก์สื่อภายนอก (YouTube/Facebook)">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-map-marked-alt"></i>
+          <input type="text" id="admin-gps" placeholder="พิกัด/ลิงก์แผนที่">
+        </div>
+
+        <input type="hidden" id="admin-edit-mode" value="create">
+        <input type="hidden" id="admin-original-source-id" value="">
+        <div class="flex gap-2 mt-3">
+          <button class="btn-primary flex-1" onclick="saveAdminSource()">
+            <i class="fas fa-save mr-1"></i>บันทึกข้อมูล
+          </button>
+          <button class="btn-primary flex-1"
+                  style="background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+                  onclick="clearAdminForm()">
+            <i class="fas fa-plus mr-1"></i>รายการใหม่
+          </button>
+        </div>
+      </div>
+
+      <div class="loft-card admin-card" style="margin:0;">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h4 class="font-bold text-white"><i class="fas fa-list mr-1" style="color:var(--coral)"></i>รายการแหล่งเรียนรู้</h4>
+          <button class="icon-btn btn-theme" onclick="loadAdminSources()" title="รีเฟรช">
+            <i class="fas fa-sync-alt text-sm"></i>
+          </button>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-search"></i>
+          <input type="text" id="admin-source-search" placeholder="ค้นหาชื่อ/รหัส/ตำบล" oninput="renderAdminSourceList()">
+        </div>
+        <div id="admin-source-list-container" class="mt-2">
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-circle-notch fa-spin"></i> กำลังโหลดข้อมูล...
+          </div>
+        </div>
+      </div>
+    </div> <!-- End TAB: Sources -->
+
+    <!-- TAB: Bases -->
+    <div id="admin-tab-bases" class="admin-tab-content">
+      <div class="loft-card admin-card" style="margin:0 0 16px;">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fas fa-layer-group" style="color:var(--primary)"></i>
+          <h4 class="font-bold text-white">จัดการฐานการเรียนรู้ (Modules)</h4>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-bookmark"></i>
+          <select id="admin-base-source-id" onchange="loadAdminBases()">
+            <option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการฐาน —</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-hashtag"></i>
+          <input type="text" id="admin-base-id" placeholder="รหัสฐานการเรียนรู้" value="(ระบบสร้างอัตโนมัติ)" readonly>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-book"></i>
+          <input type="text" id="admin-base-name" placeholder="ชื่อฐานการเรียนรู้">
+        </div>
+        <textarea id="admin-base-description" rows="2" placeholder="คำอธิบายย่อ"></textarea>
+        <div class="input-group" style="margin-top:10px;">
+          <i class="fas fa-image"></i>
+          <input type="text" id="admin-base-cover" placeholder="URL รูปปกฐาน">
+        </div>
+        <div class="flex gap-2 mb-3">
+          <input type="file" id="admin-base-cover-file" accept="image/*" style="display:none;" onchange="handleBaseImageUpload(this)">
+          <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="document.getElementById('admin-base-cover-file').click()">
+            <i class="fas fa-upload mr-1"></i>อัปโหลดรูปฐาน
+          </button>
+          <div id="admin-base-preview" style="width:50px; height:50px; border-radius:8px; background-size:cover; background-position:center; border:1px solid var(--card-border); display:none;"></div>
+        </div>
+        <div class="admin-base-meta">
+          <div class="input-group mb-0">
+            <i class="fas fa-sort-numeric-up"></i>
+            <input type="number" id="admin-base-order" placeholder="ลำดับแสดงผล">
+          </div>
+          <label class="admin-toggle">
+            <input type="checkbox" id="admin-base-active" checked>
+            <span>เปิดใช้งาน</span>
+          </label>
+        </div>
+
+        <div class="admin-subtitle">รายละเอียดเนื้อหา</div>
+        <textarea id="admin-base-history" rows="3" placeholder="จุดประสงค์การเรียนรู้"></textarea>
+        <textarea id="admin-base-result" rows="3" placeholder="เนื้อหา" style="margin-top:10px;"></textarea>
+        <textarea id="admin-base-contact" rows="2" placeholder="ข้อมูลติดต่อ" style="margin-top:10px;"></textarea>
+
+        <div class="input-group" style="margin-top:10px;">
+          <i class="fas fa-images"></i>
+          <input type="text" id="admin-base-gallery" placeholder="ลิงก์แกลอรีรูปภาพ">
+        </div>
+        <div class="input-group">
+          <i class="fab fa-youtube"></i>
+          <input type="text" id="admin-base-external" placeholder="ลิงก์สื่อภายนอก (YouTube/Facebook)">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-map-marked-alt"></i>
+          <input type="text" id="admin-base-gps" placeholder="พิกัด/ลิงก์แผนที่">
+        </div>
+
+        <input type="hidden" id="admin-base-mode" value="create">
+        <div class="flex gap-2 mt-3">
+          <button class="btn-primary flex-1" onclick="saveAdminBase()">
+            <i class="fas fa-save mr-1"></i>บันทึกฐาน
+          </button>
+          <button class="btn-primary flex-1"
+                  style="background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+                  onclick="clearAdminBaseForm()">
+            <i class="fas fa-eraser mr-1"></i>ล้างฟอร์ม
+          </button>
+        </div>
+      </div>
+
+      <div class="loft-card admin-card" style="margin:0;">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h4 class="font-bold text-white"><i class="fas fa-list mr-1" style="color:var(--coral)"></i>รายการฐานการเรียนรู้</h4>
+          <button class="icon-btn btn-theme" onclick="loadAdminBases()" title="รีเฟรช">
+            <i class="fas fa-sync-alt text-sm"></i>
+          </button>
+        </div>
+        <div class="admin-quiz-tools mt-2">
+          <button class="btn-primary" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="saveAdminBaseOrder()">
+            <i class="fas fa-sort mr-1"></i>บันทึกลำดับ
+          </button>
+        </div>
+        <p class="text-muted text-xs mt-2">ลากการ์ดฐานการเรียนรู้เพื่อสลับลำดับ แล้วกด "บันทึกลำดับ"</p>
+        <div id="admin-base-list-container" class="mt-3">
+          <div class="text-center text-muted py-3">เลือกแหล่งเรียนรู้เพื่อจัดการฐาน</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Quizzes -->
+    <div id="admin-tab-quizzes" class="admin-tab-content">
+      <div class="loft-card admin-card" style="margin:0;">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fas fa-question-circle" style="color:var(--gold)"></i>
+          <h4 class="font-bold text-white">จัดการแบบทดสอบ (Quiz)</h4>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-bookmark"></i>
+          <select id="admin-quiz-source-id" onchange="loadAdminQuizzes()">
+            <option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการข้อสอบ —</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-layer-group"></i>
+          <select id="admin-quiz-base-id" onchange="loadAdminQuizzes()">
+            <option value="">— เลือกฐานการเรียนรู้ —</option>
+          </select>
+        </div>
+
+        <textarea id="admin-quiz-question" rows="3" placeholder="คำถาม"></textarea>
+        <div class="admin-quiz-grid mt-2">
+          <input type="text" id="admin-quiz-choice-a" placeholder="ตัวเลือก A">
+          <input type="text" id="admin-quiz-choice-b" placeholder="ตัวเลือก B">
+          <input type="text" id="admin-quiz-choice-c" placeholder="ตัวเลือก C">
+          <input type="text" id="admin-quiz-choice-d" placeholder="ตัวเลือก D">
+        </div>
+
+        <div class="input-group mt-2">
+          <i class="fas fa-check-circle"></i>
+          <select id="admin-quiz-answer">
+            <option value="A">เฉลย: A</option>
+            <option value="B">เฉลย: B</option>
+            <option value="C">เฉลย: C</option>
+            <option value="D">เฉลย: D</option>
+          </select>
+        </div>
+
+        <input type="hidden" id="admin-quiz-mode" value="create">
+        <input type="hidden" id="admin-quiz-id" value="">
+        <div class="flex gap-2 mt-2">
+          <button class="btn-primary flex-1" onclick="saveAdminQuiz()">
+            <i class="fas fa-save mr-1"></i>บันทึกข้อสอบ
+          </button>
+          <button class="btn-primary flex-1"
+                  style="background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+                  onclick="clearAdminQuizForm()">
+            <i class="fas fa-eraser mr-1"></i>ล้างฟอร์ม
+          </button>
+        </div>
+
+        <input type="file" id="admin-quiz-csv-file" accept=".csv,text/csv" style="display:none;" onchange="handleAdminQuizCsvImport(this)">
+        <div class="admin-quiz-tools mt-3">
+          <button class="btn-primary" onclick="exportAdminQuizCsv()">
+            <i class="fas fa-file-export mr-1"></i>ส่งออก CSV
+          </button>
+          <button class="btn-primary" style="background:linear-gradient(135deg,#10b981,#059669);" onclick="triggerAdminQuizCsvImport()">
+            <i class="fas fa-file-import mr-1"></i>นำเข้า CSV
+          </button>
+          <button class="btn-primary" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="saveAdminQuizOrder()">
+            <i class="fas fa-sort mr-1"></i>บันทึกลำดับ
+          </button>
+        </div>
+        <p class="text-muted text-xs mt-2">ลากการ์ดข้อสอบเพื่อสลับลำดับ แล้วกด "บันทึกลำดับ"</p>
+
+        <div id="admin-quiz-list-container" class="mt-3">
+          <div class="text-center text-muted py-3">เลือกแหล่งเรียนรู้เพื่อจัดการข้อสอบ</div>
+        </div>
+      </div>
+    </div> <!-- End TAB: Quizzes -->
+
+    <!-- TAB: Activities -->
+    <div id="admin-tab-activities" class="admin-tab-content">
+      <div class="loft-card admin-card" style="margin:0;">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fas fa-bullhorn" style="color:var(--gold)"></i>
+          <h4 class="font-bold text-white">จัดการหน้าแรก: ข่าวและกิจกรรม</h4>
+        </div>
+
+        <!-- Admin Only: Featured Activity -->
+        <div id="admin-featured-wrapper">
+          <p class="text-muted text-xs mb-2">กิจกรรมเด่น (แสดง 1 รายการบนหน้าแรก)</p>
+          <input type="hidden" id="admin-featured-id" value="">
+          <div class="input-group">
+            <i class="fas fa-heading"></i>
+            <input type="text" id="admin-featured-title" placeholder="ชื่อกิจกรรมเด่น">
+          </div>
+          <div class="input-group">
+            <i class="fas fa-image"></i>
+            <input type="text" id="admin-featured-image" placeholder="URL รูปกิจกรรมเด่น">
+          </div>
+          <div class="flex gap-2 mb-3">
+            <input type="file" id="admin-featured-image-file" accept="image/*" style="display:none;" onchange="handleFeaturedImageUpload(this)">
+            <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="document.getElementById('admin-featured-image-file').click()">
+              <i class="fas fa-upload mr-1"></i>อัปโหลดรูปภาพ
+            </button>
+            <div id="admin-featured-preview" style="width:50px; height:50px; border-radius:8px; background-size:cover; background-position:center; border:1px solid var(--card-border); display:none;"></div>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" id="admin-featured-location" placeholder="สถานที่จัดกิจกรรม">
+          </div>
+          <div class="input-group">
+            <i class="fas fa-route"></i>
+            <input type="text" id="admin-featured-maplink" placeholder="ลิงก์นำทาง (Google Maps URL)">
+          </div>
+          <div class="flex gap-2 mb-2">
+            <div class="input-group flex-1 mb-0">
+              <i class="fas fa-calendar-day"></i>
+              <input type="date" id="admin-featured-startdate">
+            </div>
+            <div class="input-group flex-1 mb-0">
+              <i class="fas fa-calendar-check"></i>
+              <input type="date" id="admin-featured-enddate">
+            </div>
+          </div>
+          <textarea id="admin-featured-desc" rows="2" placeholder="คำอธิบายสั้นกิจกรรมเด่น"></textarea>
+          <button class="btn-primary w-100 mt-2" onclick="saveFeaturedActivity()">
+            <i class="fas fa-save mr-1"></i>บันทึกกิจกรรมเด่น
+          </button>
+          <hr style="margin:16px 0;">
+        </div>
+        <p class="text-muted text-xs mb-2">กิจกรรมรายไตรมาส (21 พื้นที่)</p>
+        <input type="hidden" id="admin-quarter-activity-id" value="">
+        <div class="flex gap-2 mb-2">
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-layer-group"></i>
+            <select id="admin-quarter-select">
+              <option value="1">ไตรมาส 1</option>
+              <option value="2">ไตรมาส 2</option>
+              <option value="3">ไตรมาส 3</option>
+              <option value="4">ไตรมาส 4</option>
+            </select>
+          </div>
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-calendar"></i>
+            <input type="number" id="admin-year-input" placeholder="ปี ค.ศ. เช่น 2026">
+          </div>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-map"></i>
+          <select id="admin-area-code"></select>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-heading"></i>
+          <input type="text" id="admin-activity-name" placeholder="ชื่อกิจกรรม">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-calendar-day"></i>
+          <input type="date" id="admin-activity-date">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-map-marker-alt"></i>
+          <input type="text" id="admin-activity-location" placeholder="สถานที่จัด">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-route"></i>
+          <input type="text" id="admin-activity-maplink" placeholder="ลิงก์นำทาง (Google Maps URL)">
+        </div>
+        <textarea id="admin-activity-benefit" rows="2" placeholder="ผู้เข้าร่วมจะได้อะไรจากกิจกรรมนี้"></textarea>
+        <div class="input-group" style="margin-top:8px;">
+          <i class="fas fa-users"></i>
+          <input type="text" id="admin-activity-capacity" placeholder="จำนวนคนที่รับสมัคร">
+        </div>
+        <div class="flex gap-2 mb-2">
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-user-tie"></i>
+            <input type="text" id="admin-contact-name" placeholder="ชื่อผู้ดูแล">
+          </div>
+          <div class="input-group flex-1 mb-0">
+            <i class="fas fa-phone"></i>
+            <input type="text" id="admin-contact-phone" placeholder="เบอร์ติดต่อ">
+          </div>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-toggle-on"></i>
+          <select id="admin-activity-status">
+            <option value="Active">ใช้งาน</option>
+            <option value="Cancelled">ยกเลิก</option>
+          </select>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <button class="btn-primary flex-1" onclick="saveQuarterActivity()">
+            <i class="fas fa-save mr-1"></i>บันทึกกิจกรรม
+          </button>
+          <button class="btn-primary flex-1"
+                  style="background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+                  onclick="clearQuarterActivityForm()">
+            <i class="fas fa-plus mr-1"></i>รายการใหม่
+          </button>
+        </div>
+
+        <div class="input-group mt-3">
+          <i class="fas fa-search"></i>
+          <input type="text" id="admin-quarter-activity-search" placeholder="ค้นหากิจกรรม/พื้นที่/ผู้ดูแล" oninput="renderAdminQuarterActivities()">
+        </div>
+        <div id="admin-quarter-activities-list" class="mt-2">
+          <div class="text-center text-muted py-3">กำลังโหลดรายการกิจกรรม...</div>
+        </div>
+      </div>
+    </div> <!-- End TAB: Activities -->
+  </div>
+</div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LEADERBOARD PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="leaderboard-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center;">
+      <h3>
+        <i class="fas fa-trophy mr-2" style="color:var(--gold);filter:drop-shadow(0 0 8px var(--gold-glow))"></i>
+        กระดาน Top 10
+      </h3>
+    </div>
+    <div class="content-area" id="leaderboard-container">
+      <div class="flex flex-col items-center gap-3 mt-16" style="color:var(--text-soft)">
+        <i class="fas fa-circle-notch fa-spin text-4xl" style="color:var(--primary)"></i>
+        <p>กำลังโหลดข้อมูล…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PROFILE PAGE
+  ═══════════════════════════════════════════════════════ -->
+  <div id="proposal-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <button class="back-button" onclick="showPage('profile-page')"><i class="fas fa-chevron-left"></i></button>
+      <h3><i class="fas fa-lightbulb mr-2" style="color:var(--gold)"></i>เสนอแนะเนื้อหา</h3>
+    </div>
+    <div class="px-4 mt-6">
+      <div class="loft-card">
+        <h4 class="font-bold mb-3" style="color:var(--primary)">อยากเรียนรู้อะไรเพิ่มเติม?</h4>
+        <p class="text-muted text-xs mb-4">เสนอหัวข้อหรือเนื้อหาที่คุณอยากให้เราพัฒนาเพิ่มเติมในระบบ</p>
+        <div class="input-group">
+          <i class="fas fa-heading"></i>
+          <input type="text" id="proposal-title" placeholder="หัวข้อที่สนใจ">
+        </div>
+        <textarea id="proposal-desc" rows="4" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+        <button class="btn-primary w-100 mt-3" onclick="submitProposal()">
+          <i class="fas fa-paper-plane mr-2"></i>ส่งข้อเสนอแนะ
+        </button>
+      </div>
+
+      <div class="mt-6 mb-4">
+        <h4 class="font-bold text-white mb-3"><i class="fas fa-history mr-2" style="color:var(--coral)"></i>ประวัติข้อเสนอของคุณ</h4>
+        <div id="proposal-list-container">
+          <!-- List items will be here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evaluation Modal -->
+  <div id="evaluation-modal" class="modal-overlay" style="display:none; align-items:center;">
+    <div class="action-sheet" style="border-radius:28px; padding:24px; margin:20px; border-bottom:1px solid var(--card-border);">
+      <div class="text-center mb-4">
+        <h3 class="text-xl font-bold text-white">ประเมินแหล่งเรียนรู้</h3>
+        <p class="text-muted text-sm">ช่วยเราพัฒนาให้ดียิ่งขึ้นโดยการประเมินความพึงพอใจ</p>
+      </div>
+      
+      <div class="flex justify-center gap-2 mb-6" id="eval-stars">
+        <i class="fas fa-star text-3xl cursor-pointer eval-star" data-value="1" onclick="setEvalRating(1)"></i>
+        <i class="fas fa-star text-3xl cursor-pointer eval-star" data-value="2" onclick="setEvalRating(2)"></i>
+        <i class="fas fa-star text-3xl cursor-pointer eval-star" data-value="3" onclick="setEvalRating(3)"></i>
+        <i class="fas fa-star text-3xl cursor-pointer eval-star" data-value="4" onclick="setEvalRating(4)"></i>
+        <i class="fas fa-star text-3xl cursor-pointer eval-star" data-value="5" onclick="setEvalRating(5)"></i>
+      </div>
+
+      <textarea id="eval-comment" rows="3" placeholder="ความคิดเห็นเพิ่มเติม (ถ้ามี)"></textarea>
+      
+      <div class="flex gap-2 mt-4">
+        <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); border:1px solid var(--card-border); box-shadow:none;" onclick="closeEvaluation()">ข้าม</button>
+        <button class="btn-primary flex-1" onclick="submitEvaluation()">ส่งประเมิน</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="profile-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center;">
+      <h3><i class="fas fa-id-card mr-2" style="color:var(--peach)"></i>โปรไฟล์ผู้เรียน</h3>
+    </div>
+
+    <div class="px-4 mt-6">
+
+      <!-- Avatar -->
+      <div class="profile-upload-wrapper">
+        <div class="avatar-edit">
+          <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg" onchange="previewAndUploadImage(this)">
+          <label id="profile-preview" onclick="openAvatarMenu()"
+                 style="background-image:url('https://via.placeholder.com/150')">
+            <i class="fas fa-camera"></i>
+          </label>
+        </div>
+        <p class="text-muted text-xs mt-2">แตะรูปเพื่อเปลี่ยนภาพโปรไฟล์</p>
+      </div>
+
+      <!-- Profile info card -->
+      <div class="loft-card mt-2 mb-4" style="margin-top:8px;">
+        <h3 id="profile-name" class="text-xl font-black text-white mb-1">ชื่อ-นามสกุล</h3>
+        <p class="text-muted text-sm mb-4">
+          📍 ตำบล:
+          <span id="profile-tambon" class="font-bold" style="color:var(--coral)">ไม่ระบุ</span>
+        </p>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:var(--glass);border:1px solid var(--glass-border)">
+            <i class="fas fa-mobile-alt" style="color:var(--primary)"></i>
+            <span class="text-sm" style="color:var(--text-soft)">เบอร์โทร</span>
+            <span id="profile-phone" class="ml-auto font-bold text-white">08X-XXX-XXXX</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:var(--glass);border:1px solid var(--glass-border)">
+            <i class="fas fa-star" style="color:var(--gold)"></i>
+            <span class="text-sm" style="color:var(--text-soft)">เลเวล</span>
+            <span id="profile-level" class="ml-auto font-black" style="color:var(--gold)">1</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:var(--glass);border:1px solid var(--glass-border)">
+            <i class="fas fa-coins" style="color:var(--peach)"></i>
+            <span class="text-sm" style="color:var(--text-soft)">คะแนนสะสม</span>
+            <span id="profile-score" class="ml-auto font-black" style="color:var(--peach)">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Actions -->
+      <div class="flex gap-2 mb-4">
+        <button class="btn-primary flex-1" style="background:linear-gradient(135deg, var(--gold), #d97706);" onclick="showPage('proposal-page')">
+          <i class="fas fa-lightbulb mr-2"></i>เสนอแนะเนื้อหา
+        </button>
+      </div>
+
+      <!-- Certificate history -->
+      <div class="loft-card" style="margin:0 0 24px;">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-certificate" style="color:var(--gold)"></i>
+          <h4 class="font-bold text-white">ประวัติเกียรติบัตร</h4>
+        </div>
+        <div id="cert-list-container">
+          <div class="text-center py-3 text-muted text-sm">
+            <i class="fas fa-circle-notch fa-spin mr-1" style="color:var(--primary)"></i>
+            กำลังโหลด…
+          </div>
+        </div>
+        <div id="cert-pagination-controls"
+             class="flex justify-between items-center mt-4" style="display:none !important;">
+          <button id="btn-cert-prev" onclick="changeCertPage(-1)"
+                  class="btn-primary" style="padding:6px 14px;border-radius:10px;font-size:.8rem;background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);">
+            <i class="fas fa-chevron-left mr-1"></i>ก่อนหน้า
+          </button>
+          <span id="cert-page-info" class="text-muted text-xs">หน้า 1/1</span>
+          <button id="btn-cert-next" onclick="changeCertPage(1)"
+                  class="btn-primary" style="padding:6px 14px;border-radius:10px;font-size:.8rem;background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);">
+            ถัดไป<i class="fas fa-chevron-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════════════════════════ -->
+  <div class="bottom-nav" id="main-bottom-nav" style="display:none;">
+    <div class="nav-item active" id="nav-home" onclick="showPage('home-page')">
+      <i class="fas fa-home"></i><span>หน้าแรก</span>
+    </div>
+    <div class="nav-item" id="nav-map" onclick="showPage('map-page')">
+      <i class="fas fa-map-marked-alt"></i><span>แผนที่</span>
+    </div>
+    <div class="nav-item" id="nav-log" onclick="showPage('log-page')" style="display:none;">
+      <i class="fas fa-book-open"></i><span>บันทึก</span>
+    </div>
+    <div class="nav-item" id="nav-approve" onclick="showPage('approve-page')" style="display:none;">
+      <i class="fas fa-clipboard-check"></i><span>ตรวจงาน</span>
+    </div>
+    <div class="nav-item" id="nav-dashboard" onclick="showPage('dashboard-page')" style="display:none;">
+      <i class="fas fa-chart-line"></i><span>ภาพรวม</span>
+    </div>
+    <div class="nav-item" id="nav-admin" onclick="showPage('admin-page')" style="display:none;">
+      <i class="fas fa-tools"></i><span>หลังบ้าน</span>
+    </div>
+    <div class="nav-item" id="nav-leaderboard" onclick="showPage('leaderboard-page')">
+      <i class="fas fa-trophy"></i><span>อันดับ</span>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showPage('profile-page')">
+      <i class="fas fa-user"></i><span>โปรไฟล์</span>
+    </div>
+  </div>
+
+  <!-- ─── Profile Crop Modal ────────────────────────────────── -->
+  <div id="crop-modal" class="modal-overlay" style="display:none; z-index:10001; flex-direction:column; align-items:center; justify-content:center;">
+    <div class="loft-card" style="width:94%; max-width:400px; padding:20px; margin-top:0;">
+      <h3 class="text-white font-bold mb-4 text-center">ปรับตำแหน่งรูปภาพ</h3>
+      <div style="width:100%; height:300px; background:#000; border-radius:12px; overflow:hidden;">
+        <img id="crop-image" src="" style="max-width:100%;">
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="closeCropModal()">ยกเลิก</button>
+        <button class="btn-primary flex-1" onclick="applyCrop()">บันทึกรูปภาพ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Loading overlay ─────────────────────────────────── -->
+  <div id="loading-overlay" style="display:none;">
+    <div class="spinner"><i class="fas fa-circle-notch fa-spin fa-3x"></i></div>
+  </div>
+
+  <!-- ─── Avatar menu modal ────────────────────────────────── -->
+  <div id="avatar-menu-modal" class="modal-overlay" style="display:none;" onclick="closeAvatarMenu()">
+    <div class="action-sheet" onclick="event.stopPropagation()">
+      <div class="action-item" onclick="viewFullImage()">
+        <i class="fas fa-eye"></i> ดูรูปภาพโปรไฟล์
+      </div>
+      <div class="action-item" onclick="triggerUpload()">
+        <i class="fas fa-image"></i> เปลี่ยนรูปภาพใหม่
+      </div>
+      <div class="action-item font-bold" style="color:var(--coral)" onclick="closeAvatarMenu()">
+        ยกเลิก
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Image viewer modal ───────────────────────────────── -->
+  <div id="image-viewer" class="modal-overlay" style="display:none;" onclick="this.style.display='none'">
+    <span class="close-viewer">&times;</span>
+    <img id="full-image-display" src="" alt="">
+  </div>
+
+  <!-- ─── Review modal ────────────────────────────────────── -->
+  <div id="review-modal" class="modal-overlay"
+       style="display:none; z-index:9999; justify-content:center; align-items:center;">
+    <div class="loft-card" style="margin-top:0; max-width:360px; width:95%; animation:popIn .3s ease;">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+             style="background:linear-gradient(135deg,var(--primary),var(--coral))">
+          <i class="fas fa-clipboard-check text-white text-sm"></i>
+        </div>
+        <h3 class="font-black text-white text-lg">ประเมินผลงาน</h3>
+      </div>
+
+      <div class="p-3 rounded-xl mb-4" style="background:var(--glass);border:1px solid var(--glass-border)">
+        <p class="text-muted text-xs mb-1">ผู้เรียน</p>
+        <p id="review-phone" class="font-bold text-white text-sm"></p>
+        <p class="text-muted text-xs mt-2 mb-1">กิจกรรม</p>
+        <p id="review-activity" class="font-semibold text-sm" style="color:var(--primary)"></p>
+      </div>
+
+      <label class="text-muted text-xs block mb-1">คะแนนที่ได้รับ (0–100)</label>
+      <input type="number" id="review-score"
+             class="w-full text-center font-black text-2xl rounded-xl outline-none mb-3"
+             style="padding:12px;background:var(--input-bg);color:var(--gold);border:1.5px solid var(--input-border);"
+             value="50">
+
+      <label class="text-muted text-xs block mb-1">ข้อเสนอแนะ</label>
+      <textarea id="review-note" rows="2"
+                style="margin-bottom:16px;" placeholder="ความเห็นของครู…"></textarea>
+
+      <div class="flex gap-2 mb-2">
+        <button class="btn-primary flex-1"
+                style="background:linear-gradient(135deg,#e74c3c,#c0392b);"
+                onclick="submitReview('Rejected')">
+          <i class="fas fa-times mr-1"></i>ไม่ผ่าน
+        </button>
+        <button class="btn-primary flex-1"
+                style="background:linear-gradient(135deg,#10b981,#059669);"
+                onclick="submitReview('Approved')">
+          <i class="fas fa-check mr-1"></i>ให้ผ่าน
+        </button>
+      </div>
+      <button class="btn-primary w-100"
+              style="background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+              onclick="document.getElementById('review-modal').style.display='none'">
+        ยกเลิก
+      </button>
+
+      <input type="hidden" id="review-log-id">
+    </div>
+  </div>
+
+  <!-- ─── Custom alert modal ──────────────────────────────── -->
+  <div id="custom-alert-modal" class="modal-overlay"
+       style="display:none; z-index:9999; justify-content:center; align-items:center;">
+    <div class="loft-card text-center" style="margin-top:0; max-width:320px; width:90%; animation:popIn .3s ease;">
+      <div id="custom-alert-icon" class="text-5xl mb-4">💬</div>
+      <h3 id="custom-alert-title" class="text-xl font-black text-white mb-2">แจ้งเตือน</h3>
+      <p id="custom-alert-message" class="mb-5 text-sm leading-relaxed" style="color:var(--text-soft)"></p>
+      <div class="flex gap-2">
+        <button id="custom-alert-cancel"
+                class="btn-primary flex-1"
+                style="display:none;background:var(--glass);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+                onclick="closeCustomAlert(false)">ยกเลิก</button>
+        <button id="custom-alert-ok"
+                class="btn-primary flex-1"
+                onclick="closeCustomAlert(true)">ตกลง</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
