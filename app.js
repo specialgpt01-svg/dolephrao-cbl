@@ -411,8 +411,8 @@ function withAuthData(data) {
   }
 
   function loadPendingLogs() {
-    const tambon = localStorage.getItem("userTambon");
-    document.getElementById('teacher-tambon-badge').innerText = "ต." + (tambon || "ไม่ระบุ");
+    const tambon = localStorage.getItem("userTambon") || "ไม่ระบุ";
+    document.getElementById('teacher-tambon-badge').innerText = formatTambon(tambon);
     
     // Reset to first tab
     switchApproveTab('logs');
@@ -450,11 +450,15 @@ function withAuthData(data) {
         }
         let html = '';
         logs.forEach(function(log) {
+          let areaTag = formatTambon(log.tambon);
           html += '<div class="log-card">' +
-                     '<div class="log-title">' + log.activityName + '</div>' +
-                     '<div class="text-muted small mb-2"><i class="fas fa-user"></i> นักเรียนเบอร์: ' + log.phone + ' | 📅 ' + log.date + '</div>' +
-                     '<div class="log-desc mb-3" style="-webkit-line-clamp: unset;">' + log.description + '</div>' +
-                     '<button class="btn-primary w-100" style="background-color: var(--primary-color);" onclick="openReviewModal(\'' + escapeJS(log.logId) + '\', \'' + escapeJS(log.phone) + '\', \'' + escapeJS(log.activityName) + '\')">' +
+                     '<div class="log-title">' + (log.fullName || 'ไม่ระบุชื่อ') + '</div>' +
+                     '<div class="text-muted small mb-2">' +
+                       '<i class="fas fa-book"></i> กิจกรรม: ' + log.activityName + '<br>' +
+                       '<i class="fas fa-map-marker-alt"></i> ' + areaTag + ' | 📅 ' + log.date + 
+                     '</div>' +
+                     '<div class="log-desc mb-3" style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">' + log.description + '</div>' +
+                     '<button class="btn-primary w-100" style="background-color: var(--primary-color);" onclick="openReviewModal(\'' + escapeJS(log.logId) + '\', \'' + escapeJS(log.phone) + '\', \'' + escapeJS(log.activityName) + '\', \'' + escapeJS(log.fullName || 'ไม่ระบุชื่อ') + '\', \'' + escapeJS(areaTag) + '\')">' +
                        '<i class="fas fa-pen"></i> ประเมินผลงาน' +
                      '</button>' +
                    '</div>';
@@ -482,11 +486,15 @@ function withAuthData(data) {
         
         let html = '';
         proposals.forEach(function(item) {
+          let areaTag = formatTambon(item.tambon);
           html += '<div class="log-card">' +
                      '<div class="log-title">' + item.title + '</div>' +
-                     '<div class="text-muted small mb-2"><i class="fas fa-user"></i> โดยเบอร์: ' + item.phone + ' | 📅 ' + item.timestamp + '</div>' +
+                     '<div class="text-muted small mb-2">' +
+                       '<i class="fas fa-user"></i> ' + (item.fullName || 'ไม่ระบุชื่อ') + ' (' + item.phone + ')<br>' +
+                       '<i class="fas fa-map-marker-alt"></i> ' + areaTag + ' | 📅 ' + item.timestamp + 
+                     '</div>' +
                      '<div class="log-desc mb-3" style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">' + (item.description || '-') + '</div>' +
-                     '<button class="btn-primary w-100" onclick="openProposalReviewModal(' + item.rowIdx + ', \'' + escapeJS(item.title) + '\', \'' + escapeJS(item.description) + '\')">' +
+                     '<button class="btn-primary w-100" onclick="openProposalReviewModal(' + item.rowIdx + ', \'' + escapeJS(item.title) + '\', \'' + escapeJS(item.description) + '\', \'' + escapeJS(item.fullName || 'ไม่ระบุชื่อ') + '\', \'' + escapeJS(item.phone) + '\', \'' + escapeJS(areaTag) + '\')">' +
                        '<i class="fas fa-check-circle"></i> พิจารณาข้อเสนอ' +
                      '</button>' +
                    '</div>';
@@ -497,8 +505,10 @@ function withAuthData(data) {
       });
   }
 
-  function openProposalReviewModal(rowIdx, title, desc) {
+  function openProposalReviewModal(rowIdx, title, desc, fullName, phone, area) {
     document.getElementById('review-proposal-row').value = rowIdx;
+    document.getElementById('review-proposal-user').innerText = (fullName || 'ไม่ระบุชื่อ') + ' (' + phone + ')';
+    document.getElementById('review-proposal-area').innerText = area;
     document.getElementById('review-proposal-title').innerText = title;
     document.getElementById('review-proposal-desc').innerText = desc || '-';
     document.getElementById('proposal-review-modal').style.display = 'flex';
@@ -528,9 +538,10 @@ function withAuthData(data) {
       });
   }
 
-  function openReviewModal(logId, phone, activity) {
+  function openReviewModal(logId, phone, activity, fullName, area) {
     document.getElementById('review-log-id').value = logId;
-    document.getElementById('review-phone').innerText = phone;
+    document.getElementById('review-phone').innerText = (fullName || 'ไม่ระบุชื่อ') + ' (' + phone + ')';
+    document.getElementById('review-area').innerText = area;
     document.getElementById('review-activity').innerText = activity;
     document.getElementById('review-score').value = 50; 
     document.getElementById('review-note').value = '';
@@ -597,7 +608,7 @@ function withAuthData(data) {
                            '<span style="color:#7f8c8d; font-size:0.85rem;"><i class="fas fa-award"></i> ' + user.level + '</span>' +
                            ' | <b style="color:' + rStyle.color + '; font-size:1rem;">' + user.score + ' แต้ม</b>' +
                          '</div>' +
-                         '<div style="font-size:0.7rem; color:#b2bec3; margin-top:2px;">📍 ตำบล' + user.tambon + '</div>' +
+                         '<div style="font-size:0.7rem; color:#b2bec3; margin-top:2px;">📍 ' + formatTambon(user.tambon) + '</div>' +
                        '</div>' +
                      '</div>';
           });
@@ -1472,7 +1483,7 @@ function withAuthData(data) {
                 '<div class="admin-item-head">' +
                   '<div>' +
                     '<div class="admin-item-title">' + (item.SourceName || 'ไม่ระบุชื่อ') + '</div>' +
-                    '<div class="admin-item-sub">รหัส: ' + (item.SourceID || '-') + ' | ต.' + (item.TambonName || '-') + '</div>' +
+                    '<div class="admin-item-sub">รหัส: ' + (item.SourceID || '-') + ' | ' + formatTambon(item.TambonName) + '</div>' +
                   '</div>' +
                   '<div class="admin-item-actions">' +
                     '<button class="btn-primary" style="padding:6px 10px;font-size:.78rem;" onclick="editAdminSource(\'' + escapeJS(item.SourceID) + '\')"><i class="fas fa-pen"></i></button>' +
@@ -2014,6 +2025,37 @@ function withAuthData(data) {
     document.getElementById('map-picker-modal').style.display = 'none';
   }
 
+  // ฟังก์ชันช่วยในการลบคำนำหน้าชื่อพื้นที่เพื่อการเปรียบเทียบที่ยืดหยุ่น
+  function normalizeTambon(v) {
+    if (v == null) return '';
+    let str = String(v).trim();
+    return str.replace(/^((ต\.|ตำบล|ศศช\.|บ้าน|บ\.)\s*)+/g, '').trim();
+  }
+
+  function formatTambon(v) {
+     const name = normalizeTambon(v);
+     if (!name) return '';
+     
+     // รายชื่อ ศศช. ทั้ง 10 แห่ง
+     const sashaMap = {
+       "อาบอลาชา": "ศศช.บ้านอาบอลาชา",
+       "อาบอเน": "ศศช.บ้านอาบอเน",
+       "อาแย": "ศศช.บ้านอาแย",
+       "ป่าหญ้าไทร": "ศศช.บ้านป่าหญ้าไทร",
+       "ขอนม่วง": "ศศช.บ้านขอนม่วง",
+       "แม่งัดน้อย": "ศศช.บ้านแม่งัดน้อย",
+       "ห้วยทรายขาว": "ศศช.บ้านห้วยทรายขาว",
+       "ห้วยกันใจ": "ศศช.บ้านห้วยกันใจ",
+       "ปางตอย": "ศศช.บ้านปางตอย",
+       "ปางฟาน": "ศศช.บ้านปางฟาน"
+     };
+     
+     if (sashaMap[name]) return sashaMap[name];
+     
+     // สำหรับตำบลทั่วไป ให้เติม ต. นำหน้า (ถ้ายังไม่มี)
+     return "ต." + name;
+   }
+
   function getValidImageUrl(url) {
     if (!url) return 'https://via.placeholder.com/150?text=No+Image';
     let str = String(url).trim();
@@ -2059,7 +2101,7 @@ function withAuthData(data) {
 
        cacheMapSources.forEach(function(source) {
          // กรองตามตำบล
-         if (filterTambon && source.TambonName !== filterTambon) return;
+         if (filterTambon && normalizeTambon(source.TambonName) !== normalizeTambon(filterTambon)) return;
 
          // เพิ่มหมุดลงแผนที่
          if (source.Latitude && source.Longitude) {
@@ -2069,7 +2111,7 @@ function withAuthData(data) {
              const marker = L.marker([lat, lng], {icon: redIcon}).addTo(districtMap);
              const popupHtml = '<div style="text-align:center; font-family: \'Prompt\', sans-serif;">' +
                                  '<b style="color:#d35400; font-size:1.05rem;">' + source.SourceName + '</b><br>' +
-                                 '<span style="color:#7f8c8d; font-size:0.85rem;">📍 ต.' + source.TambonName + '</span><br>' +
+                                 '<span style="color:#7f8c8d; font-size:0.85rem;">📍 ' + formatTambon(source.TambonName) + '</span><br>' +
                                  '<button onclick="openSourceDetail(\'' + escapeJS(source.SourceID) + '\')" style="margin-top:10px; padding:8px 10px; background:#34495e; color:white; border:none; border-radius:6px; cursor:pointer; width:100%; font-family: \'Prompt\', sans-serif;">เข้าสู่บทเรียน</button>' +
                                '</div>';
              marker.bindPopup(popupHtml);
@@ -2087,7 +2129,7 @@ function withAuthData(data) {
                         '<img src="' + imgUrl + '" loading="lazy" class="rank-img" style="border-radius:8px; width:50px; height:50px; object-fit:cover;">' +
                         '<div class="rank-info" style="margin-left:12px;">' +
                           '<div class="rank-name" style="font-size:0.9rem; font-weight:700; color:var(--text);">' + (source.SourceName || "ไม่มีชื่อ") + '</div>' +
-                          '<div class="text-xs" style="color:var(--text-soft);">📍 ต.' + (source.TambonName || "-") + '</div>' +
+                          '<div class="text-xs" style="color:var(--text-soft);">📍 ' + formatTambon(source.TambonName) + '</div>' +
                         '</div>' +
                         '<i class="fas fa-chevron-right text-muted" style="font-size:0.8rem;"></i>' +
                       '</div>';
