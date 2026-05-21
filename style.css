@@ -8,49 +8,59 @@
 
 /* ─── CSS Variables ─────────────────────────────────────── */
 :root {
-  --bg:           #0d0a2e;
-  --bg2:          #120C6E;
-  --text:         #e8eaff;
-  --text-soft:    #a0aacc;
+  --bg:           #f8fafc;
+  --bg2:          #f1f5f9;
+  --text:         #1e293b;
+  --text-soft:    #64748b;
+  --text-inv:     #1e293b; /* Emphasis text for light mode */
   --primary:      #5E72EB;
-  --primary-glow: rgba(94,114,235,.5);
+  --primary-glow: rgba(94,114,235,.2);
   --primary-dk:   #120C6E;
   --primary-deep: #0B0742;
   --coral:        #FF9190;
-  --coral-glow:   rgba(255,145,144,.45);
+  --coral-glow:   rgba(255,145,144,.25);
   --peach:        #FDC094;
-  --gold:         #FFD700;
-  --gold-glow:    rgba(255,215,0,.4);
-  --card:         rgba(18,12,110,.6);
-  --card-solid:   #1a1560;
-  --card-border:  rgba(94,114,235,.25);
-  --glass:        rgba(94,114,235,.10);
-  --glass-border: rgba(94,114,235,.20);
-  --nav-bg:       rgba(13,10,46,.92);
-  --input-bg:     rgba(94,114,235,.08);
-  --input-border: rgba(94,114,235,.25);
-  --shadow-card:  0 8px 32px rgba(0,0,0,.45), 0 0 0 1px rgba(94,114,235,.15);
-  --shadow-btn:   0 4px 20px rgba(94,114,235,.55);
-  --shadow-coral: 0 4px 20px rgba(255,145,144,.45);
-  --shadow-glow:  0 0 30px rgba(94,114,235,.35);
+  --gold:         #f59e0b;
+  --gold-glow:    rgba(245,158,11,.2);
+  --card:         #ffffff;
+  --card-solid:   #ffffff;
+  --card-border:  rgba(94,114,235,.15);
+  --glass:        rgba(94,114,235,.05);
+  --glass-border: rgba(94,114,235,.15);
+  --nav-bg:       rgba(255,255,255,.95);
+  --input-bg:     #f1f5f9;
+  --input-border: #e2e8f0;
+  --shadow-card:  0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-btn:   0 10px 15px -3px rgba(94,114,235, 0.4);
+  --shadow-coral: 0 10px 15px -3px rgba(255,145,144, 0.3);
+  --shadow-glow:  0 0 20px rgba(94,114,235,.15);
   --r-card:       20px;
   --r-btn:        14px;
   --r-pill:       50px;
   /* JS-compat aliases */
-  --border-dark:   #120C6E;
+  --border-dark:   #e2e8f0;
   --primary-color: #5E72EB;
-  --text-color:    #e8eaff;
-  --card-bg:       #1a1560;
-  --bg-color:      #0d0a2e;
+  --text-color:    #1e293b;
+  --card-bg:       #ffffff;
+  --bg-color:      #f8fafc;
 }
 
 body.dark-mode {
-  --bg:           #060318;
-  --bg2:          #0B0742;
-  --card:         rgba(11,7,66,.75);
-  --card-solid:   #0f0c45;
-  --card-bg:      #0f0c45;
-  --bg-color:     #060318;
+  --bg:           #0d0a2e;
+  --bg2:          #120C6E;
+  --text:         #e8eaff;
+  --text-soft:    #a0aacc;
+  --text-inv:     #ffffff; /* Emphasis text for dark mode */
+  --card:         rgba(18,12,110,.6);
+  --card-solid:   #1a1560;
+  --card-border:  rgba(94,114,235,.25);
+  --nav-bg:       rgba(13,10,46,.92);
+  --input-bg:     rgba(94,114,235,.08);
+  --input-border: rgba(94,114,235,.25);
+  --shadow-card:  0 8px 32px rgba(0,0,0,.45);
+  --bg-color:      #0d0a2e;
+  --text-color:    #e8eaff;
+  --card-bg:       #1a1560;
 }
 
 /* ─── Reset ─────────────────────────────────────────────── */
@@ -96,6 +106,7 @@ body::before {
 /* ─── Utility ────────────────────────────────────────────── */
 .w-100        { width:100%; }
 .text-center  { text-align:center; }
+.text-theme-inv { color: var(--text-inv) !important; }
 .mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:1rem}.mb-4{margin-bottom:1.5rem}
 .mt-2{margin-top:.5rem}.mt-3{margin-top:1rem}.mt-4{margin-top:1.5rem}.mt-5{margin-top:3rem}
 .p-3{padding:1rem}
@@ -1172,7 +1183,7 @@ select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(94,114,235
 .rank-1 .podium-name { font-size:1.1rem; color:var(--gold); font-weight: 800; }
 
 .podium-score-badge { 
-  color:#fff; padding:4px 12px; border-radius:20px; 
+  color:var(--text-inv); padding:4px 12px; border-radius:20px; 
   font-size:.75rem; font-weight:800; 
   box-shadow:0 4px 12px rgba(0,0,0,0.4);
   background: var(--glass) !important;
