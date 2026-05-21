@@ -188,14 +188,12 @@ function withAuthData(data) {
           else badge.innerText = "Teacher";
         }
         const featuredWrapper = document.getElementById('admin-featured-wrapper');
-        if (featuredWrapper) featuredWrapper.style.display = (role === "admin") ? "block" : "none";
+        if (featuredWrapper) featuredWrapper.style.display = (role === "admin" || role === "teacher") ? "block" : "none";
         const srcTambonSelect = document.getElementById('admin-source-tambon');
         if (srcTambonSelect) {
-          if (role === "teacher") {
+          srcTambonSelect.disabled = false;
+          if (role === "teacher" && !srcTambonSelect.value) {
             srcTambonSelect.value = localStorage.getItem("userTambon") || "";
-            srcTambonSelect.disabled = true;
-          } else {
-            srcTambonSelect.disabled = false;
           }
         }
         loadAdminSources();
@@ -233,44 +231,58 @@ function withAuthData(data) {
     document.getElementById('theme-picker-modal').style.display = 'none';
   }
 
-  function applyAppTheme(primaryColor, darkBgColor) {
+  function applyAppTheme(primaryColor, bgColor, isDark) {
     const root = document.documentElement;
     root.style.setProperty('--primary', primaryColor);
     root.style.setProperty('--primary-light', primaryColor + '40');
     root.style.setProperty('--primary-color', primaryColor);
     root.style.setProperty('--blue-app', primaryColor);
     
-    // Always use dark mode base for consistency with the app's current dark theme
-    document.body.classList.add('dark-mode');
-    
-    // Set custom background if provided
-    if (darkBgColor) {
-      root.style.setProperty('--bg-app', darkBgColor);
-      root.style.setProperty('--nav-bg', darkBgColor);
+    if (isDark) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
     }
     
-    // Save to localStorage
-    localStorage.setItem('appPrimaryColor', primaryColor);
-    if (darkBgColor) localStorage.setItem('appBgColor', darkBgColor);
-    localStorage.setItem('appTheme', 'dark'); // Keep base as dark
+    if (bgColor) {
+      root.style.setProperty('--bg', bgColor);
+      root.style.setProperty('--bg-color', bgColor);
+      // For light mode, make nav-bg slightly translucent white if background is light
+      if (!isDark) {
+        root.style.setProperty('--nav-bg', 'rgba(255,255,255,0.95)');
+      } else {
+        root.style.setProperty('--nav-bg', bgColor);
+      }
+    }
     
-    // Update color picker input to match
+    localStorage.setItem('appPrimaryColor', primaryColor);
+    if (bgColor) localStorage.setItem('appBgColor', bgColor);
+    localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+    
     document.getElementById('custom-color-picker').value = primaryColor;
   }
 
   function applyCustomTheme(hexColor) {
-    // Generate a darker shade for background
+    // Generate a background based on primary color
+    // If it's very dark, we assume they want dark mode, else light mode
     const r = parseInt(hexColor.substr(1, 2), 16);
     const g = parseInt(hexColor.substr(3, 2), 16);
     const b = parseInt(hexColor.substr(5, 2), 16);
     
-    const darkR = Math.floor(r * 0.1);
-    const darkG = Math.floor(g * 0.1);
-    const darkB = Math.floor(b * 0.1);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    const isDark = brightness < 128;
     
-    const darkBg = `#${darkR.toString(16).padStart(2,'0')}${darkG.toString(16).padStart(2,'0')}${darkB.toString(16).padStart(2,'0')}`;
+    let bgColor;
+    if (isDark) {
+      const darkR = Math.floor(r * 0.1);
+      const darkG = Math.floor(g * 0.1);
+      const darkB = Math.floor(b * 0.1);
+      bgColor = `#${darkR.toString(16).padStart(2,'0')}${darkG.toString(16).padStart(2,'0')}${darkB.toString(16).padStart(2,'0')}`;
+    } else {
+      bgColor = '#f8fafc'; // Default soft light bg
+    }
     
-    applyAppTheme(hexColor, darkBg);
+    applyAppTheme(hexColor, bgColor, isDark);
   }
 
   function handleRegister() {
@@ -841,11 +853,18 @@ function withAuthData(data) {
     let html = '<option value="">— เลือกพื้นที่ —</option>';
     const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
     const myTambon = (localStorage.getItem("userTambon") || "").trim();
+    
+    let teacherAreaCode = "";
     adminHomeAreas.forEach(function(a) {
-      if (role === "teacher" && myTambon && String(a.areaName || '').trim() !== myTambon) return;
       html += '<option value="' + a.areaCode + '">' + a.areaName + ' (' + a.areaCode + ')</option>';
+      if (role === "teacher" && !teacherAreaCode) teacherAreaCode = a.areaCode;
     });
     select.innerHTML = html;
+
+    // ถ้าเป็นครู ให้เลือกพื้นที่ของตนเองให้อัตโนมัติ
+    if (role === "teacher" && teacherAreaCode) {
+      select.value = teacherAreaCode;
+    }
   }
 
   function fillAdminFeaturedForm(featured) {
@@ -961,7 +980,12 @@ function withAuthData(data) {
 
   function clearQuarterActivityForm() {
     document.getElementById('admin-quarter-activity-id').value = '';
-    document.getElementById('admin-area-code').value = '';
+    
+    const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
+    if (role !== 'teacher') {
+      document.getElementById('admin-area-code').value = '';
+    }
+    
     document.getElementById('admin-activity-name').value = '';
     document.getElementById('admin-activity-date').value = '';
     document.getElementById('admin-activity-location').value = '';
@@ -987,13 +1011,19 @@ function withAuthData(data) {
       }
     }
 
+    const areaCode = (document.getElementById('admin-area-code').value || '').trim();
+    const activityName = (document.getElementById('admin-activity-name').value || '').trim();
+
+    if (!areaCode) return showCustomAlert("กรุณาเลือกพื้นที่", "warning");
+    if (!activityName) return showCustomAlert("กรุณากรอกชื่อกิจกรรม", "warning");
+
     const payload = {
       mode: (document.getElementById('admin-quarter-activity-id').value || '').trim() ? 'edit' : 'create',
       activityId: (document.getElementById('admin-quarter-activity-id').value || '').trim(),
       quarter: quarter,
       year: year,
-      areaCode: (document.getElementById('admin-area-code').value || '').trim(),
-      activityName: (document.getElementById('admin-activity-name').value || '').trim(),
+      areaCode: areaCode,
+      activityName: activityName,
       activityDate: activityDateVal,
       locationName: (document.getElementById('admin-activity-location').value || '').trim(),
       mapLink: (document.getElementById('admin-activity-maplink').value || '').trim(),
@@ -2209,7 +2239,7 @@ function withAuthData(data) {
     renderDetailSource();
   }
 
-  function buildDetailInfoHtml(info) {
+  function buildDetailInfoHtml(info, showGps = true) {
     let html = '';
     const formatText = function(text) { return text ? String(text).split('\n').join('<br>') : ''; };
     if (!info) {
@@ -2224,10 +2254,10 @@ function withAuthData(data) {
       if(info.external) html += '<a href="' + info.external + '" target="_blank" class="btn-primary" style="flex:1; text-align:center; background-color:#c0392b;"><i class="fab fa-youtube"></i> สื่อภายนอก</a>';
       html += '</div></div>';
     }
-    if(info.gps || info.contact) {
+    if((info.gps && showGps) || info.contact) {
       html += '<div class="content-section"><h4><i class="fas fa-map-marker-alt"></i> ติดต่อสถานที่</h4>';
       if(info.contact) html += '<p>' + formatText(info.contact) + '</p>';
-      if(info.gps) {
+      if(info.gps && showGps) {
         let mapLink = String(info.gps).startsWith('http') ? info.gps : 'https://www.google.com/maps/search/?api=1&query=' + info.gps;
         html += '<p class="mt-3"><a href="' + mapLink + '" target="_blank" style="color:#3498db;"><i class="fas fa-location-arrow"></i> เปิดพิกัดนำทางแผนที่</a></p>';
       }
@@ -2312,7 +2342,7 @@ function withAuthData(data) {
       if (activeBase.description) {
         html += '<div class="content-section"><h4><i class="fas fa-info-circle"></i> รายละเอียด</h4><p>' + String(activeBase.description).split('\n').join('<br>') + '</p></div>';
       }
-      html += buildDetailInfoHtml(activeBase.info);
+      html += buildDetailInfoHtml(activeBase.info, false);
 
       html += '<div class="content-footer mt-5" style="text-align: center;">';
       html +=   '<button class="btn-finish-base" onclick="finishLearningBase(\'' + escapeJS(activeBase.baseId) + '\')" style="background: #27ae60; color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);">จบการเรียนรู้ฐานนี้ <i class="fas fa-chevron-right"></i></button>';
@@ -2898,13 +2928,13 @@ function renderLeaderboard(data) {
     // Restore Theme Colors
     const savedPrimary = localStorage.getItem('appPrimaryColor');
     const savedBg = localStorage.getItem('appBgColor');
+    const savedTheme = localStorage.getItem('appTheme');
+    
     if (savedPrimary) {
-      applyAppTheme(savedPrimary, savedBg);
+      applyAppTheme(savedPrimary, savedBg, savedTheme === 'dark');
     } else {
-      const savedTheme = localStorage.getItem('appTheme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
+      // Default to Light Mode if no saved theme
+      applyAppTheme('#5e72eb', '#f8fafc', false);
     }
 
     const savedPhone = localStorage.getItem("userPhone");
