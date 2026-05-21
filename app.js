@@ -73,6 +73,9 @@ function withAuthData(data) {
   let cacheProposals = null;
   
   let districtMap = null;
+  let mapMarkers = [];
+  let mapPicker = null;
+  let mapPickerMarker = null;
   let confirmCallback = null;
 
   let currentLogPage = 1;
@@ -218,16 +221,56 @@ function withAuthData(data) {
   function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
 
   function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    const themeIcon = document.querySelector('.btn-theme i');
+    // Legacy function, replaced by theme picker
+    openThemePicker();
+  }
+
+  function openThemePicker() {
+    document.getElementById('theme-picker-modal').style.display = 'flex';
+  }
+
+  function closeThemePicker() {
+    document.getElementById('theme-picker-modal').style.display = 'none';
+  }
+
+  function applyAppTheme(primaryColor, darkBgColor) {
+    const root = document.documentElement;
+    root.style.setProperty('--primary', primaryColor);
+    root.style.setProperty('--primary-light', primaryColor + '40');
+    root.style.setProperty('--primary-color', primaryColor);
+    root.style.setProperty('--blue-app', primaryColor);
     
-    if (isDark) {
-      themeIcon.className = 'fas fa-sun';
-      localStorage.setItem('appTheme', 'dark');
-    } else {
-      themeIcon.className = 'fas fa-moon';
-      localStorage.setItem('appTheme', 'light');
+    // Always use dark mode base for consistency with the app's current dark theme
+    document.body.classList.add('dark-mode');
+    
+    // Set custom background if provided
+    if (darkBgColor) {
+      root.style.setProperty('--bg-app', darkBgColor);
+      root.style.setProperty('--nav-bg', darkBgColor);
     }
+    
+    // Save to localStorage
+    localStorage.setItem('appPrimaryColor', primaryColor);
+    if (darkBgColor) localStorage.setItem('appBgColor', darkBgColor);
+    localStorage.setItem('appTheme', 'dark'); // Keep base as dark
+    
+    // Update color picker input to match
+    document.getElementById('custom-color-picker').value = primaryColor;
+  }
+
+  function applyCustomTheme(hexColor) {
+    // Generate a darker shade for background
+    const r = parseInt(hexColor.substr(1, 2), 16);
+    const g = parseInt(hexColor.substr(3, 2), 16);
+    const b = parseInt(hexColor.substr(5, 2), 16);
+    
+    const darkR = Math.floor(r * 0.1);
+    const darkG = Math.floor(g * 0.1);
+    const darkB = Math.floor(b * 0.1);
+    
+    const darkBg = `#${darkR.toString(16).padStart(2,'0')}${darkG.toString(16).padStart(2,'0')}${darkB.toString(16).padStart(2,'0')}`;
+    
+    applyAppTheme(hexColor, darkBg);
   }
 
   function handleRegister() {
@@ -358,15 +401,37 @@ function withAuthData(data) {
   function loadPendingLogs() {
     const tambon = localStorage.getItem("userTambon");
     document.getElementById('teacher-tambon-badge').innerText = "ต." + (tambon || "ไม่ระบุ");
-    document.getElementById('pending-list-container').innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    
+    // Reset to first tab
+    switchApproveTab('logs');
+  }
+
+  function switchApproveTab(tabName) {
+    document.querySelectorAll('.approve-tab-content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('#approve-page .admin-tab-btn').forEach(b => b.classList.remove('active'));
+    
+    if (tabName === 'logs') {
+      document.getElementById('approve-tab-logs').style.display = 'block';
+      document.querySelector('#approve-page .admin-tab-btn:nth-child(1)').classList.add('active');
+      fetchPendingLogs();
+    } else if (tabName === 'proposals') {
+      document.getElementById('approve-tab-proposals').style.display = 'block';
+      document.querySelector('#approve-page .admin-tab-btn:nth-child(2)').classList.add('active');
+      loadPendingProposals();
+    }
+  }
+
+  function fetchPendingLogs() {
+    const tambon = localStorage.getItem("userTambon");
+    const container = document.getElementById('pending-list-container');
+    container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
     
     apiGet('getPendingLogs', withAuthParams({ tambon: tambon }))
       .then(function(logs) {
         if (logs && logs.status === "error") {
-          document.getElementById('pending-list-container').innerHTML = '<div class="text-center text-muted mt-5">' + (logs.message || 'ไม่มีสิทธิ์เข้าถึงข้อมูล') + '</div>';
+          container.innerHTML = '<div class="text-center text-muted mt-5">' + (logs.message || 'ไม่มีสิทธิ์เข้าถึงข้อมูล') + '</div>';
           return;
         }
-        const container = document.getElementById('pending-list-container');
         if (logs.length === 0) {
             container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-check-circle text-success fa-2x mb-3"></i><br>ไม่มีงานค้างตรวจในตำบลของคุณครับ</div>';
             return;
@@ -384,7 +449,70 @@ function withAuthData(data) {
         });
         container.innerHTML = html;
       }).catch(function() {
-        document.getElementById('pending-list-container').innerHTML = '<div class="text-center text-muted mt-5">โหลดไม่สำเร็จ</div>';
+        container.innerHTML = '<div class="text-center text-muted mt-5">โหลดไม่สำเร็จ</div>';
+      });
+  }
+
+  function loadPendingProposals() {
+    const container = document.getElementById('pending-proposals-container');
+    container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    
+    apiGet('getPendingProposals', withAuthParams({}))
+      .then(function(proposals) {
+        if (proposals && proposals.status === "error") {
+          container.innerHTML = '<div class="text-center text-muted mt-5">' + (proposals.message || 'ไม่มีสิทธิ์เข้าถึงข้อมูล') + '</div>';
+          return;
+        }
+        if (!Array.isArray(proposals) || proposals.length === 0) {
+          container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-check-circle text-success fa-2x mb-3"></i><br>ไม่มีข้อเสนอแนะที่รอการพิจารณาครับ</div>';
+          return;
+        }
+        
+        let html = '';
+        proposals.forEach(function(item) {
+          html += '<div class="log-card">' +
+                     '<div class="log-title">' + item.title + '</div>' +
+                     '<div class="text-muted small mb-2"><i class="fas fa-user"></i> โดยเบอร์: ' + item.phone + ' | 📅 ' + item.timestamp + '</div>' +
+                     '<div class="log-desc mb-3" style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">' + (item.description || '-') + '</div>' +
+                     '<button class="btn-primary w-100" onclick="openProposalReviewModal(' + item.rowIdx + ', \'' + escapeJS(item.title) + '\', \'' + escapeJS(item.description) + '\')">' +
+                       '<i class="fas fa-check-circle"></i> พิจารณาข้อเสนอ' +
+                     '</button>' +
+                   '</div>';
+        });
+        container.innerHTML = html;
+      }).catch(function() {
+        container.innerHTML = '<div class="text-center text-muted mt-5">โหลดไม่สำเร็จ</div>';
+      });
+  }
+
+  function openProposalReviewModal(rowIdx, title, desc) {
+    document.getElementById('review-proposal-row').value = rowIdx;
+    document.getElementById('review-proposal-title').innerText = title;
+    document.getElementById('review-proposal-desc').innerText = desc || '-';
+    document.getElementById('proposal-review-modal').style.display = 'flex';
+  }
+
+  function closeProposalReviewModal() {
+    document.getElementById('proposal-review-modal').style.display = 'none';
+  }
+
+  function submitProposalReview(status) {
+    const rowIdx = document.getElementById('review-proposal-row').value;
+    closeProposalReviewModal();
+    showLoading(true);
+    
+    apiPost('reviewProposal', withAuthData({ rowIdx: rowIdx, status: status }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === "success") {
+          showCustomAlert("บันทึกการพิจารณาเรียบร้อย", "success");
+          loadPendingProposals();
+        } else {
+          showCustomAlert(res.message || "ไม่สามารถบันทึกได้", "error");
+        }
+      }).catch(function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
       });
   }
 
@@ -447,7 +575,7 @@ function withAuthData(data) {
             let imgUrl = (user.image && String(user.image).trim() !== "") ? user.image : defaultImg;
             html += '<div class="rank-card" style="border-left: 6px solid ' + rStyle.color + '; background: linear-gradient(to right, white, #fcfcfc);">' +
                        '<div class="rank-number" style="color: ' + rStyle.color + '; width:50px; font-weight:900; font-size:1.3rem;">' + (index + 1) + '</div>' +
-                       '<img src="' + imgUrl + '" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="border: 3px solid ' + rStyle.color + ';">' +
+                       '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="border: 3px solid ' + rStyle.color + ';">' +
                        '<div class="rank-info">' +
                          '<div style="display:flex; justify-content:space-between; align-items:center;">' +
                            '<span class="rank-name" style="font-size:1.1rem; color:#2d3436;">' + user.name + '</span>' +
@@ -596,7 +724,7 @@ function withAuthData(data) {
     }
     container.innerHTML =
       '<div class="home-featured-card">' +
-        '<img src="' + img + '" class="home-featured-img" alt="featured">' +
+        '<img src="' + img + '" loading="lazy" class="home-featured-img" alt="featured">' +
         '<div class="home-featured-body">' +
           '<h4 class="home-featured-title">' + (featured.title || '-') + '</h4>' +
           (dateText ? '<div class="home-featured-meta">' + dateText + '</div>' : '') +
@@ -1393,6 +1521,7 @@ function withAuthData(data) {
         if (res.status === "success") {
           showCustomAlert("บันทึกข้อมูลแหล่งเรียนรู้เรียบร้อย", "success");
           cacheSources = null;
+          cacheMapSources = null;
           clearAdminForm();
           loadAdminSources();
         } else {
@@ -1414,6 +1543,7 @@ function withAuthData(data) {
           if (res.status === "success") {
             showCustomAlert("ลบข้อมูลเรียบร้อย", "success");
             cacheSources = null;
+            cacheMapSources = null;
             clearAdminQuizForm();
             adminQuizzesCache = [];
             document.getElementById('admin-quiz-list-container').innerHTML = '<div class="text-center text-muted py-3">เลือกแหล่งเรียนรู้เพื่อจัดการข้อสอบ</div>';
@@ -1797,6 +1927,80 @@ function withAuthData(data) {
       }).catch(function() { showLoading(false); });
   }
 
+  function openMapPicker() {
+    document.getElementById('map-picker-modal').style.display = 'flex';
+    
+    // ดึงค่าปัจจุบันจาก input (ถ้ามี)
+    const currentCoord = document.getElementById('admin-source-coord').value.trim();
+    let initialLat = 19.3653;
+    let initialLng = 99.2016;
+    
+    if (currentCoord && currentCoord.indexOf(',') > -1) {
+      const parts = currentCoord.split(',');
+      const pLat = parseFloat(parts[0]);
+      const pLng = parseFloat(parts[1]);
+      if (!isNaN(pLat) && !isNaN(pLng)) {
+        initialLat = pLat;
+        initialLng = pLng;
+      }
+    }
+
+    setTimeout(function() {
+      if (!mapPicker) {
+        mapPicker = L.map('map-picker-container').setView([initialLat, initialLng], 15);
+        const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' });
+        const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' });
+        googleStreets.addTo(mapPicker);
+        L.control.layers({ "แผนที่ถนน": googleStreets, "ดาวเทียม": googleSatellite }).addTo(mapPicker);
+        
+        const redIcon = new L.Icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        mapPickerMarker = L.marker([initialLat, initialLng], { icon: redIcon, draggable: true }).addTo(mapPicker);
+        
+        mapPicker.on('click', function(e) {
+          mapPickerMarker.setLatLng(e.latlng);
+        });
+      } else {
+        mapPicker.setView([initialLat, initialLng], 15);
+        mapPickerMarker.setLatLng([initialLat, initialLng]);
+        mapPicker.invalidateSize();
+      }
+    }, 200);
+  }
+
+  function confirmMapPicker() {
+    if (mapPickerMarker) {
+      const pos = mapPickerMarker.getLatLng();
+      document.getElementById('admin-source-coord').value = pos.lat.toFixed(15) + ', ' + pos.lng.toFixed(15);
+    }
+    closeMapPicker();
+  }
+
+  function closeMapPicker() {
+    document.getElementById('map-picker-modal').style.display = 'none';
+  }
+
+  function getValidImageUrl(url) {
+    if (!url) return 'https://via.placeholder.com/150?text=No+Image';
+    let str = String(url).trim();
+    if (str.indexOf('drive.google.com/file/d/') > -1) {
+      const parts = str.split('/d/');
+      if (parts.length > 1) {
+        const id = parts[1].split('/')[0];
+        return 'https://lh3.googleusercontent.com/d/' + id;
+      }
+    }
+    if (str.indexOf('drive.google.com/open?id=') > -1) {
+      const id = str.split('id=')[1].split('&')[0];
+      return 'https://lh3.googleusercontent.com/d/' + id;
+    }
+    return str;
+  }
+
   function renderDistrictMap() {
     if (!districtMap) {
       districtMap = L.map('overall-map').setView([19.3653, 99.2016], 11);
@@ -1806,7 +2010,15 @@ function withAuthData(data) {
       L.control.layers({ "แผนที่ถนน (Google)": googleStreets, "ดาวเทียม (Google)": googleSatellite }).addTo(districtMap);
     }
 
-    if (!districtMap.markersAdded && cacheMapSources) {
+    // ล้างหมุดเดิม
+    mapMarkers.forEach(m => districtMap.removeLayer(m));
+    mapMarkers = [];
+
+    const filterTambon = document.getElementById('map-tambon-filter').value;
+    const listContainer = document.getElementById('map-list-container');
+    let listHtml = '';
+
+    if (cacheMapSources) {
        const bounds = []; 
        const redIcon = new L.Icon({
          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -1816,6 +2028,10 @@ function withAuthData(data) {
        });
 
        cacheMapSources.forEach(function(source) {
+         // กรองตามตำบล
+         if (filterTambon && source.TambonName !== filterTambon) return;
+
+         // เพิ่มหมุดลงแผนที่
          if (source.Latitude && source.Longitude) {
            const lat = parseFloat(source.Latitude); const lng = parseFloat(source.Longitude);
            if(!isNaN(lat) && !isNaN(lng)) {
@@ -1827,22 +2043,70 @@ function withAuthData(data) {
                                  '<button onclick="openSourceDetail(\'' + escapeJS(source.SourceID) + '\')" style="margin-top:10px; padding:8px 10px; background:#34495e; color:white; border:none; border-radius:6px; cursor:pointer; width:100%; font-family: \'Prompt\', sans-serif;">เข้าสู่บทเรียน</button>' +
                                '</div>';
              marker.bindPopup(popupHtml);
+             mapMarkers.push(marker);
            }
          }
+
+         // สร้างรายการด้านล่าง (สไตล์หน้าอันดับ)
+         let rawUrl = source.CoverImageURL;
+         if (!rawUrl || rawUrl === 'undefined') rawUrl = source.CoverImage;
+         if (!rawUrl || rawUrl === 'undefined') rawUrl = '';
+         const imgUrl = getValidImageUrl(rawUrl);
+         
+         listHtml += '<div class="rank-card" onclick="focusOnSource(\'' + escapeJS(source.SourceID) + '\')" style="margin-bottom:10px; cursor:pointer; border-left:4px solid var(--primary);">' +
+                        '<img src="' + imgUrl + '" loading="lazy" class="rank-img" style="border-radius:8px; width:50px; height:50px; object-fit:cover;">' +
+                        '<div class="rank-info" style="margin-left:12px;">' +
+                          '<div class="rank-name" style="font-size:0.9rem; font-weight:700; color:var(--text);">' + (source.SourceName || "ไม่มีชื่อ") + '</div>' +
+                          '<div class="text-xs" style="color:var(--text-soft);">📍 ต.' + (source.TambonName || "-") + '</div>' +
+                        '</div>' +
+                        '<i class="fas fa-chevron-right text-muted" style="font-size:0.8rem;"></i>' +
+                      '</div>';
        });
-       if(bounds.length > 0) districtMap.fitBounds(bounds); 
-       districtMap.markersAdded = true;
+
+       if (listHtml === '') {
+         listHtml = '<div class="text-center text-muted py-10">ไม่พบแหล่งเรียนรู้ในตำบลนี้</div>';
+       }
+       listContainer.innerHTML = listHtml;
+
+       if(bounds.length > 0) {
+         districtMap.fitBounds(bounds, { padding: [20, 20] }); 
+       } else {
+         districtMap.setView([19.3653, 99.2016], 11);
+       }
     }
     setTimeout(function() { districtMap.invalidateSize(); }, 300);
+  }
+
+  function focusOnSource(sourceId) {
+    if (!cacheMapSources) return;
+    const source = cacheMapSources.find(s => s.SourceID === sourceId);
+    if (source && source.Latitude && source.Longitude && districtMap) {
+      const lat = parseFloat(source.Latitude);
+      const lng = parseFloat(source.Longitude);
+      districtMap.setView([lat, lng], 17);
+      
+      // หาหมุดที่ตรงกับตำแหน่งนี้และเปิด popup
+      mapMarkers.forEach(m => {
+        const pos = m.getLatLng();
+        if (pos.lat === lat && pos.lng === lng) {
+          m.openPopup();
+        }
+      });
+    }
   }
 
   function loadSources() {
     if (cacheSources !== null) return;
     
     // โหลดข้อมูลแผนที่ก่อนเพื่อให้หน้าแผนที่พร้อมใช้งานเร็วขึ้น
-    if (!cacheMapSources) {
+    if (!cacheMapSources || (cacheMapSources.length > 0 && cacheMapSources[0].CoverImage === undefined)) {
       apiGet('getMapSources', withAuthParams())
-        .then(function(sources) { cacheMapSources = sources; })
+        .then(function(sources) { 
+          cacheMapSources = sources;
+          if (document.getElementById('map-page').style.display !== 'none') {
+            renderDistrictMap();
+          }
+        })
         .catch(function() {});
     }
 
@@ -1926,7 +2190,10 @@ function withAuthData(data) {
 
   function renderDetailAfterLoad() {
     const sourceData = activeSourceDetailData;
-    document.getElementById('detail-cover').style.backgroundImage = 'url(\'' + (sourceData.CoverImageURL || 'https://via.placeholder.com/500x300') + '\')';
+    let rawUrl = sourceData.CoverImageURL || sourceData.CoverImage || '';
+    if (rawUrl === 'undefined') rawUrl = '';
+    const validUrl = getValidImageUrl(rawUrl) !== 'https://via.placeholder.com/150?text=No+Image' ? getValidImageUrl(rawUrl) : 'https://via.placeholder.com/500x300';
+    document.getElementById('detail-cover').style.backgroundImage = 'url(\'' + validUrl + '\')';
     document.getElementById('detail-tambon').innerText = sourceData.TambonName;
     document.getElementById('detail-title').innerText = sourceData.SourceName;
 
@@ -2207,15 +2474,17 @@ function renderLeaderboard(data) {
       let defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=random&color=fff';
       let imgUrl = (user.image && String(user.image).trim() !== "") ? user.image : defaultImg;
       
+      let scoreBadgeStyle = (rankNum === 1) ? '' : 'style="background:' + rStyle.color + ';"';
+      
       html += '<div class="podium-item rank-' + rankNum + '">' +
                 '<div class="podium-avatar-wrapper">' +
-                  '<i class="fas fa-crown crown-icon"></i>' + // ไม่ใส่สีตรงนี้ ให้ CSS ทำงาน
-                  '<img src="' + imgUrl + '" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="podium-img" style="border-color:' + rStyle.color + ';">' +
+                  '<i class="fas fa-crown crown-icon"></i>' + 
+                  '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="podium-img" style="border-color:' + rStyle.color + ';">' +
                 '</div>' +
-                '<div class="podium-base">' + rankNum + '</div>' + // แท่นเหยียบ
+                '<div class="podium-base">' + rankNum + '</div>' + 
                 '<div class="podium-info">' +
                   '<div class="podium-name">' + user.name + '</div>' +
-                  '<div class="podium-score-badge" style="background:' + rStyle.color + ';">' + user.score + ' แต้ม</div>' +
+                  '<div class="podium-score-badge" ' + scoreBadgeStyle + '>' + user.score + ' แต้ม</div>' +
                 '</div>' +
               '</div>';
     });
@@ -2232,7 +2501,7 @@ function renderLeaderboard(data) {
 
       html += '<div class="rank-card" style="margin-bottom: 8px; padding: 10px 15px; border-left: 4px solid ' + rStyle.color + ';">' +
                  '<div class="rank-number" style="font-size: 1.1rem; width: 30px; color: #7f8c8d;">' + rankNum + '</div>' +
-                 '<img src="' + imgUrl + '" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="width: 40px; height: 40px; margin: 0 10px;">' +
+                 '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="width: 40px; height: 40px; margin: 0 10px;">' +
                  '<div class="rank-info">' +
                    '<div class="rank-name" style="font-size: 0.95rem;">' + user.name + '</div>' +
                    '<div class="rank-score" style="font-size: 0.8rem;">' + user.score + ' แต้ม</div>' +
@@ -2313,18 +2582,27 @@ function renderLeaderboard(data) {
       let html = '';
       paginatedHistory.forEach(function(item) {
         const hasCert = item.certUrl && String(item.certUrl).trim() !== "" && item.certUrl !== "undefined";
-        const btnClass = hasCert ? "background-color: #27ae60;" : "background-color: #34495e;";
         
         html += '<div class="rank-card" style="margin-bottom: 12px; border-left: 5px solid #f1c40f; align-items:center;">' +
                    '<div style="flex-grow:1;">' +
                      '<div style="font-weight:bold; font-size:1rem;">' + item.sourceName + '</div>' +
                      '<div style="font-size:0.85rem; color:#27ae60;">สอบผ่าน (' + item.score + ')</div>' +
-                   '</div>' +
-                   '<button class="btn-primary" style="padding: 8px 15px; width: auto; ' + btnClass + '" ' +
-                     'onclick="handleCertClick(\'' + escapeJS(item.sourceName) + '\', \'' + escapeJS(item.score) + '\', \'' + escapeJS(item.certUrl) + '\', \'' + escapeJS(item.sourceId) + '\')">' +
-                     '<i class="fas ' + (hasCert ? 'fa-eye' : 'fa-file-pdf') + '"></i> ' + (hasCert ? 'ดูใบประกาศ' : 'รับใบประกาศ') +
-                   '</button>' +
-                 '</div>';
+                   '</div>';
+        
+        if (hasCert) {
+          // ถ้ามีใบประกาศแล้ว ใช้ลิงก์ตรง <a> เพื่อป้องกันการบล็อกป๊อปอัพ
+          html += '<a href="' + item.certUrl + '" target="_blank" class="btn-primary" style="padding: 8px 15px; width: auto; background-color: #27ae60; text-decoration:none; display:inline-flex; align-items:center; gap:8px; justify-content:center;">' +
+                    '<i class="fas fa-eye"></i> ดูใบประกาศ' +
+                  '</a>';
+        } else {
+          // ถ้ายังไม่มี ให้กดเพื่อสร้าง
+          html += '<button class="btn-primary" style="padding: 8px 15px; width: auto; background-color: #34495e;" ' +
+                    'onclick="handleCertClick(\'' + escapeJS(item.sourceName) + '\', \'' + escapeJS(item.score) + '\', \'\', \'' + escapeJS(item.sourceId) + '\', \'' + escapeJS(item.baseId) + '\')">' +
+                    '<i class="fas fa-file-pdf"></i> รับใบประกาศ' +
+                  '</button>';
+        }
+        
+        html += '</div>';
       });
       container.innerHTML = html;
 
@@ -2343,12 +2621,18 @@ function renderLeaderboard(data) {
       renderHistoryUI(cacheHistory);
   }
 
-  function handleCertClick(sourceName, score, existingUrl, sourceId) {
-    if (existingUrl && existingUrl !== "undefined" && String(existingUrl).trim() !== "") window.open(existingUrl, '_blank');
-    else startGenerateCert(sourceName, score, sourceId);
+  function handleCertClick(sourceName, score, existingUrl, sourceId, baseId) {
+    if (existingUrl && existingUrl !== "undefined" && String(existingUrl).trim() !== "") {
+      const win = window.open(existingUrl, '_blank');
+      if (!win) {
+        showCustomAlert('เบราว์เซอร์บล็อกการเปิดหน้าต่างใหม่<br><br><a href="' + existingUrl + '" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none;">คลิกที่นี่เพื่อดูใบประกาศ</a>', 'success', 'เปิดใบประกาศ');
+      }
+    } else {
+      startGenerateCert(sourceName, score, sourceId, baseId);
+    }
   }
 
-  function startGenerateCert(sourceName, score, sourceId) {
+  function startGenerateCert(sourceName, score, sourceId, baseId) {
     // 🌟 ดึงชื่อบริสุทธิ์จาก data-rawname แทนการใช้ innerText เพื่อป้องกันป้าย Rank ติดไปบนเกียรติบัตร
     const nameEl = document.getElementById('profile-name');
     const name = nameEl.getAttribute('data-rawname') || nameEl.innerText;
@@ -2357,10 +2641,20 @@ function renderLeaderboard(data) {
     if (!name || name === "ไม่ระบุชื่อ") return showCustomAlert("ระบบไม่พบชื่อของคุณ", "error");
     
     showLoading(true);
-    apiPost('generateCert', { name: name, source: sourceName, score: score, phone: phone, sourceId: sourceId })
+    apiPost('generateCert', { name: name, source: sourceName, score: score, phone: phone, sourceId: sourceId, baseId: baseId })
       .then(function(res) {
         showLoading(false);
-        if(res.status === "success") { window.open(res.url, '_blank'); cacheHistory = null; loadProfileData(); }
+        if(res.status === "success") { 
+          cacheHistory = null; 
+          loadProfileData(); 
+          
+          const win = window.open(res.url, '_blank');
+          if (!win) {
+             showCustomAlert('สร้างใบประกาศสำเร็จ!<br><br><a href="' + res.url + '" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none;">คลิกที่นี่เพื่อเปิดดู</a>', 'success', 'สำเร็จ');
+          } else {
+             showCustomAlert("สร้างใบประกาศสำเร็จ และเปิดในหน้าต่างใหม่แล้ว", "success");
+          }
+        }
         else { showCustomAlert("เกิดข้อผิดพลาด: " + res.message, "error"); }
       }).catch(function() { showLoading(false); showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); });
   }
@@ -2531,24 +2825,32 @@ function renderLeaderboard(data) {
 
   function renderProposalList(data) {
     const container = document.getElementById('proposal-list-container');
-    if (!data || data.length === 0) {
+    
+    // ตรวจสอบว่าข้อมูลที่ได้มาเป็น Array หรือไม่ (ถ้าเป็น Error Object จะได้ไม่พัง)
+    if (!Array.isArray(data) || data.length === 0) {
       container.innerHTML = '<div class="text-center py-8 text-muted" style="background:var(--glass); border-radius:14px; border:1px dashed var(--card-border);">ยังไม่มีประวัติการเสนอแนะ</div>';
       return;
     }
     
     let html = '';
     data.forEach(function(item) {
-      const statusClass = 'status-' + item.status.toLowerCase();
-      const statusThai = item.status === 'Pending' ? 'รอดำเนินการ' : (item.status === 'Approved' ? 'รับเรื่องแล้ว' : 'ปฏิเสธ');
+      if (!item) return;
+      
+      const rawStatus = String(item.status || "Pending");
+      const statusClass = 'status-' + rawStatus.toLowerCase();
+      let statusThai = 'รอดำเนินการ';
+      
+      if (rawStatus === 'Approved') statusThai = 'รับเรื่องแล้ว';
+      else if (rawStatus === 'Rejected') statusThai = 'ปฏิเสธ';
       
       html += '<div class="proposal-item">' +
                 '<div class="flex justify-between items-start mb-2">' +
-                  '<h5 class="font-bold text-white">' + item.title + '</h5>' +
+                  '<h5 class="font-bold text-white">' + (item.title || "ไม่มีหัวข้อ") + '</h5>' +
                   '<span class="proposal-status ' + statusClass + '">' + statusThai + '</span>' +
                 '</div>' +
                 '<p class="text-xs text-muted mb-2">' + (item.description || '-') + '</p>' +
                 '<div class="text-xs" style="color:var(--text-soft); opacity:0.6;">' +
-                  '<i class="far fa-clock mr-1"></i>' + item.timestamp +
+                  '<i class="far fa-clock mr-1"></i>' + (item.timestamp || '-') +
                 '</div>' +
               '</div>';
     });
@@ -2556,11 +2858,16 @@ function renderLeaderboard(data) {
   }
 
   window.onload = function() {
-    const savedTheme = localStorage.getItem('appTheme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      const themeIcon = document.querySelector('.btn-theme i');
-      if(themeIcon) { themeIcon.className = 'fas fa-sun'; }
+    // Restore Theme Colors
+    const savedPrimary = localStorage.getItem('appPrimaryColor');
+    const savedBg = localStorage.getItem('appBgColor');
+    if (savedPrimary) {
+      applyAppTheme(savedPrimary, savedBg);
+    } else {
+      const savedTheme = localStorage.getItem('appTheme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     }
 
     const savedPhone = localStorage.getItem("userPhone");
@@ -2568,8 +2875,28 @@ function renderLeaderboard(data) {
     if (savedPhone) {
       document.getElementById('header-user-name').innerText = localStorage.getItem("userName") || "User";
       updateNavByRole();
-      showPage('home-page');
-      loadSources();
+      
+      // Parallel loading for better performance
+      const qy = getCurrentQuarterAndYear();
+      Promise.all([
+        apiGet('getHomeData', { quarter: qy.quarter, year: qy.year }),
+        apiGet('getSources', withAuthParams())
+      ]).then(function(results) {
+        const homeRes = results[0];
+        const sourceRes = results[1];
+        
+        if (homeRes.status === "success") {
+          cacheHomeData = homeRes;
+        }
+        if (Array.isArray(sourceRes)) {
+          cacheSources = sourceRes;
+        }
+        
+        // After pre-fetching, show page and render
+        showPage('home-page');
+      }).catch(function() {
+        showPage('home-page');
+      });
     } else {
       showPage('login-page');
     }
