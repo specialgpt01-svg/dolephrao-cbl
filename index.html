@@ -23,12 +23,13 @@
       theme: {
         extend: {
           colors: {
-            'navy-deep': '#0B0742',
-            'navy-dk':   '#120C6E',
-            'blue-app':  '#5E72EB',
-            'coral':     '#FF9190',
-            'peach':     '#FDC094',
-            'gold':      '#FFD700',
+            'emerald-deep': '#064e3b',
+            'emerald-dk':   '#059669',
+            'emerald-app':  '#10b981',
+            'primary':   '#10b981',
+            'coral':     '#10b981', /* ใช้ Emerald แทน Coral เพื่อความคลีน */
+            'peach':     '#34d399', /* ใช้ Emerald 400 */
+            'gold':      '#fbbf24',
           },
           fontFamily: { prompt: ['Prompt','sans-serif'] }
         }
@@ -67,9 +68,9 @@
 
       <!-- Decorative divider -->
       <div class="flex items-center gap-2 mb-5">
-        <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(94,114,235,.4))"></div>
+        <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(16,185,129,.4))"></div>
         <span class="text-xs font-bold tracking-widest" style="color:var(--coral)">SIGN IN</span>
-        <div class="flex-1 h-px" style="background:linear-gradient(270deg,transparent,rgba(94,114,235,.4))"></div>
+        <div class="flex-1 h-px" style="background:linear-gradient(270deg,transparent,rgba(16,185,129,.4))"></div>
       </div>
 
       <div class="input-group">
@@ -159,9 +160,9 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="home-page" class="page-section" style="display:none;">
     <div class="header-bar">
-      <h3><i class="fas fa-bullhorn mr-2" style="color:var(--peach)"></i>ข่าวและกิจกรรม</h3>
+      <h3><i class="fas fa-bullhorn mr-2" style="color:var(--primary-soft)"></i>ข่าวและกิจกรรม</h3>
       <div class="user-badge" id="header-user-name">
-        <i class="fas fa-user-circle mr-1" style="color:var(--coral)"></i>User
+        <i class="fas fa-user-circle mr-1" style="color:var(--primary-soft)"></i>User
       </div>
     </div>
 
@@ -228,7 +229,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="map-page" class="page-section">
     <div class="header-bar" style="justify-content:space-between; padding: 10px 15px;">
-      <h3 style="font-size: 1rem;"><i class="fas fa-globe-asia mr-2" style="color:var(--peach)"></i>แผนที่</h3>
+      <h3 style="font-size: 1rem;"><i class="fas fa-globe-asia mr-2" style="color:var(--primary-soft)"></i>แผนที่</h3>
       <select id="map-tambon-filter" onchange="renderDistrictMap()" style="background:var(--nav-bg); color:var(--text); border:1px solid var(--card-border); border-radius:8px; padding:4px 8px; font-size:0.8rem; font-family:'Prompt',sans-serif; width: 150px;">
         <option value="">ทั้งหมด</option>
         <option value="ต.เวียง">ต.เวียง</option>
@@ -291,7 +292,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="quiz-page" class="page-section" style="display:none;">
     <div class="header-bar">
-      <h3><i class="fas fa-brain mr-2" style="color:var(--peach)"></i>แบบทดสอบ</h3>
+      <h3><i class="fas fa-brain mr-2" style="color:var(--primary-soft)"></i>แบบทดสอบ</h3>
       <button class="back-button" style="position:relative;top:0;left:0;padding:6px 14px;font-size:.8rem;"
               onclick="showPage('detail-page')">
         <i class="fas fa-times"></i> ออก
@@ -354,7 +355,7 @@
         <i class="fas fa-home mr-2"></i>กลับหน้าหลัก
       </button>
       <button id="btn-retry" class="btn-primary w-100"
-              style="background:rgba(94,114,235,.18);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
+              style="background:rgba(16,185,129,.18);color:var(--text);box-shadow:none;border:1px solid var(--card-border);"
               onclick="showPage('detail-page')">
         <i class="fas fa-redo mr-2"></i>ทบทวนเนื้อหา
       </button>
@@ -366,7 +367,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="log-page" class="page-section" style="display:none;">
     <div class="header-bar" style="justify-content:center;">
-      <h3><i class="fas fa-book-open mr-2" style="color:var(--peach)"></i>บันทึกการเรียนรู้</h3>
+      <h3><i class="fas fa-book-open mr-2" style="color:var(--primary)"></i>บันทึกการเรียนรู้</h3>
     </div>
 
     <div class="px-4 mt-4 pb-4">
@@ -374,7 +375,7 @@
       <div class="loft-card" style="margin:0 0 16px;">
         <div class="flex items-center gap-2 mb-4">
           <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base"
-               style="background:linear-gradient(135deg,var(--primary),var(--coral));box-shadow:var(--shadow-btn)">
+               style="background:linear-gradient(135deg,var(--primary),var(--primary-dk));box-shadow:var(--shadow-btn)">
             <i class="fas fa-plus text-white"></i>
           </div>
           <h4 class="font-bold" style="color:var(--primary)">ส่งบันทึกกิจกรรมใหม่</h4>
@@ -397,7 +398,7 @@
         <div class="flex items-center gap-2 mb-4">
           <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
                style="background:var(--glass);border:1px solid var(--card-border)">
-            <i class="fas fa-history" style="color:var(--coral)"></i>
+            <i class="fas fa-history" style="color:var(--primary)"></i>
           </div>
           <h4 class="font-bold text-theme-inv">ประวัติการยื่นกิจกรรม</h4>
         </div>
@@ -446,7 +447,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="approve-page" class="page-section" style="display:none;">
     <div class="header-bar">
-      <h3><i class="fas fa-clipboard-check mr-2" style="color:var(--peach)"></i>ตรวจงานนักศึกษา</h3>
+      <h3><i class="fas fa-clipboard-check mr-2" style="color:var(--primary-soft)"></i>ตรวจงานนักศึกษา</h3>
       <span class="user-badge" id="teacher-tambon-badge">ตำบล…</span>
     </div>
     
@@ -498,7 +499,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="dashboard-page" class="page-section" style="display:none;">
     <div class="header-bar" style="justify-content:center;">
-      <h3><i class="fas fa-chart-line mr-2" style="color:var(--peach)"></i>แดชบอร์ดภาพรวม</h3>
+      <h3><i class="fas fa-chart-line mr-2" style="color:var(--primary-soft)"></i>แดชบอร์ดภาพรวม</h3>
     </div>
 
     <div class="px-4 mt-4 pb-4">
@@ -562,7 +563,7 @@
   ═══════════════════════════════════════════════════════ -->
   <div id="admin-page" class="page-section" style="display:none;">
     <div class="header-bar">
-      <h3><i class="fas fa-tools mr-2" style="color:var(--peach)"></i>หน้าหลังบ้าน</h3>
+      <h3><i class="fas fa-tools mr-2" style="color:var(--primary-soft)"></i>หน้าหลังบ้าน</h3>
       <span class="user-badge">Admin</span>
     </div>
 
@@ -713,7 +714,7 @@
         <div class="input-group relative">
           <i class="fas fa-location-arrow"></i>
           <input type="text" id="admin-source-coord" placeholder="พิกัดสถานที่ เช่น 19.346402439253406, 99.2004815317497">
-          <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-app text-white px-2 py-1 rounded text-xs hover:bg-navy-dk transition-colors" onclick="openMapPicker()">
+          <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 bg-emerald-app text-white px-2 py-1 rounded text-xs hover:bg-emerald-dk transition-colors" onclick="openMapPicker()">
             <i class="fas fa-map-marked-alt mr-1"></i>เลือกจากแผนที่
           </button>
         </div>
@@ -844,7 +845,7 @@
           </button>
         </div>
         <div class="admin-quiz-tools mt-2">
-          <button class="btn-primary" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="saveAdminBaseOrder()">
+          <button class="btn-primary" style="background:linear-gradient(135deg,var(--primary),var(--primary-dk));" onclick="saveAdminBaseOrder()">
             <i class="fas fa-sort mr-1"></i>บันทึกลำดับ
           </button>
         </div>
@@ -915,7 +916,7 @@
           <button class="btn-primary" style="background:linear-gradient(135deg,#10b981,#059669);" onclick="triggerAdminQuizCsvImport()">
             <i class="fas fa-file-import mr-1"></i>นำเข้า CSV
           </button>
-          <button class="btn-primary" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="saveAdminQuizOrder()">
+          <button class="btn-primary" style="background:linear-gradient(135deg,var(--primary),var(--primary-dk));" onclick="saveAdminQuizOrder()">
             <i class="fas fa-sort mr-1"></i>บันทึกลำดับ
           </button>
         </div>
@@ -1101,7 +1102,7 @@
       </div>
 
       <div class="mt-6 mb-4">
-        <h4 class="font-bold text-theme-inv mb-3"><i class="fas fa-history mr-2" style="color:var(--coral)"></i>ประวัติข้อเสนอของคุณ</h4>
+        <h4 class="font-bold text-theme-inv mb-3"><i class="fas fa-history mr-2" style="color:var(--primary)"></i>ประวัติข้อเสนอของคุณ</h4>
         <div id="proposal-list-container">
           <!-- List items will be here -->
         </div>
@@ -1116,10 +1117,10 @@
       <p class="text-xs text-center mb-4" style="color:var(--text-soft);">ปรับแต่งสีสันตามความชอบของคุณ</p>
       
       <div class="theme-color-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:20px;">
-        <button class="theme-color-btn" style="background:#5e72eb; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#5e72eb', '#f8fafc', false)" title="Light Blue"></button>
-        <button class="theme-color-btn" style="background:#2ecc71; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#2ecc71', '#f8fafc', false)" title="Light Green"></button>
-        <button class="theme-color-btn" style="background:#e74c3c; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#e74c3c', '#f8fafc', false)" title="Light Red"></button>
-        <button class="theme-color-btn" style="background:#0d0a2e; border:2px solid #5e72eb; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#5e72eb', '#0d0a2e', true)" title="Dark Mode"></button>
+        <button class="theme-color-btn" style="background:#10b981; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#10b981', '#f8fafc', false)" title="Emerald"></button>
+        <button class="theme-color-btn" style="background:#059669; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#059669', '#f8fafc', false)" title="Forest"></button>
+        <button class="theme-color-btn" style="background:#0d9488; border:2px solid transparent; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#0d9488', '#f8fafc', false)" title="Teal"></button>
+        <button class="theme-color-btn" style="background:#022c22; border:2px solid #10b981; width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;" onclick="applyAppTheme('#10b981', '#020617', true)" title="Dark Mode"></button>
       </div>
 
       <div class="text-center mb-4">
@@ -1158,7 +1159,7 @@
 
   <div id="profile-page" class="page-section" style="display:none;">
     <div class="header-bar" style="justify-content:center;">
-      <h3><i class="fas fa-id-card mr-2" style="color:var(--peach)"></i>โปรไฟล์ผู้เรียน</h3>
+      <h3><i class="fas fa-id-card mr-2" style="color:var(--primary-soft)"></i>โปรไฟล์ผู้เรียน</h3>
     </div>
 
     <div class="px-4 mt-6">
@@ -1180,7 +1181,7 @@
         <h3 id="profile-name" class="text-xl font-black text-theme-inv mb-1">ชื่อ-นามสกุล</h3>
         <p class="text-muted text-sm mb-4">
           📍 ตำบล:
-          <span id="profile-tambon" class="font-bold" style="color:var(--coral)">ไม่ระบุ</span>
+          <span id="profile-tambon" class="font-bold" style="color:var(--primary)">ไม่ระบุ</span>
         </p>
 
         <div class="flex flex-col gap-3">
@@ -1198,9 +1199,9 @@
           </div>
           <div class="flex items-center gap-3 p-3 rounded-xl"
                style="background:var(--glass);border:1px solid var(--glass-border)">
-            <i class="fas fa-coins" style="color:var(--peach)"></i>
+            <i class="fas fa-coins" style="color:var(--primary)"></i>
             <span class="text-sm" style="color:var(--text-soft)">คะแนนสะสม</span>
-            <span id="profile-score" class="ml-auto font-black" style="color:var(--peach)">0</span>
+            <span id="profile-score" class="ml-auto font-black" style="color:var(--primary)">0</span>
           </div>
         </div>
       </div>
@@ -1360,7 +1361,7 @@
     <div class="loft-card" style="margin-top:0; max-width:360px; width:95%; animation:popIn .3s ease;">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-9 h-9 rounded-xl flex items-center justify-center"
-             style="background:linear-gradient(135deg,var(--primary),var(--coral))">
+             style="background:linear-gradient(135deg,var(--primary),var(--primary-dk))">
           <i class="fas fa-clipboard-check text-white text-sm"></i>
         </div>
         <h3 class="font-black text-white text-lg">ประเมินผลงาน</h3>
@@ -1387,7 +1388,7 @@
 
       <div class="flex gap-2 mb-2">
         <button class="btn-primary flex-1"
-                style="background:linear-gradient(135deg,#e74c3c,#c0392b);"
+                style="background:linear-gradient(135deg,#ef4444,#dc2626);"
                 onclick="submitReview('Rejected')">
           <i class="fas fa-times mr-1"></i>ไม่ผ่าน
         </button>

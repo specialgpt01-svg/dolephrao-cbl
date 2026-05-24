@@ -94,16 +94,16 @@ function withAuthData(data) {
   let totalCertPages = 1;
   const CERTS_PER_PAGE = 5;
 
-  // 🌟 ฟังก์ชันตัวช่วย: กำหนดสีและไอคอนตามระดับ Rank ROV
+  // 🌟 ฟังก์ชันตัวช่วย: กำหนดสีและไอคอนตามระดับ Rank (Emerald Palette)
   function getRankStyle(levelStr) {
     let lvl = String(levelStr).toUpperCase();
-    if (lvl.indexOf("GLORIOUS") > -1 || lvl.indexOf("CONQUEROR") > -1) return { title: "Glorious Conqueror", color: "#ff4757", icon: "fa-crown" };
-    if (lvl.indexOf("ต้นแบบ") > -1 || lvl.indexOf("MASTER") > -1) return { title: "นักเรียนรู้ต้นแบบ", color: "#a55eea", icon: "fa-medal" };
-    if (lvl.indexOf("เชี่ยวชาญ") > -1 || lvl.indexOf("DIAMOND") > -1) return { title: "นักเรียนรู้ระดับเชี่ยวชาญ", color: "#45aaf2", icon: "fa-gem" };
-    if (lvl.indexOf("ก้าวหน้า") > -1 || lvl.indexOf("PLATINUM") > -1) return { title: "นักเรียนรู้ระดับก้าวหน้า", color: "#2bcbba", icon: "fa-shield-alt" };
-    if (lvl.indexOf("กลาง") > -1 || lvl.indexOf("GOLD") > -1) return { title: "นักเรียนรู้ระดับกลาง", color: "#f1c40f", icon: "fa-star" };
-    if (lvl.indexOf("ต้น") > -1 || lvl.indexOf("SILVER") > -1) return { title: "นักเรียนรู้ระดับต้น", color: "#bdc3c7", icon: "fa-star-half-alt" };
-    return { title: "ผู้เตรียมความพร้อม", color: "#cd7f32", icon: "fa-seedling" };
+    if (lvl.indexOf("GLORIOUS") > -1 || lvl.indexOf("CONQUEROR") > -1) return { title: "Glorious Conqueror", color: "#fbbf24", icon: "fa-crown" };
+    if (lvl.indexOf("ต้นแบบ") > -1 || lvl.indexOf("MASTER") > -1) return { title: "นักเรียนรู้ต้นแบบ", color: "#064e3b", icon: "fa-medal" };
+    if (lvl.indexOf("เชี่ยวชาญ") > -1 || lvl.indexOf("DIAMOND") > -1) return { title: "นักเรียนรู้ระดับเชี่ยวชาญ", color: "#059669", icon: "fa-gem" };
+    if (lvl.indexOf("ก้าวหน้า") > -1 || lvl.indexOf("PLATINUM") > -1) return { title: "นักเรียนรู้ระดับก้าวหน้า", color: "#10b981", icon: "fa-shield-alt" };
+    if (lvl.indexOf("กลาง") > -1 || lvl.indexOf("GOLD") > -1) return { title: "นักเรียนรู้ระดับกลาง", color: "#34d399", icon: "fa-star" };
+    if (lvl.indexOf("ต้น") > -1 || lvl.indexOf("SILVER") > -1) return { title: "นักเรียนรู้ระดับต้น", color: "#94a3b8", icon: "fa-star-half-alt" };
+    return { title: "ผู้เตรียมความพร้อม", color: "#64748b", icon: "fa-seedling" };
   }
 
   function showCustomAlert(message, type, title) {
@@ -118,10 +118,10 @@ function withAuthData(data) {
     msgEl.innerHTML = message; titleEl.innerText = title;
     cancelBtn.style.display = 'none'; confirmCallback = null;
 
-    if (type === 'success') { icon.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i>'; }
-    else if (type === 'error') { icon.innerHTML = '<i class="fas fa-times-circle" style="color: #e74c3c;"></i>'; titleEl.innerText = 'เกิดข้อผิดพลาด';}
-    else if (type === 'warning') { icon.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #f1c40f;"></i>'; }
-    else { icon.innerHTML = '<i class="fas fa-info-circle" style="color: #3498db;"></i>'; }
+    if (type === 'success') { icon.innerHTML = '<i class="fas fa-check-circle" style="color: #10b981;"></i>'; }
+    else if (type === 'error') { icon.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>'; titleEl.innerText = 'เกิดข้อผิดพลาด';}
+    else if (type === 'warning') { icon.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>'; }
+    else { icon.innerHTML = '<i class="fas fa-info-circle" style="color: #10b981;"></i>'; }
 
     modal.style.display = 'flex';
   }
@@ -469,7 +469,7 @@ function withAuthData(data) {
                  '<div class="text-muted small mb-2"><i class="far fa-calendar-alt"></i> ' + log.date + '</div>' +
                  '<div class="log-desc">' + log.description + '</div>';
                  
-      if (log.note) { html += '<div class="mt-2 p-2" style="background:#f9f9f9; border-radius:5px; font-size:0.85rem; border-left:3px solid #3498db; color: #2c3e50;"><b>💬 ข้อเสนอแนะจากครู:</b> ' + log.note + '</div>'; }
+      if (log.note) { html += '<div class="mt-2 p-2" style="background:var(--bg2); border-radius:5px; font-size:0.85rem; border-left:3px solid var(--primary); color: var(--text);"><b>💬 ข้อเสนอแนะจากครู:</b> ' + log.note + '</div>'; }
       html += '</div>';
     });
     container.innerHTML = html;
@@ -1552,7 +1552,7 @@ function withAuthData(data) {
                   '</div>' +
                   '<div class="admin-item-actions">' +
                     '<button class="btn-primary" style="padding:6px 10px;font-size:.78rem;" onclick="editAdminSource(\'' + escapeJS(item.SourceID) + '\')"><i class="fas fa-pen"></i></button>' +
-                    '<button class="btn-primary" style="padding:6px 10px;font-size:.78rem;background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="focusAdminQuizManager(\'' + escapeJS(item.SourceID) + '\')"><i class="fas fa-question"></i></button>' +
+                    '<button class="btn-primary" style="padding:6px 10px;font-size:.78rem;background:linear-gradient(135deg,var(--primary),var(--primary-dk));" onclick="focusAdminQuizManager(\'' + escapeJS(item.SourceID) + '\')"><i class="fas fa-question"></i></button>' +
                     '<button class="btn-primary" style="padding:6px 10px;font-size:.78rem;background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="deleteAdminSource(\'' + escapeJS(item.SourceID) + '\')"><i class="fas fa-trash"></i></button>' +
                   '</div>' +
                 '</div>' +
@@ -2175,9 +2175,9 @@ function withAuthData(data) {
              bounds.push([lat, lng]);
              const marker = L.marker([lat, lng], {icon: redIcon}).addTo(districtMap);
              const popupHtml = '<div style="text-align:center; font-family: \'Prompt\', sans-serif;">' +
-                                 '<b style="color:#d35400; font-size:1.05rem;">' + source.SourceName + '</b><br>' +
+                                 '<b style="color:var(--primary); font-size:1.05rem;">' + source.SourceName + '</b><br>' +
                                  '<span style="color:#7f8c8d; font-size:0.85rem;">📍 ' + formatTambon(source.TambonName) + '</span><br>' +
-                                 '<button onclick="openSourceDetail(\'' + escapeJS(source.SourceID) + '\')" style="margin-top:10px; padding:8px 10px; background:#34495e; color:white; border:none; border-radius:6px; cursor:pointer; width:100%; font-family: \'Prompt\', sans-serif;">เข้าสู่บทเรียน</button>' +
+                                 '<button onclick="openSourceDetail(\'' + escapeJS(source.SourceID) + '\')" style="margin-top:10px; padding:8px 10px; background:var(--primary-dk); color:white; border:none; border-radius:6px; cursor:pointer; width:100%; font-family: \'Prompt\', sans-serif;">เข้าสู่บทเรียน</button>' +
                                '</div>';
              marker.bindPopup(popupHtml);
              mapMarkers.push(marker);
@@ -2350,7 +2350,7 @@ function withAuthData(data) {
     let html = '';
     const formatText = function(text) { return text ? String(text).split('\n').join('<br>') : ''; };
     if (!info) {
-      html += '<div class="text-center mt-4 mb-4" style="color: #e67e22;"><i class="fas fa-exclamation-circle"></i> แอดมินกำลังอัปเดตเนื้อหาเพิ่มเติมครับ</div>';
+      html += '<div class="text-center mt-4 mb-4" style="color: var(--text-soft);"><i class="fas fa-exclamation-circle"></i> แอดมินกำลังอัปเดตเนื้อหาเพิ่มเติมครับ</div>';
       return html;
     }
     if(info.history) html += '<div class="content-section"><h4><i class="fas fa-bullseye"></i> จุดประสงค์การเรียนรู้</h4><p>' + formatText(info.history) + '</p></div>';
@@ -2358,7 +2358,7 @@ function withAuthData(data) {
     if(info.gallery || info.external) {
       html += '<div class="content-section"><h4><i class="fas fa-photo-video"></i> สื่อการเรียนรู้</h4><div style="display:flex; gap:10px; flex-wrap:wrap;">';
       if(info.gallery) html += '<a href="' + info.gallery + '" target="_blank" class="btn-primary" style="flex:1; text-align:center;"><i class="fas fa-images"></i> แกลอรีรูปภาพ</a>';
-      if(info.external) html += '<a href="' + info.external + '" target="_blank" class="btn-primary" style="flex:1; text-align:center; background-color:#c0392b;"><i class="fab fa-youtube"></i> สื่อภายนอก</a>';
+      if(info.external) html += '<a href="' + info.external + '" target="_blank" class="btn-primary" style="flex:1; text-align:center; background-color:#ef4444;"><i class="fab fa-youtube"></i> สื่อภายนอก</a>';
       html += '</div></div>';
     }
     if((info.gps && showGps) || info.contact) {
@@ -2366,7 +2366,7 @@ function withAuthData(data) {
       if(info.contact) html += '<p>' + formatText(info.contact) + '</p>';
       if(info.gps && showGps) {
         let mapLink = String(info.gps).startsWith('http') ? info.gps : 'https://www.google.com/maps/search/?api=1&query=' + info.gps;
-        html += '<p class="mt-3"><a href="' + mapLink + '" target="_blank" style="color:#3498db;"><i class="fas fa-location-arrow"></i> เปิดพิกัดนำทางแผนที่</a></p>';
+        html += '<p class="mt-3"><a href="' + mapLink + '" target="_blank" style="color:var(--primary);"><i class="fas fa-location-arrow"></i> เปิดพิกัดนำทางแผนที่</a></p>';
       }
       html += '</div>';
     }
@@ -2384,7 +2384,7 @@ function withAuthData(data) {
     if (learningViewMode === 'list') {
       // หน้าแสดงรายการฐาน
       html += '<div class="learning-intro-section">';
-      html += '<h3 class="mb-3" style="color: #2c3e50; font-weight: 600;"><i class="fas fa-list-ol"></i> ลำดับฐานการเรียนรู้</h3>';
+      html += '<h3 class="mb-3" style="color: var(--text-inv); font-weight: 600;"><i class="fas fa-list-ol"></i> ลำดับฐานการเรียนรู้</h3>';
       html += '<p class="text-muted mb-4" style="font-size: 0.9rem;">กรุณาเรียนรู้ให้ครบทุกฐานเพื่อปลดล็อกแบบทดสอบสุดท้าย</p>';
       
       const progress = getLearningProgress(sourceId);
@@ -2421,9 +2421,9 @@ function withAuthData(data) {
         // ปุ่มแบบทดสอบสุดท้าย
         const allDone = bases.every(function(b) { return progress.includes(String(b.baseId)); });
         if (allDone) {
-          html += '<div class="final-quiz-section mt-5" style="text-align: center; background: #f8f9fa; padding: 30px; border-radius: 15px; border: 2px dashed #3498db;">';
-          html +=   '<div class="mb-3" style="font-size: 1.1rem; color: #27ae60; font-weight: bold;"><i class="fas fa-trophy"></i> ยอดเยี่ยม! คุณเรียนครบทุกฐานแล้ว</div>';
-          html +=   '<button class="btn-quiz-final" onclick="startFinalQuiz()" style="width: 100%; max-width: 300px; padding: 15px; font-size: 1.1rem; border-radius: 50px; background: #3498db; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);"><i class="fas fa-file-signature"></i> ทำแบบทดสอบวัดความรู้รวม</button>';
+          html += '<div class="final-quiz-section mt-5" style="text-align: center; background: var(--bg2); padding: 30px; border-radius: 15px; border: 2px dashed var(--primary);">';
+            html +=   '<div class="mb-3" style="font-size: 1.1rem; color: var(--primary); font-weight: bold;"><i class="fas fa-trophy"></i> ยอดเยี่ยม! คุณเรียนครบทุกฐานแล้ว</div>';
+          html +=   '<button class="btn-quiz-final" onclick="startFinalQuiz()" style="width: 100%; max-width: 300px; padding: 15px; font-size: 1.1rem; border-radius: 50px; background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow);"><i class="fas fa-file-signature"></i> ทำแบบทดสอบวัดความรู้รวม</button>';
           html += '</div>';
         }
       } else {
@@ -2443,7 +2443,7 @@ function withAuthData(data) {
       html += '<div class="learning-content-view">';
       html +=   '<button class="btn-back-to-list" onclick="learningViewMode=\'list\'; renderDetailSource();" style="background: none; border: 1px solid #ccc; padding: 5px 15px; border-radius: 20px; color: #666; cursor: pointer;"><i class="fas fa-arrow-left"></i> กลับไปรายการฐาน</button>';
       html +=   '<div class="content-header mt-3 mb-4">';
-      html +=     '<h2 style="color: #2c3e50;">' + (activeBase.baseName || 'ฐานการเรียนรู้') + '</h2>';
+      html +=     '<h2 style="color: var(--text-inv);">' + (activeBase.baseName || 'ฐานการเรียนรู้') + '</h2>';
       html +=   '</div>';
       
       if (activeBase.description) {
@@ -2452,7 +2452,7 @@ function withAuthData(data) {
       html += buildDetailInfoHtml(activeBase.info, false);
 
       html += '<div class="content-footer mt-5" style="text-align: center;">';
-      html +=   '<button class="btn-finish-base" onclick="finishLearningBase(\'' + escapeJS(activeBase.baseId) + '\')" style="background: #27ae60; color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);">จบการเรียนรู้ฐานนี้ <i class="fas fa-chevron-right"></i></button>';
+      html +=   '<button class="btn-finish-base" onclick="finishLearningBase(\'' + escapeJS(activeBase.baseId) + '\')" style="background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px var(--primary-glow);">จบการเรียนรู้ฐานนี้ <i class="fas fa-chevron-right"></i></button>';
       html += '</div>';
       html += '</div>';
     }
@@ -2559,7 +2559,7 @@ function withAuthData(data) {
     const btnRetry = document.getElementById('btn-retry');
 
     if (isPass === "Pass") {
-      resultTitle.innerText = "ยอดเยี่ยม! คุณสอบผ่านเกณฑ์"; resultTitle.style.color = "#2ecc71"; 
+      resultTitle.innerText = "ยอดเยี่ยม! คุณสอบผ่านเกณฑ์"; resultTitle.style.color = "var(--primary)"; 
       resultIcon.innerText = "🏆"; 
       document.getElementById('result-message').innerText = "คุณได้รับ " + earnedPoints + " แต้มสะสม";
       btnRetry.style.display = "none"; 
@@ -2569,7 +2569,7 @@ function withAuthData(data) {
         openEvaluation();
       }, 2000);
     } else {
-      resultTitle.innerText = "พยายามอีกนิดนะ!"; resultTitle.style.color = "#e74c3c"; 
+      resultTitle.innerText = "พยายามอีกนิดนะ!"; resultTitle.style.color = "#ef4444"; 
       resultIcon.innerText = "💪"; 
       document.getElementById('result-message').innerText = "คะแนนยังไม่ถึง 80% ลองใหม่นะ";
       btnRetry.style.display = "block"; 
@@ -2757,20 +2757,20 @@ function renderLeaderboard(data) {
       paginatedHistory.forEach(function(item) {
         const hasCert = item.certUrl && String(item.certUrl).trim() !== "" && item.certUrl !== "undefined";
         
-        html += '<div class="rank-card" style="margin-bottom: 12px; border-left: 5px solid #f1c40f; align-items:center;">' +
+        html += '<div class="rank-card" style="margin-bottom: 12px; border-left: 5px solid var(--gold); align-items:center;">' +
                    '<div style="flex-grow:1;">' +
                      '<div style="font-weight:bold; font-size:1rem;">' + item.sourceName + '</div>' +
-                     '<div style="font-size:0.85rem; color:#27ae60;">สอบผ่าน (' + item.score + ')</div>' +
+                     '<div style="font-size:0.85rem; color:var(--primary);">สอบผ่าน (' + item.score + ')</div>' +
                    '</div>';
         
         if (hasCert) {
           // ถ้ามีใบประกาศแล้ว ใช้ลิงก์ตรง <a> เพื่อป้องกันการบล็อกป๊อปอัพ
-          html += '<a href="' + item.certUrl + '" target="_blank" class="btn-primary" style="padding: 8px 15px; width: auto; background-color: #27ae60; text-decoration:none; display:inline-flex; align-items:center; gap:8px; justify-content:center;">' +
+          html += '<a href="' + item.certUrl + '" target="_blank" class="btn-primary" style="padding: 8px 15px; width: auto; background-color: var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:8px; justify-content:center;">' +
                     '<i class="fas fa-eye"></i> ดูใบประกาศ' +
                   '</a>';
         } else {
           // ถ้ายังไม่มี ให้กดเพื่อสร้าง
-          html += '<button class="btn-primary" style="padding: 8px 15px; width: auto; background-color: #34495e;" ' +
+          html += '<button class="btn-primary" style="padding: 8px 15px; width: auto; background-color: var(--primary-dk);" ' +
                     'onclick="handleCertClick(\'' + escapeJS(item.sourceName) + '\', \'' + escapeJS(item.score) + '\', \'\', \'' + escapeJS(item.sourceId) + '\', \'' + escapeJS(item.baseId) + '\')">' +
                     '<i class="fas fa-file-pdf"></i> รับใบประกาศ' +
                   '</button>';
@@ -3041,7 +3041,7 @@ function renderLeaderboard(data) {
       applyAppTheme(savedPrimary, savedBg, savedTheme === 'dark');
     } else {
       // Default to Light Mode if no saved theme
-      applyAppTheme('#5e72eb', '#f8fafc', false);
+      applyAppTheme('#10b981', '#f8fafc', false);
     }
 
     const savedPhone = localStorage.getItem("userPhone");
