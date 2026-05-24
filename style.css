@@ -1210,7 +1210,7 @@ select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(94,114,235
 }
 .home-featured-img {
   width:100%;
-  height:170px;
+  aspect-ratio: 16 / 9;
   object-fit:cover;
 }
 .home-featured-body {
