@@ -568,7 +568,11 @@
 
     <!-- Admin Tabs Navigation -->
     <div class="admin-tabs">
-      <button class="admin-tab-btn active" onclick="switchAdminTab('sources')">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('stats')">
+        <i class="fas fa-chart-pie"></i>
+        <span>ภาพรวม</span>
+      </button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('sources')">
         <i class="fas fa-map-location-dot"></i>
         <span>แหล่งเรียนรู้</span>
       </button>
@@ -587,8 +591,71 @@
     </div>
 
     <div class="px-4 mt-2 pb-4">
+      <!-- TAB: Dashboard Stats -->
+      <div id="admin-tab-stats" class="admin-tab-content active">
+        <div id="admin-stats-filter-container" class="mb-4">
+          <div class="input-group">
+            <i class="fas fa-filter"></i>
+            <select id="admin-stats-tambon-filter" onchange="loadAdminStats()">
+              <option value="ทั้งหมด">🌍 ภาพรวมทุกพื้นที่</option>
+              <option value="ต.เวียง">ต.เวียง</option>
+              <option value="ต.ทุ่งหลวง">ต.ทุ่งหลวง</option>
+              <option value="ต.ป่าตุ้ม">ต.ป่าตุ้ม</option>
+              <option value="ต.ป่าไหน่">ต.ป่าไหน่</option>
+              <option value="ต.สันทราย">ต.สันทราย</option>
+              <option value="ต.บ้านโป่ง">ต.บ้านโป่ง</option>
+              <option value="ต.น้ำแพร่">ต.น้ำแพร่</option>
+              <option value="ต.เขื่อนผาก">ต.เขื่อนผาก</option>
+              <option value="ต.แม่แวน">ต.แม่แวน</option>
+              <option value="ต.แม่ปั๋ง">ต.แม่ปั๋ง</option>
+              <option value="ต.โหล่งขอด">ต.โหล่งขอด</option>
+              <option value="ศศช.บ้านอาบอลาชา">ศศช.บ้านอาบอลาชา</option>
+              <option value="ศศช.บ้านอาบอเน">ศศช.บ้านอาบอเน</option>
+              <option value="ศศช.บ้านอาแย">ศศช.บ้านอาแย</option>
+              <option value="ศศช.บ้านป่าหญ้าไทร">ศศช.บ้านป่าหญ้าไทร</option>
+              <option value="ศศช.บ้านขอนม่วง">ศศช.บ้านขอนม่วง</option>
+              <option value="ศศช.บ้านแม่งัดน้อย">ศศช.บ้านแม่งัดน้อย</option>
+              <option value="ศศช.บ้านห้วยทรายขาว">ศศช.บ้านห้วยทรายขาว</option>
+              <option value="ศศช.บ้านห้วยกันใจ">ศศช.บ้านห้วยกันใจ</option>
+              <option value="ศศช.บ้านปางตอย">ศศช.บ้านปางตอย</option>
+              <option value="ศศช.บ้านปางฟาน">ศศช.บ้านปางฟาน</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="loft-card text-center" style="margin:0; padding:15px; background:linear-gradient(135deg, var(--primary), var(--primary-dk)); border:none;">
+            <p class="text-white/70 text-xs mb-1">ผู้ใช้ทั้งหมด</p>
+            <div class="font-black text-3xl text-white" id="stat-total-users">0</div>
+          </div>
+          <div class="loft-card text-center" style="margin:0; padding:15px;">
+            <p class="text-muted text-xs mb-1">เกียรติบัตรที่ออก</p>
+            <div class="font-black text-3xl" style="color:var(--gold)" id="stat-total-certs">0</div>
+          </div>
+          <div class="loft-card text-center" style="margin:0; padding:15px;">
+            <p class="text-muted text-xs mb-1">ความพึงพอใจ</p>
+            <div class="font-black text-3xl" style="color:var(--coral)" id="stat-avg-satisfaction">0.0</div>
+            <p class="text-[10px] text-muted" id="stat-rating-count">จาก 0 การประเมิน</p>
+          </div>
+          <div class="loft-card text-center" style="margin:0; padding:15px;">
+            <p class="text-muted text-xs mb-1">ข้อเสนอแนะค้างตรวจ</p>
+            <div class="font-black text-3xl text-theme-inv" id="stat-pending-proposals">0</div>
+          </div>
+        </div>
+
+        <div id="admin-stats-extra" class="loft-card" style="margin:0;">
+          <h4 class="font-bold text-theme-inv mb-4 flex items-center justify-between">
+            <span><i class="fas fa-map-marked-alt mr-2" style="color:var(--primary)"></i>ความต้องการรายพื้นที่</span>
+            <span class="text-[10px] font-normal text-muted">แสดงข้อมูลผู้ใช้ 5 อันดับแรก</span>
+          </h4>
+          <div id="admin-top-areas-list" class="space-y-3">
+             <div class="text-center text-muted py-4 text-xs">กำลังโหลดข้อมูล...</div>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB: Sources -->
-      <div id="admin-tab-sources" class="admin-tab-content active">
+      <div id="admin-tab-sources" class="admin-tab-content">
         <div class="loft-card admin-card" style="margin:0 0 16px;">
           <div class="flex items-center gap-2 mb-3">
             <i class="fas fa-edit" style="color:var(--primary)"></i>
