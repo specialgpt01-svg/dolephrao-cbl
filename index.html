@@ -1174,6 +1174,11 @@
           </label>
         </div>
         <p class="text-muted text-xs mt-2">แตะรูปเพื่อเปลี่ยนภาพโปรไฟล์</p>
+        <button id="btn-adjust-profile" class="btn-primary mt-2" 
+                style="display:none; padding:6px 14px; font-size:0.75rem; border-radius:var(--r-pill); background:var(--glass); color:var(--text); border:1px solid var(--card-border); backdrop-filter:blur(10px);" 
+                onclick="adjustProfileImage()">
+          <i class="fas fa-arrows-alt mr-1"></i> ปรับตำแหน่งรูปภาพ
+        </button>
       </div>
 
       <!-- Profile info card -->
@@ -1324,7 +1329,7 @@
       </div>
       <div class="flex gap-2 mt-4">
         <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="closeCropModal()">ยกเลิก</button>
-        <button class="btn-primary flex-1" onclick="applyCrop()">บันทึกรูปภาพ</button>
+        <button id="btn-crop-save" class="btn-primary flex-1" onclick="applyCrop()">บันทึกรูปภาพ</button>
       </div>
     </div>
   </div>
@@ -1342,6 +1347,9 @@
       </div>
       <div class="action-item" onclick="triggerUpload()">
         <i class="fas fa-image"></i> เปลี่ยนรูปภาพใหม่
+      </div>
+      <div id="menu-adjust-profile" class="action-item" onclick="adjustProfileImage()" style="display:none;">
+        <i class="fas fa-arrows-alt"></i> ปรับตำแหน่งรูปภาพ
       </div>
       <div class="action-item font-bold" style="color:var(--coral)" onclick="closeAvatarMenu()">
         ยกเลิก

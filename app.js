@@ -476,8 +476,14 @@ function withAuthData(data) {
   }
 
   function loadPendingLogs() {
+    const role = localStorage.getItem("userRole");
     const tambon = localStorage.getItem("userTambon") || "ไม่ระบุ";
-    document.getElementById('teacher-tambon-badge').innerText = formatTambon(tambon);
+    
+    if (role === 'admin') {
+      document.getElementById('teacher-tambon-badge').innerText = "ทุกพื้นที่ (Admin)";
+    } else {
+      document.getElementById('teacher-tambon-badge').innerText = formatTambon(tambon);
+    }
     
     // Reset to first tab
     switchApproveTab('logs');
@@ -499,7 +505,12 @@ function withAuthData(data) {
   }
 
   function fetchPendingLogs() {
-    const tambon = localStorage.getItem("userTambon");
+    const role = localStorage.getItem("userRole");
+    let tambon = localStorage.getItem("userTambon");
+    
+    // ถ้าเป็น Admin ให้ส่ง "ทั้งหมด" เพื่อดึงงานทุกพื้นที่
+    if (role === 'admin') tambon = "ทั้งหมด";
+
     const container = document.getElementById('pending-list-container');
     container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
     
@@ -510,7 +521,8 @@ function withAuthData(data) {
           return;
         }
         if (logs.length === 0) {
-            container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-check-circle text-success fa-2x mb-3"></i><br>ไม่มีงานค้างตรวจในตำบลของคุณครับ</div>';
+            const msg = (role === 'admin') ? "ไม่มีงานค้างตรวจในระบบครับ" : "ไม่มีงานค้างตรวจในตำบลของคุณครับ";
+            container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-check-circle text-success fa-2x mb-3"></i><br>' + msg + '</div>';
             return;
         }
         let html = '';
@@ -990,19 +1002,18 @@ function withAuthData(data) {
     }
   }
 
-  function openCropModal(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const cropImg = document.getElementById('crop-image');
-      cropImg.src = e.target.result;
-      document.getElementById('crop-modal').style.display = 'flex';
-      
-      if (cropper) {
-        cropper.destroy();
-      }
+  function openCropModal(source) {
+    const cropImg = document.getElementById('crop-image');
+    const modal = document.getElementById('crop-modal');
+    
+    showLoading(true); // 🔄 แสดง Loading ระหว่างเตรียมรูป
+    
+    const startCropper = () => {
+      modal.style.display = 'flex';
+      if (cropper) cropper.destroy();
       
       const aspect = (currentCropContext === 'profile') ? 1 : 16/9;
-
+      
       setTimeout(function() {
         cropper = new Cropper(cropImg, {
           aspectRatio: aspect,
@@ -1016,10 +1027,51 @@ function withAuthData(data) {
           cropBoxMovable: true,
           cropBoxResizable: true,
           toggleDragModeOnDblclick: false,
+          checkOrientation: true,
+          crossOrigin: 'anonymous'
         });
+        showLoading(false); // ✅ ปิด Loading เมื่อพร้อมใช้งาน
       }, 100);
+    };
+
+    if (typeof source === 'string') {
+      // It's a URL
+      cropImg.src = source;
+      // สำหรับรูปจาก URL อาจต้องรอโหลดรูปสักครู่
+      cropImg.onload = function() {
+        startCropper();
+        cropImg.onload = null;
+      };
+      cropImg.onerror = function() {
+        showLoading(false);
+        showCustomAlert("ไม่สามารถโหลดรูปภาพได้", "error");
+      };
+    } else {
+      // It's a File
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        cropImg.src = e.target.result;
+        startCropper();
+      };
+      reader.onerror = function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการอ่านไฟล์", "error");
+      };
+      reader.readAsDataURL(source);
     }
-    reader.readAsDataURL(file);
+  }
+
+  function adjustProfileImage() {
+    const profileImg = document.getElementById('profile-preview');
+    const picUrl = profileImg.getAttribute('data-url');
+    if (picUrl && picUrl.startsWith('http')) {
+      currentCropContext = 'profile';
+      currentFileName = "profile_" + localStorage.getItem("userPhone") + "_" + Date.now() + ".jpg";
+      openCropModal(picUrl);
+    } else {
+      showCustomAlert("ยังไม่มีรูปโปรไฟล์ให้ปรับตำแหน่งครับ", "warning");
+    }
+    closeAvatarMenu();
   }
 
   function previewAndUploadImage(input) {
@@ -2728,11 +2780,22 @@ function renderLeaderboard(data) {
       
       const imgUrl = me.profileimage || "";
       const profileImg = document.getElementById('profile-preview');
+      const adjustBtn = document.getElementById('btn-adjust-profile');
+      const menuAdjust = document.getElementById('menu-adjust-profile');
+
       if (imgUrl && imgUrl.startsWith('http')) {
         profileImg.style.backgroundImage = "url('" + imgUrl + "')";
         profileImg.setAttribute('data-url', imgUrl);
+        if (adjustBtn) adjustBtn.style.display = 'inline-block';
+        if (menuAdjust) menuAdjust.style.display = 'flex';
+        
         const headerUser = document.getElementById('header-user-name');
         if (headerUser) headerUser.innerHTML = '<img src="' + imgUrl + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:5px; object-fit:cover;"> ' + me.fullname;
+      } else {
+        profileImg.style.backgroundImage = "url('https://via.placeholder.com/150')";
+        profileImg.removeAttribute('data-url');
+        if (adjustBtn) adjustBtn.style.display = 'none';
+        if (menuAdjust) menuAdjust.style.display = 'none';
       }
   }
 
@@ -2859,61 +2922,72 @@ function renderLeaderboard(data) {
 
   function applyCrop() {
     if (!cropper) return;
+    const saveBtn = document.getElementById('btn-crop-save');
+    if (saveBtn) saveBtn.disabled = true;
     showLoading(true);
     
-    // Set output size based on context
-    const outputWidth = (currentCropContext === 'profile') ? 400 : 1280;
-    const outputHeight = (currentCropContext === 'profile') ? 400 : 720;
+    // ⏲️ ให้เวลาเบราว์เซอร์ Render Loading Overlay ก่อนเริ่มประมวลผลหนัก
+    setTimeout(function() {
+      try {
+        const outputWidth = (currentCropContext === 'profile') ? 400 : 1280;
+        const outputHeight = (currentCropContext === 'profile') ? 400 : 720;
 
-    const canvas = cropper.getCroppedCanvas({
-      width: outputWidth,
-      height: outputHeight
-    });
-    
-    const base64 = canvas.toDataURL('image/jpeg', 0.8);
-    const phone = localStorage.getItem("userPhone");
-    
-    const action = (currentCropContext === 'profile') ? 'uploadImage' : 'uploadGeneralImage';
-    
-    apiPost(action, { 
-      base64: base64, 
-      fileName: currentFileName || ("upload_" + Date.now() + ".jpg"), 
-      phone: phone 
-    }).then(function(res) {
+        const canvas = cropper.getCroppedCanvas({
+          width: outputWidth,
+          height: outputHeight
+        });
+        
+        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+        const phone = localStorage.getItem("userPhone");
+        const action = (currentCropContext === 'profile') ? 'uploadImage' : 'uploadGeneralImage';
+        
+        apiPost(action, { 
+          base64: base64, 
+          fileName: currentFileName || ("upload_" + Date.now() + ".jpg"), 
+          phone: phone 
+        }).then(function(res) {
+            showLoading(false);
+            if (saveBtn) saveBtn.disabled = false;
+            if(res.status === "success") {
+              if (currentCropContext === 'profile') {
+                document.getElementById('profile-preview').style.backgroundImage = "url('" + base64 + "')";
+                document.getElementById('profile-preview').setAttribute('data-url', res.url);
+                showCustomAlert("อัปเดตรูปสำเร็จ!", "success"); 
+                cacheLeaderboard = null; cacheProfile = null;
+              } else if (currentCropContext === 'source') {
+                document.getElementById('admin-source-cover').value = res.url;
+                const preview = document.getElementById('admin-source-preview');
+                preview.style.backgroundImage = "url('" + res.url + "')";
+                preview.style.display = 'block';
+                showCustomAlert("อัปโหลดรูปปกสำเร็จ", "success");
+              } else if (currentCropContext === 'base') {
+                document.getElementById('admin-base-cover').value = res.url;
+                const preview = document.getElementById('admin-base-preview');
+                preview.style.backgroundImage = "url('" + res.url + "')";
+                preview.style.display = 'block';
+                showCustomAlert("อัปโหลดรูปฐานสำเร็จ", "success");
+              } else if (currentCropContext === 'featured') {
+                document.getElementById('admin-featured-image').value = res.url;
+                const preview = document.getElementById('admin-featured-preview');
+                preview.style.backgroundImage = "url('" + res.url + "')";
+                preview.style.display = 'block';
+                showCustomAlert("อัปโหลดรูปกิจกรรมสำเร็จ", "success");
+              }
+              closeCropModal();
+            } else { 
+              showCustomAlert("Error: " + res.message, "error"); 
+            }
+          }).catch(function() { 
+            showLoading(false); 
+            if (saveBtn) saveBtn.disabled = false;
+            showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); 
+          });
+      } catch (err) {
         showLoading(false);
-        if(res.status === "success") {
-          if (currentCropContext === 'profile') {
-            document.getElementById('profile-preview').style.backgroundImage = "url('" + base64 + "')";
-            document.getElementById('profile-preview').setAttribute('data-url', res.url);
-            showCustomAlert("อัปเดตรูปสำเร็จ!", "success"); 
-            cacheLeaderboard = null; cacheProfile = null;
-          } else if (currentCropContext === 'source') {
-            document.getElementById('admin-source-cover').value = res.url;
-            const preview = document.getElementById('admin-source-preview');
-            preview.style.backgroundImage = "url('" + res.url + "')";
-            preview.style.display = 'block';
-            showCustomAlert("อัปโหลดรูปปกสำเร็จ", "success");
-          } else if (currentCropContext === 'base') {
-            document.getElementById('admin-base-cover').value = res.url;
-            const preview = document.getElementById('admin-base-preview');
-            preview.style.backgroundImage = "url('" + res.url + "')";
-            preview.style.display = 'block';
-            showCustomAlert("อัปโหลดรูปฐานสำเร็จ", "success");
-          } else if (currentCropContext === 'featured') {
-            document.getElementById('admin-featured-image').value = res.url;
-            const preview = document.getElementById('admin-featured-preview');
-            preview.style.backgroundImage = "url('" + res.url + "')";
-            preview.style.display = 'block';
-            showCustomAlert("อัปโหลดรูปกิจกรรมสำเร็จ", "success");
-          }
-          closeCropModal();
-        } else { 
-          showCustomAlert("Error: " + res.message, "error"); 
-        }
-      }).catch(function() { 
-        showLoading(false); 
-        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); 
-      });
+        if (saveBtn) saveBtn.disabled = false;
+        showCustomAlert("เกิดข้อผิดพลาดในการประมวลผลรูปภาพ", "error");
+      }
+    }, 150);
   }
 
   // --- Evaluation Logic ---

@@ -298,10 +298,10 @@ select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(16,185,129
 /* ─── Loading overlay ────────────────────────────────────── */
 #loading-overlay {
   position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(11,7,66,.75); backdrop-filter:blur(8px);
-  display:flex; justify-content:center; align-items:center; z-index:999;
+  background:rgba(2,44,34,.8); backdrop-filter:blur(8px);
+  display:flex; justify-content:center; align-items:center; z-index:99999;
 }
-.spinner { color:var(--coral); filter:drop-shadow(0 0 16px var(--coral)); }
+.spinner { color:var(--primary); filter:drop-shadow(0 0 16px var(--primary-glow)); }
 
 /* ─── Login / Register Page ──────────────────────────────── */
 #login-page, #register-page {
@@ -954,6 +954,16 @@ select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(16,185,129
 
 /* ─── Profile ────────────────────────────────────────────── */
 .profile-upload-wrapper { display:flex; flex-direction:column; align-items:center; margin-bottom:18px; }
+#btn-adjust-profile {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+#btn-adjust-profile:hover {
+  background: var(--primary-glow) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--primary-glow) !important;
+}
 .avatar-edit {
   position:relative; width:115px; height:115px;
   border:3px solid var(--primary); border-radius:50%; overflow:hidden;
