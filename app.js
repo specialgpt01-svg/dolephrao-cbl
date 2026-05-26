@@ -141,6 +141,7 @@ function withAuthData(data) {
     const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
     document.getElementById('nav-log').style.display = (role === "user") ? "flex" : "none";
     document.getElementById('nav-approve').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
+    document.getElementById('nav-user-mgmt').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
     document.getElementById('nav-dashboard').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
     document.getElementById('nav-admin').style.display = (role === "admin" || role === "teacher") ? "flex" : "none";
   }
@@ -169,6 +170,7 @@ function withAuthData(data) {
       
       if(pageId === 'log-page') { document.getElementById('nav-log').classList.add('active'); loadMyLogs(1); }
       if(pageId === 'approve-page') { document.getElementById('nav-approve').classList.add('active'); loadPendingLogs(); }
+      if(pageId === 'user-mgmt-page') { document.getElementById('nav-user-mgmt').classList.add('active'); loadUserMgmt(); }
       if(pageId === 'dashboard-page') { document.getElementById('nav-dashboard').classList.add('active'); loadDashboard(); }
       if(pageId === 'proposal-page') { loadUserProposals(); }
       if(pageId === 'admin-page') {
@@ -615,6 +617,28 @@ function withAuthData(data) {
       });
   }
 
+  function getAISummary() {
+    const container = document.getElementById('ai-summary-container');
+    const textEl = document.getElementById('ai-summary-text');
+    
+    showLoading(true);
+    apiGet('getAISummary', withAuthParams({}))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === 'success') {
+          container.style.display = 'block';
+          textEl.innerText = res.summary;
+          // เลื่อนไปที่ตำแหน่งสรุป
+          container.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          showCustomAlert(res.message, "error");
+        }
+      }).catch(function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI", "error");
+      });
+  }
+
   function openReviewModal(logId, phone, activity, fullName, area) {
     document.getElementById('review-log-id').value = logId;
     document.getElementById('review-phone').innerText = (fullName || 'ไม่ระบุชื่อ') + ' (' + phone + ')';
@@ -646,6 +670,211 @@ function withAuthData(data) {
           showCustomAlert(res.message || "ไม่สามารถบันทึกผลประเมินได้", "error");
         }
       }).catch(function() { showLoading(false); showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); });
+  }
+
+  function loadUserMgmt() {
+    const role = localStorage.getItem("userRole");
+    const tambon = localStorage.getItem("userTambon") || "ไม่ระบุ";
+    const badge = document.getElementById('user-mgmt-tambon-badge');
+    const filterContainer = document.getElementById('admin-user-filter-container');
+    const filterEl = document.getElementById('user-mgmt-tambon-filter');
+
+    if (role === 'admin') {
+      badge.innerText = "ทุกพื้นที่ (Admin)";
+      filterContainer.style.display = 'block';
+    } else {
+      badge.innerText = formatTambon(tambon);
+      filterContainer.style.display = 'none';
+      filterEl.value = tambon;
+    }
+
+    fetchUserMgmtList();
+  }
+
+  let currentUserMgmtTab = 'approve';
+  function switchUserMgmtTab(tabId) {
+    currentUserMgmtTab = tabId;
+    document.getElementById('tab-btn-approve-img').classList.toggle('active', tabId === 'approve');
+    document.getElementById('tab-btn-all-users').classList.toggle('active', tabId === 'all');
+    renderUserMgmtList(fullUserList);
+  }
+
+  let fullUserList = [];
+  function fetchUserMgmtList() {
+    const role = localStorage.getItem("userRole");
+    let tambon = localStorage.getItem("userTambon");
+    const filterEl = document.getElementById('user-mgmt-tambon-filter');
+    
+    if (role === 'admin') tambon = filterEl.value || "ทั้งหมด";
+
+    const container = document.getElementById('user-mgmt-list');
+    container.innerHTML = '<div class="text-center text-muted py-8"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    apiGet('getUsersByTambon', withAuthParams({ tambon: tambon }))
+      .then(function(users) {
+        fullUserList = users || [];
+        renderUserMgmtList(fullUserList);
+      }).catch(function() {
+        container.innerHTML = '<div class="text-center text-muted py-8">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+      });
+  }
+
+  function renderUserMgmtList(users) {
+    const container = document.getElementById('user-mgmt-list');
+    const countEl = document.getElementById('user-mgmt-count');
+    
+    // กรองตาม Tab
+    let filtered = users;
+    if (currentUserMgmtTab === 'approve') {
+      filtered = users.filter(function(u) { return u.imageStatus === 'Pending'; });
+    }
+    
+    countEl.innerText = filtered.length + " คน";
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="text-center text-muted py-8">ไม่พบรายชื่อสมาชิก</div>';
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(function(u) {
+      const isPending = u.imageStatus === 'Pending';
+      const statusText = isPending ? 'รออนุมัติ' : (u.imageStatus === 'Rejected' ? 'ไม่อนุมัติ' : 'อนุมัติแล้ว');
+      const statusColor = isPending ? 'var(--gold)' : (u.imageStatus === 'Rejected' ? '#ef4444' : '#10b981');
+      const imgUrl = u.profileImage || 'https://via.placeholder.com/150';
+
+      html += '<div class="rank-card" style="margin-bottom:12px; align-items:flex-start; padding:15px; flex-direction:column; gap:12px;">' +
+                '<div class="flex items-center w-full gap-3">' +
+                  '<img src="' + imgUrl + '" class="w-12 h-12 rounded-full object-cover border-2" style="border-color:' + statusColor + '">' +
+                  '<div class="flex-grow">' +
+                    '<div class="font-bold text-theme-inv">' + u.fullName + '</div>' +
+                    '<div class="text-[10px] text-muted">' + u.username + ' • ' + formatTambon(u.tambon) + '</div>' +
+                  '</div>' +
+                  '<div class="text-[10px] font-bold px-2 py-1 rounded" style="background:var(--glass); color:' + statusColor + '">' + statusText + '</div>' +
+                '</div>';
+      
+      if (currentUserMgmtTab === 'approve') {
+        // Tab อนุมัติรูป: โชว์แค่ปุ่มอนุมัติ/ไม่อนุมัติ
+        if (u.profileImage && u.profileImage.startsWith('http')) {
+          html += '<div class="flex gap-2 w-full">' +
+                    '<button class="btn-primary flex-1" style="padding:6px; font-size:0.75rem; background:#ef4444;" onclick="approveUserImage(\'' + u.username + '\', \'Rejected\')">' +
+                      '<i class="fas fa-times mr-1"></i> ไม่อนุมัติรูป' +
+                    '</button>' +
+                    '<button class="btn-primary flex-1" style="padding:6px; font-size:0.75rem; background:#10b981;" onclick="approveUserImage(\'' + u.username + '\', \'Approved\')">' +
+                      '<i class="fas fa-check mr-1"></i> อนุมัติรูป' +
+                    '</button>' +
+                  '</div>';
+        }
+      } else {
+        // Tab จัดการทั้งหมด: โชว์ปุ่มแก้ไข และ ลบ
+        html += '<div class="flex gap-2 w-full">' +
+                  '<button class="btn-primary flex-1" style="padding:6px; font-size:0.75rem; background:var(--glass); color:var(--text); border:1px solid var(--card-border);" onclick="openEditUserModal(\'' + u.username + '\', \'' + escapeJS(u.fullName) + '\', \'' + (u.profileImage || '') + '\')">' +
+                    '<i class="fas fa-edit mr-1"></i> แก้ไข' +
+                  '</button>' +
+                  '<button class="btn-primary flex-1" style="padding:6px; font-size:0.75rem; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #ef4444;" onclick="deleteUser(\'' + u.username + '\')">' +
+                    '<i class="fas fa-trash-alt mr-1"></i> ลบ' +
+                  '</button>' +
+                '</div>';
+      }
+      
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function openEditUserModal(username, fullName, profileImage) {
+    document.getElementById('edit-user-username').value = username;
+    document.getElementById('edit-user-fullname').value = fullName;
+    document.getElementById('edit-user-image').value = profileImage;
+    document.getElementById('edit-user-modal').style.display = 'flex';
+  }
+
+  function closeEditUserModal() {
+    document.getElementById('edit-user-modal').style.display = 'none';
+  }
+
+  function handleEditUserImageUpload(input) {
+    if (input.files && input.files[0]) {
+      showLoading(true);
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // ใช้ Cropper เพื่อปรับขนาดรูป
+        currentCropContext = 'editUser';
+        currentFileName = "profile_edit_" + document.getElementById('edit-user-username').value + ".jpg";
+        openCropModal(input.files[0]);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function submitEditUser() {
+    const username = document.getElementById('edit-user-username').value;
+    const fullName = document.getElementById('edit-user-fullname').value.trim();
+    const profileImage = document.getElementById('edit-user-image').value.trim();
+
+    if (!fullName) return showCustomAlert("กรุณากรอกชื่อ-นามสกุล", "warning");
+
+    showLoading(true);
+    apiPost('updateUserDetails', withAuthParams({ targetUserId: username, fullName: fullName, profileImage: profileImage }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === 'success') {
+          showCustomAlert("แก้ไขข้อมูลสำเร็จ", "success");
+          closeEditUserModal();
+          fetchUserMgmtList();
+        } else {
+          showCustomAlert(res.message, "error");
+        }
+      }).catch(function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+      });
+  }
+
+  function deleteUser(username) {
+    showCustomAlert("คุณต้องการลบสมาชิกรายนี้ใช่หรือไม่? ข้อมูลจะถูกลบถาวร", "warning", true, function(confirm) {
+      if (confirm) {
+        showLoading(true);
+        apiPost('deleteUser', withAuthParams({ targetUserId: username }))
+          .then(function(res) {
+            showLoading(false);
+            if (res.status === 'success') {
+              showCustomAlert("ลบสมาชิกเรียบร้อย", "success");
+              fetchUserMgmtList();
+            } else {
+              showCustomAlert(res.message, "error");
+            }
+          }).catch(function() {
+            showLoading(false);
+            showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+          });
+      }
+    });
+  }
+
+  function filterUserMgmtList() {
+    const query = document.getElementById('user-mgmt-search').value.toLowerCase();
+    const filtered = fullUserList.filter(function(u) {
+      return u.fullName.toLowerCase().includes(query) || u.username.includes(query);
+    });
+    renderUserMgmtList(filtered);
+  }
+
+  function approveUserImage(userId, status) {
+    showLoading(true);
+    apiPost('approveProfileImage', withAuthParams({ targetUserId: userId, status: status }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === 'success') {
+          showCustomAlert("ดำเนินการสำเร็จ", "success");
+          fetchUserMgmtList();
+        } else {
+          showCustomAlert(res.message, "error");
+        }
+      }).catch(function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+      });
   }
 
   function loadDashboard() {
@@ -2779,18 +3008,37 @@ function renderLeaderboard(data) {
       document.getElementById('profile-score').innerText = me.totalscore || "0";
       
       const imgUrl = me.profileimage || "";
+      const imgStatus = String(me.imagestatus || "Approved");
       const profileImg = document.getElementById('profile-preview');
       const adjustBtn = document.getElementById('btn-adjust-profile');
       const menuAdjust = document.getElementById('menu-adjust-profile');
 
       if (imgUrl && imgUrl.startsWith('http')) {
-        profileImg.style.backgroundImage = "url('" + imgUrl + "')";
-        profileImg.setAttribute('data-url', imgUrl);
-        if (adjustBtn) adjustBtn.style.display = 'inline-block';
-        if (menuAdjust) menuAdjust.style.display = 'flex';
-        
-        const headerUser = document.getElementById('header-user-name');
-        if (headerUser) headerUser.innerHTML = '<img src="' + imgUrl + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:5px; object-fit:cover;"> ' + me.fullname;
+        if (imgStatus === 'Approved') {
+          profileImg.style.backgroundImage = "url('" + imgUrl + "')";
+          profileImg.setAttribute('data-url', imgUrl);
+          if (adjustBtn) adjustBtn.style.display = 'inline-block';
+          if (menuAdjust) menuAdjust.style.display = 'flex';
+          
+          const headerUser = document.getElementById('header-user-name');
+          if (headerUser) headerUser.innerHTML = '<img src="' + imgUrl + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:5px; object-fit:cover;"> ' + me.fullname;
+        } else {
+          // ถ้ายังไม่อนุมัติ หรือถูกปฏิเสธ ให้ใช้รูป Placeholder
+          profileImg.style.backgroundImage = "url('https://via.placeholder.com/150')";
+          profileImg.removeAttribute('data-url');
+          if (adjustBtn) adjustBtn.style.display = 'none';
+          if (menuAdjust) menuAdjust.style.display = 'none';
+          
+          const statusText = imgStatus === 'Pending' ? '(รออนุมัติรูป)' : '(รูปไม่เหมาะสม)';
+          const headerUser = document.getElementById('header-user-name');
+          if (headerUser) headerUser.innerHTML = '<i class="fas fa-user-circle mr-1" style="color:var(--primary-soft)"></i> ' + me.fullname + ' <span style="font-size:10px; color:var(--gold)">' + statusText + '</span>';
+          
+          if (imgStatus === 'Pending') {
+            showCustomAlert("รูปโปรไฟล์ของคุณกำลังรอการตรวจสอบจากเจ้าหน้าที่", "info");
+          } else if (imgStatus === 'Rejected') {
+            showCustomAlert("รูปโปรไฟล์ของคุณไม่ผ่านการอนุมัติ กรุณาเปลี่ยนรูปที่เหมาะสม", "error");
+          }
+        }
       } else {
         profileImg.style.backgroundImage = "url('https://via.placeholder.com/150')";
         profileImg.removeAttribute('data-url');
@@ -2950,10 +3198,19 @@ function renderLeaderboard(data) {
             if (saveBtn) saveBtn.disabled = false;
             if(res.status === "success") {
               if (currentCropContext === 'profile') {
-                document.getElementById('profile-preview').style.backgroundImage = "url('" + base64 + "')";
-                document.getElementById('profile-preview').setAttribute('data-url', res.url);
-                showCustomAlert("อัปเดตรูปสำเร็จ!", "success"); 
-                cacheLeaderboard = null; cacheProfile = null;
+                // เมื่ออัปโหลดใหม่ สถานะจะเป็น Pending ทันที
+                // เราจะไม่โชว์รูปที่อัปโหลดทันที แต่จะใช้ placeholder และแจ้งเตือน
+                document.getElementById('profile-preview').style.backgroundImage = "url('https://via.placeholder.com/150')";
+                document.getElementById('profile-preview').removeAttribute('data-url');
+                
+                const adjustBtn = document.getElementById('btn-adjust-profile');
+                if (adjustBtn) adjustBtn.style.display = 'none';
+                
+                showCustomAlert("อัปโหลดรูปสำเร็จ! กรุณารอครูประจำตำบลตรวจสอบความเหมาะสมก่อนแสดงผล", "success"); 
+                cacheLeaderboard = null; 
+                cacheProfile = null;
+                // รีโหลดข้อมูลโปรไฟล์เพื่ออัปเดตสถานะใน UI
+                loadProfileData();
               } else if (currentCropContext === 'source') {
                 document.getElementById('admin-source-cover').value = res.url;
                 const preview = document.getElementById('admin-source-preview');
@@ -2972,6 +3229,9 @@ function renderLeaderboard(data) {
                 preview.style.backgroundImage = "url('" + res.url + "')";
                 preview.style.display = 'block';
                 showCustomAlert("อัปโหลดรูปกิจกรรมสำเร็จ", "success");
+              } else if (currentCropContext === 'editUser') {
+                document.getElementById('edit-user-image').value = res.url;
+                showCustomAlert("อัปโหลดรูปสำเร็จ! อย่าลืมกดบันทึกการแก้ไข", "success");
               }
               closeCropModal();
             } else { 

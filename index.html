@@ -480,15 +480,98 @@
 
       <!-- TAB Content: Proposals -->
       <div id="approve-tab-proposals" class="approve-tab-content" style="display:none;">
-        <div class="flex items-center gap-2 mb-3">
-          <i class="fas fa-lightbulb" style="color:var(--gold)"></i>
-          <h4 class="font-bold text-theme-inv">ข้อเสนอแนะที่รอการพิจารณา</h4>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-lightbulb" style="color:var(--gold)"></i>
+            <h4 class="font-bold text-theme-inv">ข้อเสนอแนะที่รอการพิจารณา</h4>
+          </div>
+          <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; background:linear-gradient(135deg, #8b5cf6, #6366f1);" onclick="getAISummary()">
+            <i class="fas fa-robot mr-1"></i> สรุปโดย AI
+          </button>
         </div>
+
+        <!-- AI Summary Result -->
+        <div id="ai-summary-container" class="loft-card" style="display:none; margin:0 0 16px; background:rgba(139, 92, 246, 0.1); border:1px solid rgba(139, 92, 246, 0.3);">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-sparkles" style="color:#8b5cf6"></i>
+            <span class="font-bold text-sm" style="color:#8b5cf6">AI สรุปความต้องการภาพรวม</span>
+          </div>
+          <div id="ai-summary-text" class="text-xs leading-relaxed text-theme-inv whitespace-pre-wrap"></div>
+        </div>
+
         <div id="pending-proposals-container">
           <div class="flex flex-col items-center gap-2 mt-10 text-center" style="color:var(--text-soft)">
             <i class="fas fa-circle-notch fa-spin text-3xl" style="color:var(--primary)"></i>
             <p>กำลังค้นหาข้อเสนอแนะ…</p>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       USER MANAGEMENT PAGE — For Teachers & Admin
+  ═══════════════════════════════════════════════════════ -->
+  <div id="user-mgmt-page" class="page-section" style="display:none;">
+    <div class="header-bar">
+      <h3><i class="fas fa-users-cog mr-2" style="color:var(--primary-soft)"></i>จัดการสมาชิก</h3>
+      <span class="user-badge" id="user-mgmt-tambon-badge">ตำบล…</span>
+    </div>
+
+    <div class="px-4 mt-4 pb-4">
+      <!-- User Mgmt Tabs -->
+      <div class="admin-tabs mb-4">
+        <button id="tab-btn-approve-img" class="admin-tab-btn active" onclick="switchUserMgmtTab('approve')">
+          <i class="fas fa-user-check"></i>
+          <span>อนุมัติรูป</span>
+        </button>
+        <button id="tab-btn-all-users" class="admin-tab-btn" onclick="switchUserMgmtTab('all')">
+          <i class="fas fa-users"></i>
+          <span>จัดการสมาชิก</span>
+        </button>
+      </div>
+
+      <div class="loft-card" style="margin:0 0 16px; padding:15px;">
+        <div class="input-group mb-0">
+          <i class="fas fa-search"></i>
+          <input type="text" id="user-mgmt-search" placeholder="ค้นหาชื่อหรือเบอร์โทร..." onkeyup="filterUserMgmtList()">
+        </div>
+        <div id="admin-user-filter-container" class="mt-2" style="display:none;">
+          <select id="user-mgmt-tambon-filter" onchange="fetchUserMgmtList()" 
+                  style="width:100%; background:var(--nav-bg); color:var(--text); border:1px solid var(--card-border); border-radius:12px; padding:8px 12px; font-size:0.85rem; font-family:'Prompt',sans-serif;">
+            <option value="ทั้งหมด">🌍 ทุกพื้นที่</option>
+            <option value="ต.เวียง">ต.เวียง</option>
+            <option value="ต.ทุ่งหลวง">ต.ทุ่งหลวง</option>
+            <option value="ต.ป่าตุ้ม">ต.ป่าตุ้ม</option>
+            <option value="ต.ป่าไหน่">ต.ป่าไหน่</option>
+            <option value="ต.สันทราย">ต.สันทราย</option>
+            <option value="ต.บ้านโป่ง">ต.บ้านโป่ง</option>
+            <option value="ต.น้ำแพร่">ต.น้ำแพร่</option>
+            <option value="ต.เขื่อนผาก">ต.เขื่อนผาก</option>
+            <option value="ต.แม่แวน">ต.แม่แวน</option>
+            <option value="ต.แม่ปั๋ง">ต.แม่ปั๋ง</option>
+            <option value="ต.โหล่งขอด">ต.โหล่งขอด</option>
+            <option value="ศศช.บ้านอาบอลาชา">ศศช.บ้านอาบอลาชา</option>
+            <option value="ศศช.บ้านอาบอเน">ศศช.บ้านอาบอเน</option>
+            <option value="ศศช.บ้านอาแย">ศศช.บ้านอาแย</option>
+            <option value="ศศช.บ้านป่าหญ้าไทร">ศศช.บ้านป่าหญ้าไทร</option>
+            <option value="ศศช.บ้านขอนม่วง">ศศช.บ้านขอนม่วง</option>
+            <option value="ศศช.บ้านแม่งัดน้อย">ศศช.บ้านแม่งัดน้อย</option>
+            <option value="ศศช.บ้านห้วยทรายขาว">ศศช.บ้านห้วยทรายขาว</option>
+            <option value="ศศช.บ้านห้วยกันใจ">ศศช.บ้านห้วยกันใจ</option>
+            <option value="ศศช.บ้านปางตอย">ศศช.บ้านปางตอย</option>
+            <option value="ศศช.บ้านปางฟาน">ศศช.บ้านปางฟาน</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="loft-card" style="margin:0;">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-bold text-theme-inv">รายชื่อสมาชิก</h4>
+          <span class="user-badge" id="user-mgmt-count" style="font-size:0.7rem; padding:2px 8px;">0 คน</span>
+        </div>
+        <div id="user-mgmt-list" class="space-y-3">
+          <div class="text-center text-muted py-8"><i class="fas fa-spinner fa-spin mr-2"></i>กำลังโหลด...</div>
         </div>
       </div>
     </div>
@@ -1262,6 +1345,9 @@
     <div class="nav-item" id="nav-approve" onclick="showPage('approve-page')" style="display:none;">
       <i class="fas fa-clipboard-check"></i><span>ตรวจงาน</span>
     </div>
+    <div class="nav-item" id="nav-user-mgmt" onclick="showPage('user-mgmt-page')" style="display:none;">
+      <i class="fas fa-users-cog"></i><span>สมาชิก</span>
+    </div>
     <div class="nav-item" id="nav-dashboard" onclick="showPage('dashboard-page')" style="display:none;">
       <i class="fas fa-chart-line"></i><span>ภาพรวม</span>
     </div>
@@ -1273,6 +1359,36 @@
     </div>
     <div class="nav-item" id="nav-profile" onclick="showPage('profile-page')">
       <i class="fas fa-user"></i><span>โปรไฟล์</span>
+    </div>
+  </div>
+
+  <!-- ─── Edit User Modal ────────────────────────────── -->
+  <div id="edit-user-modal" class="modal-overlay" style="display:none; z-index:10006;">
+    <div class="loft-card" style="width:90%; max-width:400px; padding:25px; margin-top:0;">
+      <h3 class="text-theme-inv font-bold mb-4 text-center"><i class="fas fa-user-edit mr-2" style="color:var(--primary)"></i>แก้ไขข้อมูลสมาชิก</h3>
+      <input type="hidden" id="edit-user-username">
+      
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="edit-user-fullname" placeholder="ชื่อ-นามสกุล">
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-image"></i>
+        <input type="text" id="edit-user-image" placeholder="URL รูปโปรไฟล์">
+      </div>
+      
+      <div class="flex gap-2 mt-2 mb-4">
+        <input type="file" id="edit-user-image-file" accept="image/*" style="display:none;" onchange="handleEditUserImageUpload(this)">
+        <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); box-shadow:none; border:1px solid var(--card-border);" onclick="document.getElementById('edit-user-image-file').click()">
+          <i class="fas fa-upload mr-1"></i>อัปโหลดรูปใหม่
+        </button>
+      </div>
+
+      <div class="flex gap-2 mt-6">
+        <button class="btn-primary flex-1" style="background:var(--glass); color:var(--text); border:1px solid var(--card-border); box-shadow:none;" onclick="closeEditUserModal()">ยกเลิก</button>
+        <button class="btn-primary flex-1" onclick="submitEditUser()">บันทึกการแก้ไข</button>
+      </div>
     </div>
   </div>
 
