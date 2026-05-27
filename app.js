@@ -696,10 +696,29 @@ function withAuthData(data) {
     currentUserMgmtTab = tabId;
     document.getElementById('tab-btn-approve-img').classList.toggle('active', tabId === 'approve');
     document.getElementById('tab-btn-all-users').classList.toggle('active', tabId === 'all');
-    renderUserMgmtList(fullUserList);
+    const certBtn = document.getElementById('tab-btn-cert-history');
+    if (certBtn) certBtn.classList.toggle('active', tabId === 'cert');
+
+    const titleEl = document.getElementById('user-mgmt-title');
+    if (titleEl) {
+      titleEl.innerText = tabId === 'cert' ? 'ประวัติการออกใบเกียรติบัตร' : 'รายชื่อสมาชิก';
+    }
+
+    if (tabId === 'cert') {
+      fetchCertHistory();
+    } else {
+      renderUserMgmtList(fullUserList);
+    }
   }
 
   let fullUserList = [];
+  let fullCertHistory = [];
+
+  function onUserMgmtTambonFilterChange() {
+    if (currentUserMgmtTab === 'cert') fetchCertHistory();
+    else fetchUserMgmtList();
+  }
+
   function fetchUserMgmtList() {
     const role = localStorage.getItem("userRole");
     let tambon = localStorage.getItem("userTambon");
@@ -713,7 +732,29 @@ function withAuthData(data) {
     apiGet('getUsersByTambon', withAuthParams({ tambon: tambon }))
       .then(function(users) {
         fullUserList = users || [];
-        renderUserMgmtList(fullUserList);
+        if (currentUserMgmtTab !== 'cert') renderUserMgmtList(fullUserList);
+      }).catch(function() {
+        container.innerHTML = '<div class="text-center text-muted py-8">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+      });
+  }
+
+  function fetchCertHistory() {
+    const role = localStorage.getItem("userRole");
+    let tambon = localStorage.getItem("userTambon");
+    const filterEl = document.getElementById('user-mgmt-tambon-filter');
+    if (role === 'admin') tambon = filterEl.value || "ทั้งหมด";
+
+    const container = document.getElementById('user-mgmt-list');
+    container.innerHTML = '<div class="text-center text-muted py-8"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    apiGet('getCertIssuanceHistory', withAuthParams({ tambon: tambon }))
+      .then(function(res) {
+        if (res && res.status === 'success') {
+          fullCertHistory = res.items || [];
+          renderCertHistory(fullCertHistory);
+        } else {
+          container.innerHTML = '<div class="text-center text-muted py-8">' + ((res && res.message) ? res.message : 'เกิดข้อผิดพลาดในการโหลดข้อมูล') + '</div>';
+        }
       }).catch(function() {
         container.innerHTML = '<div class="text-center text-muted py-8">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
       });
@@ -741,7 +782,8 @@ function withAuthData(data) {
       const isPending = u.imageStatus === 'Pending';
       const statusText = isPending ? 'รออนุมัติ' : (u.imageStatus === 'Rejected' ? 'ไม่อนุมัติ' : 'อนุมัติแล้ว');
       const statusColor = isPending ? 'var(--gold)' : (u.imageStatus === 'Rejected' ? '#ef4444' : '#10b981');
-      const imgUrl = u.profileImage || 'https://via.placeholder.com/150';
+      const placeholderImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+      const imgUrl = (u.profileImage && u.profileImage.startsWith('http')) ? u.profileImage : placeholderImg;
 
       html += '<div class="rank-card" style="margin-bottom:12px; align-items:flex-start; padding:15px; flex-direction:column; gap:12px;">' +
                 '<div class="flex items-center w-full gap-3">' +
@@ -780,6 +822,58 @@ function withAuthData(data) {
       html += '</div>';
     });
     container.innerHTML = html;
+  }
+
+  function renderCertHistory(items) {
+    const container = document.getElementById('user-mgmt-list');
+    const countEl = document.getElementById('user-mgmt-count');
+    countEl.innerText = (items || []).length + " รายการ";
+
+    if (!items || items.length === 0) {
+      container.innerHTML = '<div class="text-center text-muted py-8">ยังไม่มีประวัติการออกใบเกียรติบัตร</div>';
+      return;
+    }
+
+    let html = '';
+    items.forEach(function(it) {
+      const whenText = it.issuedAt ? it.issuedAt : '-';
+      const who = it.fullName ? it.fullName : it.userId;
+      const area = it.tambon ? it.tambon : '-';
+      const score = it.score ? it.score : '-';
+      const src = it.sourceName ? it.sourceName : '-';
+      const link = it.certUrl ? it.certUrl : '';
+
+      html += '<div class="rank-card" style="margin-bottom:12px; align-items:flex-start; padding:15px; flex-direction:column; gap:10px;">' +
+                '<div class="flex items-start w-full gap-3">' +
+                  '<div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); color:var(--gold); flex-shrink:0;">' +
+                    '<i class="fas fa-award"></i>' +
+                  '</div>' +
+                  '<div class="flex-grow">' +
+                    '<div class="font-bold text-theme-inv">' + escapeHtml(who) + '</div>' +
+                    '<div class="text-[10px] text-muted">' + escapeHtml(it.userId || '-') + ' • ' + escapeHtml(area) + '</div>' +
+                  '</div>' +
+                  '<div class="text-[10px] font-bold px-2 py-1 rounded" style="background:var(--glass); color:var(--text); border:1px solid var(--card-border);">' + escapeHtml(whenText) + '</div>' +
+                '</div>' +
+                '<div class="text-xs" style="color:var(--text-soft)">' +
+                  '<div><span style="color:var(--text)">เนื้อหา:</span> ' + escapeHtml(src) + '</div>' +
+                  '<div><span style="color:var(--text)">คะแนน:</span> ' + escapeHtml(score) + '</div>' +
+                '</div>' +
+                (link ? ('<a href="' + link + '" target="_blank" class="btn-primary" style="padding:7px 12px; width:auto; font-size:0.75rem; background:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:8px;">' +
+                          '<i class="fas fa-eye"></i> เปิดใบเกียรติบัตร' +
+                        '</a>') : '') +
+              '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function openEditUserModal(username, fullName, profileImage) {
@@ -854,10 +948,19 @@ function withAuthData(data) {
 
   function filterUserMgmtList() {
     const query = document.getElementById('user-mgmt-search').value.toLowerCase();
-    const filtered = fullUserList.filter(function(u) {
-      return u.fullName.toLowerCase().includes(query) || u.username.includes(query);
-    });
-    renderUserMgmtList(filtered);
+    if (currentUserMgmtTab === 'cert') {
+      const filtered = fullCertHistory.filter(function(it) {
+        return String(it.fullName || '').toLowerCase().includes(query) ||
+               String(it.userId || '').toLowerCase().includes(query) ||
+               String(it.sourceName || '').toLowerCase().includes(query);
+      });
+      renderCertHistory(filtered);
+    } else {
+      const filtered = fullUserList.filter(function(u) {
+        return u.fullName.toLowerCase().includes(query) || u.username.includes(query);
+      });
+      renderUserMgmtList(filtered);
+    }
   }
 
   function approveUserImage(userId, status) {
@@ -1543,7 +1646,7 @@ function withAuthData(data) {
     const currentValue = sourceSelect.value || '';
     let options = '<option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการฐาน —</option>';
     (adminSourcesCache || []).forEach(function(item) {
-      options += '<option value="' + item.SourceID + '">' + item.SourceID + ' - ' + item.SourceName + ' (ต.' + item.TambonName + ')</option>';
+      options += '<option value="' + item.SourceID + '">' + item.SourceID + ' - ' + item.SourceName + ' (' + formatTambon(item.TambonName) + ')</option>';
     });
     sourceSelect.innerHTML = options;
     if (currentValue && (adminSourcesCache || []).some(function(s) { return String(s.SourceID) === String(currentValue); })) {
@@ -1779,7 +1882,7 @@ function withAuthData(data) {
     const currentValue = sourceSelect.value || '';
     let options = '<option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการข้อสอบ —</option>';
     (adminSourcesCache || []).forEach(function(item) {
-      options += '<option value="' + item.SourceID + '">' + item.SourceID + ' - ' + item.SourceName + ' (ต.' + item.TambonName + ')</option>';
+      options += '<option value="' + item.SourceID + '">' + item.SourceID + ' - ' + item.SourceName + ' (' + formatTambon(item.TambonName) + ')</option>';
     });
     sourceSelect.innerHTML = options;
     if (currentValue && (adminSourcesCache || []).some(function(s) { return String(s.SourceID) === String(currentValue); })) {
@@ -2398,8 +2501,8 @@ function withAuthData(data) {
      
      if (sashaMap[name]) return sashaMap[name];
      
-     // สำหรับตำบลทั่วไป ให้เติม ต. นำหน้า (ถ้ายังไม่มี)
-     return "ต." + name;
+     const cleaned = String(name).replace(/^((ต\.|ตำบล)\s*)+/g, '').trim();
+     return "ต." + cleaned;
    }
 
   function getValidImageUrl(url) {
@@ -2612,7 +2715,7 @@ function withAuthData(data) {
     if (rawUrl === 'undefined') rawUrl = '';
     const validUrl = getValidImageUrl(rawUrl) !== 'https://via.placeholder.com/150?text=No+Image' ? getValidImageUrl(rawUrl) : 'https://via.placeholder.com/500x300';
     document.getElementById('detail-cover').style.backgroundImage = 'url(\'' + validUrl + '\')';
-    document.getElementById('detail-tambon').innerText = sourceData.TambonName;
+    document.getElementById('detail-tambon').innerText = formatTambon(sourceData.TambonName);
     document.getElementById('detail-title').innerText = sourceData.SourceName;
 
     showPage('detail-page');
@@ -3023,8 +3126,9 @@ function renderLeaderboard(data) {
           const headerUser = document.getElementById('header-user-name');
           if (headerUser) headerUser.innerHTML = '<img src="' + imgUrl + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:5px; object-fit:cover;"> ' + me.fullname;
         } else {
-          // ถ้ายังไม่อนุมัติ หรือถูกปฏิเสธ ให้ใช้รูป Placeholder
-          profileImg.style.backgroundImage = "url('https://via.placeholder.com/150')";
+          // ใช้ SVG แทน URL ภายนอกเพื่อป้องกัน ERR_CONNECTION_CLOSED
+          const placeholderImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+          profileImg.style.backgroundImage = "url('" + placeholderImg + "')";
           profileImg.removeAttribute('data-url');
           if (adjustBtn) adjustBtn.style.display = 'none';
           if (menuAdjust) menuAdjust.style.display = 'none';
@@ -3040,7 +3144,8 @@ function renderLeaderboard(data) {
           }
         }
       } else {
-        profileImg.style.backgroundImage = "url('https://via.placeholder.com/150')";
+        const placeholderImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+        profileImg.style.backgroundImage = "url('" + placeholderImg + "')";
         profileImg.removeAttribute('data-url');
         if (adjustBtn) adjustBtn.style.display = 'none';
         if (menuAdjust) menuAdjust.style.display = 'none';

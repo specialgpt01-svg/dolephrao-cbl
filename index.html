@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
   <title>LOFT LEARN | สกร.อำเภอพร้าว</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -529,6 +530,10 @@
           <i class="fas fa-users"></i>
           <span>จัดการสมาชิก</span>
         </button>
+        <button id="tab-btn-cert-history" class="admin-tab-btn" onclick="switchUserMgmtTab('cert')">
+          <i class="fas fa-award"></i>
+          <span>ประวัติใบเกียรติบัตร</span>
+        </button>
       </div>
 
       <div class="loft-card" style="margin:0 0 16px; padding:15px;">
@@ -537,7 +542,7 @@
           <input type="text" id="user-mgmt-search" placeholder="ค้นหาชื่อหรือเบอร์โทร..." onkeyup="filterUserMgmtList()">
         </div>
         <div id="admin-user-filter-container" class="mt-2" style="display:none;">
-          <select id="user-mgmt-tambon-filter" onchange="fetchUserMgmtList()" 
+          <select id="user-mgmt-tambon-filter" onchange="onUserMgmtTambonFilterChange()" 
                   style="width:100%; background:var(--nav-bg); color:var(--text); border:1px solid var(--card-border); border-radius:12px; padding:8px 12px; font-size:0.85rem; font-family:'Prompt',sans-serif;">
             <option value="ทั้งหมด">🌍 ทุกพื้นที่</option>
             <option value="ต.เวียง">ต.เวียง</option>
@@ -567,7 +572,7 @@
 
       <div class="loft-card" style="margin:0;">
         <div class="flex items-center justify-between mb-4">
-          <h4 class="font-bold text-theme-inv">รายชื่อสมาชิก</h4>
+          <h4 class="font-bold text-theme-inv" id="user-mgmt-title">รายชื่อสมาชิก</h4>
           <span class="user-badge" id="user-mgmt-count" style="font-size:0.7rem; padding:2px 8px;">0 คน</span>
         </div>
         <div id="user-mgmt-list" class="space-y-3">
