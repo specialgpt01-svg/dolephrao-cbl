@@ -71,6 +71,8 @@ function withAuthData(data) {
   let cacheHomeData = null;
   let evalRating = 0;
   let cacheProposals = null;
+  let allMarketProducts = [];
+  let cacheMarketProducts = null;
   
   let districtMap = null;
   let mapMarkers = [];
@@ -148,7 +150,11 @@ function withAuthData(data) {
 
   function showPage(pageId) {
     document.querySelectorAll('.page-section').forEach(function(page) { page.style.display = 'none'; });
-    document.getElementById(pageId).style.display = 'block';
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+      targetPage.style.display = 'block';
+      targetPage.scrollTop = 0;
+    }
     
     const bottomNav = document.getElementById('main-bottom-nav');
     const sysActions = document.getElementById('system-top-right-actions'); 
@@ -173,6 +179,11 @@ function withAuthData(data) {
       if(pageId === 'user-mgmt-page') { document.getElementById('nav-user-mgmt').classList.add('active'); loadUserMgmt(); }
       if(pageId === 'dashboard-page') { document.getElementById('nav-dashboard').classList.add('active'); loadDashboard(); }
       if(pageId === 'proposal-page') { loadUserProposals(); }
+      if(pageId === 'market-page') { 
+        const navEl = document.getElementById('nav-market');
+        if (navEl) navEl.classList.add('active'); 
+        loadMarketData(); 
+      }
       if(pageId === 'admin-page') {
         const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
         if (role !== "admin" && role !== "teacher") {
@@ -382,6 +393,7 @@ function withAuthData(data) {
           localStorage.setItem("userName", res.user.fullName);
           localStorage.setItem("userRole", String(res.user.role || "user").trim().toLowerCase());
           localStorage.setItem("userTambon", res.user.tambon);
+          localStorage.setItem("userScore", res.user.score || "0");
           document.getElementById('header-user-name').innerText = res.user.fullName;
           updateNavByRole();
           showPage('home-page');
@@ -395,6 +407,16 @@ function withAuthData(data) {
       localStorage.removeItem("userName");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userTambon");
+      // Clear frontend caches
+      cacheSources = null;
+      cacheMapSources = null;
+      cacheLeaderboard = null;
+      cacheProfile = null;
+      cacheHistory = null;
+      cacheHomeData = null;
+      cacheProposals = null;
+      allMarketProducts = [];
+      cacheMarketProducts = null;
       showPage('login-page');
     });
   }
@@ -1334,6 +1356,14 @@ function withAuthData(data) {
     }
   }
 
+  function handleProductImageUpload(input) {
+    if (input.files && input.files[0]) {
+      currentCropContext = 'product';
+      currentFileName = "product_" + Date.now() + "_" + input.files[0].name;
+      openCropModal(input.files[0]);
+    }
+  }
+
   function openCropModal(source) {
     const cropImg = document.getElementById('crop-image');
     const modal = document.getElementById('crop-modal');
@@ -1585,6 +1615,7 @@ function withAuthData(data) {
     document.getElementById('admin-source-name').value = '';
     document.getElementById('admin-source-tambon').value = '';
     document.getElementById('admin-source-cover').value = '';
+    document.getElementById('admin-source-cert-template').value = '';
     document.getElementById('admin-source-preview').style.display = 'none';
     document.getElementById('admin-source-coord').value = '';
     document.getElementById('admin-history').value = '';
@@ -1954,6 +1985,7 @@ function withAuthData(data) {
     document.getElementById('admin-source-tambon').value = item.TambonName || '';
     const imgUrl = item.CoverImageURL || '';
     document.getElementById('admin-source-cover').value = imgUrl;
+    document.getElementById('admin-source-cert-template').value = item.CertTemplateID || '';
     const preview = document.getElementById('admin-source-preview');
     if (imgUrl) {
       preview.style.backgroundImage = "url('" + imgUrl + "')";
@@ -1995,6 +2027,7 @@ function withAuthData(data) {
       sourceName: sourceName,
       tambonName: tambonName,
       coverImageUrl: (document.getElementById('admin-source-cover').value || '').trim(),
+      certTemplateId: (document.getElementById('admin-source-cert-template').value || '').trim(),
       coordinates: coordinates,
       history: (document.getElementById('admin-history').value || '').trim(),
       result: (document.getElementById('admin-result').value || '').trim(),
@@ -3095,8 +3128,96 @@ function renderLeaderboard(data) {
       });
   }
 
+  function updateAvatarRing(levelStr) {
+    const ringEl = document.getElementById('profile-avatar-ring');
+    const sparklesEl = document.getElementById('profile-avatar-sparkles');
+    if (!ringEl) return;
+
+    // Reset classes
+    ringEl.className = 'profile-avatar-ring';
+    if (sparklesEl) sparklesEl.innerHTML = '';
+
+    let lvl = String(levelStr).toUpperCase();
+    let lvlClass = 'lvl-0';
+    let particleCount = 0;
+    let particleColor = '';
+
+    if (lvl.indexOf("GLORIOUS") > -1 || lvl.indexOf("CONQUEROR") > -1) {
+      lvlClass = 'lvl-6';
+      particleCount = 14;
+      particleColor = '#fbbf24';
+    } else if (lvl.indexOf("ต้นแบบ") > -1 || lvl.indexOf("MASTER") > -1) {
+      lvlClass = 'lvl-5';
+      particleCount = 9;
+      particleColor = '#34d399';
+    } else if (lvl.indexOf("เชี่ยวชาญ") > -1 || lvl.indexOf("DIAMOND") > -1) {
+      lvlClass = 'lvl-4';
+      particleCount = 6;
+      particleColor = '#00f2fe';
+    } else if (lvl.indexOf("ก้าวหน้า") > -1 || lvl.indexOf("PLATINUM") > -1) {
+      lvlClass = 'lvl-3';
+    } else if (lvl.indexOf("กลาง") > -1 || lvl.indexOf("GOLD") > -1) {
+      lvlClass = 'lvl-2';
+    } else if (lvl.indexOf("ต้น") > -1 || lvl.indexOf("SILVER") > -1) {
+      lvlClass = 'lvl-1';
+    }
+
+    ringEl.classList.add(lvlClass);
+
+    // Generate particles if needed
+    if (particleCount > 0 && sparklesEl) {
+      for (let i = 0; i < particleCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'avatar-particle';
+        const delay = Math.random() * 2;
+        const duration = 1.8 + Math.random() * 1.5;
+        const size = 3 + Math.random() * 5;
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 62 + Math.random() * 14; // float outside the avatar
+        
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+
+        p.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          background: ${particleColor};
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 0 8px ${particleColor};
+          opacity: 0;
+          pointer-events: none;
+          animation: floatParticle ${duration}s ease-in-out infinite;
+          animation-delay: ${delay}s;
+          --tx: ${x}px;
+          --ty: ${y}px;
+        `;
+        
+        // If glorious conqueror, occasionally make them gold stars
+        if (lvlClass === 'lvl-6' && Math.random() > 0.6) {
+          p.innerHTML = '<i class="fas fa-star" style="font-size: 7px; color: #fbbf24; text-shadow: 0 0 5px #fbbf24;"></i>';
+          p.style.background = 'transparent';
+          p.style.boxShadow = 'none';
+        }
+
+        sparklesEl.appendChild(p);
+      }
+    }
+  }
+
   function renderProfileUI(me) {
       let rStyle = getRankStyle(me.level);
+      
+      // Set avatar ring and styles dynamically based on the level rank color
+      const wrapperEl = document.querySelector('.avatar-ring-wrapper');
+      if (wrapperEl) {
+        wrapperEl.style.setProperty('--avatar-border-color', rStyle.color);
+        wrapperEl.style.setProperty('--avatar-shadow-color', rStyle.color + '40');
+      }
+      updateAvatarRing(me.level);
       
       // สร้างป้ายสวยๆ ไว้เติมต่อท้ายชื่อ
       let badgeHtml = '<span style="background:' + rStyle.color + '; color:white; font-size:0.6rem; padding:3px 8px; border-radius:12px; vertical-align:middle; margin-left:8px; display:inline-block;"><i class="fas ' + rStyle.icon + '"></i> ' + rStyle.title + '</span>';
@@ -3109,6 +3230,7 @@ function renderLeaderboard(data) {
       document.getElementById('profile-tambon').innerText = me.tambon || "ไม่ระบุ";
       document.getElementById('profile-level').innerHTML = '<span style="color:' + rStyle.color + '; font-weight:bold;"><i class="fas ' + rStyle.icon + '"></i> ' + rStyle.title + '</span>';
       document.getElementById('profile-score').innerText = me.totalscore || "0";
+      localStorage.setItem("userScore", me.totalscore || "0");
       
       const imgUrl = me.profileimage || "";
       const imgStatus = String(me.imagestatus || "Approved");
@@ -3266,7 +3388,7 @@ function renderLeaderboard(data) {
       cropper = null;
     }
     // Clear all file inputs
-    const inputs = ['imageUpload', 'admin-source-cover-file', 'admin-base-cover-file', 'admin-featured-image-file'];
+    const inputs = ['imageUpload', 'admin-source-cover-file', 'admin-base-cover-file', 'admin-featured-image-file', 'admin-product-image-file'];
     inputs.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
@@ -3337,6 +3459,14 @@ function renderLeaderboard(data) {
               } else if (currentCropContext === 'editUser') {
                 document.getElementById('edit-user-image').value = res.url;
                 showCustomAlert("อัปโหลดรูปสำเร็จ! อย่าลืมกดบันทึกการแก้ไข", "success");
+              } else if (currentCropContext === 'product') {
+                document.getElementById('admin-product-image').value = res.url;
+                const preview = document.getElementById('admin-product-preview');
+                if (preview) {
+                  preview.style.backgroundImage = "url('" + res.url + "')";
+                  preview.style.display = 'block';
+                }
+                showCustomAlert("อัปโหลดรูปสินค้าสำเร็จ", "success");
               }
               closeCropModal();
             } else { 
@@ -3353,6 +3483,382 @@ function renderLeaderboard(data) {
         showCustomAlert("เกิดข้อผิดพลาดในการประมวลผลรูปภาพ", "error");
       }
     }, 150);
+  }
+
+  function loadMarketData() {
+    const grid = document.getElementById('market-products-grid');
+    if (!grid) return;
+    
+    // แสดงปุ่ม "เพิ่มสินค้าใหม่" เฉพาะ ครู และ แอดมิน
+    const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
+    const addBtn = document.getElementById('btn-admin-add-product');
+    if (addBtn) {
+      addBtn.style.display = (role === "admin" || role === "teacher") ? "inline-block" : "none";
+    }
+
+    // ซิงก์แต้มสะสมของผู้ใช้ในเบื้องหลังแบบเรียลไทม์เพื่อไม่ให้แต้มหน้าคูปองไม่ตรง
+    const myPhone = localStorage.getItem("userPhone") || "";
+    if (myPhone) {
+      apiGet('getUserProfile', { phone: myPhone })
+        .then(function(res) {
+          if (res.status === "success" && res.profile) {
+            localStorage.setItem("userScore", res.profile.totalscore || "0");
+            
+            // อัปเดตป้ายแต้มในหน้าผลิตภัณฑ์ถ้าเปิดโมดอลรายละเอียดค้างไว้
+            const scoreBadge = document.getElementById('market-user-score-badge');
+            if (scoreBadge) {
+              scoreBadge.innerText = 'มี ' + (res.profile.totalscore || "0") + ' แต้ม';
+            }
+            
+            // อัปเดตหน้าโปรไฟล์ด้วย
+            const profileScoreEl = document.getElementById('profile-score');
+            if (profileScoreEl) {
+              profileScoreEl.innerText = res.profile.totalscore || "0";
+            }
+          }
+        }).catch(function(err) {
+          console.error("Failed to silently sync userScore:", err);
+        });
+    }
+
+    if (cacheMarketProducts && Array.isArray(cacheMarketProducts)) {
+      allMarketProducts = cacheMarketProducts;
+      renderMarketProducts(allMarketProducts);
+      return;
+    }
+    
+    grid.innerHTML = '<div class="col-span-2 text-center py-12 text-muted text-sm"><i class="fas fa-circle-notch fa-spin fa-2x mb-2" style="color:var(--primary)"></i><p>กำลังโหลดสินค้าชุมชน...</p></div>';
+    
+    apiGet('getProducts')
+      .then(function(res) {
+        if (res.status === "success" && Array.isArray(res.data)) {
+          cacheMarketProducts = res.data;
+          allMarketProducts = res.data;
+          renderMarketProducts(allMarketProducts);
+        } else {
+          grid.innerHTML = '<div class="col-span-2 text-center text-muted py-8">โหลดข้อมูลผลิตภัณฑ์ไม่สำเร็จ</div>';
+        }
+      }).catch(function() {
+        grid.innerHTML = '<div class="col-span-2 text-center text-muted py-8">เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์</div>';
+      });
+  }
+
+  function renderMarketProducts(products) {
+    const grid = document.getElementById('market-products-grid');
+    if (!grid) return;
+
+    if (products.length === 0) {
+      grid.innerHTML = '<div class="col-span-2 text-center text-muted py-12" style="background:var(--glass); border-radius:14px; border:1px dashed var(--card-border);"><i class="fas fa-shopping-basket fa-3x mb-3 text-muted" style="opacity:0.4;"></i><p class="font-bold">ยังไม่มีสินค้าในหมวดหมู่นี้</p><p class="text-xs text-muted mt-1">มาร่วมสนับสนุนภูมิปัญญาท้องถิ่นกันครับ</p></div>';
+      return;
+    }
+
+    const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
+    const myTambon = normalizeTambon(localStorage.getItem("userTambon") || "");
+    const canManageAll = (role === "admin");
+    const canManageOwn = (role === "teacher");
+
+    let html = '';
+    products.forEach(function(item) {
+      const isMyProduct = canManageAll || (canManageOwn && normalizeTambon(item.tambon) === myTambon);
+      const categoryLabel = item.category === 'OTOP' ? 'สินค้า OTOP' : (item.category === 'Wisdom' ? 'ภูมิปัญญา' : (item.category === 'Agriculture' ? 'การเกษตร' : 'อื่น ๆ'));
+      const priceText = item.price.toLowerCase().indexOf('บาท') > -1 ? item.price : item.price + ' บาท';
+      
+      let coverUrl = getValidImageUrl(item.image);
+      if (coverUrl === 'https://via.placeholder.com/150?text=No+Image') {
+        coverUrl = 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=300&auto=format&fit=crop';
+      }
+
+      html += '<div class="market-product-card" onclick="openProductDetail(\'' + escapeJS(item.productId) + '\')">';
+      
+      // Admin Actions inside Card
+      if (isMyProduct) {
+        html += '<div class="product-card-admin-actions" onclick="event.stopPropagation()">' +
+                  '<button class="btn-product-edit" onclick="editProduct(\'' + escapeJS(item.productId) + '\')" title="แก้ไข"><i class="fas fa-pen"></i></button>' +
+                  '<button class="btn-product-delete" onclick="deleteProduct(\'' + escapeJS(item.productId) + '\', event)" title="ลบ"><i class="fas fa-trash"></i></button>' +
+                '</div>';
+      }
+
+      html +=   '<div class="product-card-img" style="background-image: url(\'' + coverUrl + '\');">' +
+                  '<div class="product-card-overlay"></div>' +
+                  '<div class="product-card-badges">' +
+                    '<span class="tambon">' + formatTambon(item.tambon) + '</span>' +
+                    '<span class="category">' + categoryLabel + '</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="product-card-body">' +
+                  '<h4 class="product-card-title">' + item.name + '</h4>' +
+                  '<p class="product-card-desc">' + (item.description || "ไม่มีรายละเอียดเพิ่มเติม") + '</p>' +
+                  '<div class="product-card-price mt-auto">' + priceText + '</div>' +
+                '</div>' +
+              '</div>';
+    });
+
+    grid.innerHTML = html;
+  }
+
+  function filterMarketProducts() {
+    const query = (document.getElementById('market-search').value || '').trim().toLowerCase();
+    const tambonFilter = document.getElementById('market-tambon-filter').value;
+    const catFilter = document.getElementById('market-category-filter').value;
+
+    let filtered = allMarketProducts || [];
+
+    if (query) {
+      filtered = filtered.filter(function(item) {
+        const text = [item.name, item.description, item.tambon, item.category].join(' ').toLowerCase();
+        return text.indexOf(query) > -1;
+      });
+    }
+
+    if (tambonFilter) {
+      filtered = filtered.filter(function(item) {
+        return normalizeTambon(item.tambon) === normalizeTambon(tambonFilter);
+      });
+    }
+
+    if (catFilter) {
+      filtered = filtered.filter(function(item) {
+        return item.category === catFilter;
+      });
+    }
+
+    renderMarketProducts(filtered);
+  }
+
+  let currentDetailProductId = "";
+  let currentDetailProductName = "";
+
+  function openProductDetail(productId) {
+    const item = allMarketProducts.find(p => p.productId === productId);
+    if (!item) return;
+
+    // Reset redeemed coupon container
+    const couponCont = document.getElementById('redeemed-coupon-container');
+    if (couponCont) couponCont.style.display = 'none';
+
+    // Store current product data for coupon redemption
+    currentDetailProductId = item.productId;
+    currentDetailProductName = item.name;
+
+    // Update user score badge inside detail modal
+    const userScore = Number(localStorage.getItem("userScore") || 0);
+    const scoreBadge = document.getElementById('market-user-score-badge');
+    if (scoreBadge) {
+      scoreBadge.innerText = 'มี ' + userScore + ' แต้ม';
+    }
+
+    document.getElementById('product-detail-name').innerText = item.name;
+    document.getElementById('product-detail-price').innerText = item.price.toLowerCase().indexOf('บาท') > -1 ? item.price : item.price + ' บาท';
+    document.getElementById('product-detail-desc').innerText = item.description || "ไม่มีรายละเอียดเพิ่มเติม";
+    document.getElementById('product-detail-tambon-badge').innerText = formatTambon(item.tambon);
+    
+    const catLabels = { 'OTOP': 'สินค้า OTOP', 'Wisdom': 'ภูมิปัญญาท้องถิ่น', 'Agriculture': 'เกษตรชุมชน', 'Other': 'อื่น ๆ' };
+    document.getElementById('product-detail-cat-badge').innerText = catLabels[item.category] || "อื่น ๆ";
+    document.getElementById('product-detail-contact').innerText = item.contact;
+    
+    let coverUrl = getValidImageUrl(item.image);
+    if (coverUrl === 'https://via.placeholder.com/150?text=No+Image') {
+      coverUrl = 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop';
+    }
+    document.getElementById('product-detail-cover').style.backgroundImage = "url('" + coverUrl + "')";
+
+    document.getElementById('product-detail-modal').style.display = 'flex';
+  }
+
+  function redeemCouponUI(points, discount) {
+    const userPhone = localStorage.getItem("userPhone") || "";
+    if (!userPhone) {
+      return showCustomAlert("กรุณาเข้าสู่ระบบเพื่อใช้สิทธิ์แต้มสะสม", "warning");
+    }
+
+    const userScore = Number(localStorage.getItem("userScore") || 0);
+    if (userScore < points) {
+      return showCustomAlert("แต้มสะสมของคุณไม่เพียงพอสำหรับการแลกส่วนลดนี้ (ต้องการ " + points + " แต้ม, คุณมี " + userScore + " แต้ม)", "warning");
+    }
+
+    showCustomConfirm("ยืนยันแลก " + points + " แต้ม เป็นคูปองส่วนลดมูลค่า " + discount + " บาท สำหรับซื้อสินค้าชิ้นนี้?", function() {
+      showLoading(true);
+      apiPost('redeemCoupon', withAuthData({
+        points: points,
+        discount: discount,
+        productId: currentDetailProductId,
+        productName: currentDetailProductName
+      })).then(function(res) {
+        showLoading(false);
+        if (res.status === "success" && res.couponCode) {
+          // Update score in local storage
+          localStorage.setItem("userScore", res.newScore);
+          
+          // Update score badge inside modal
+          const scoreBadge = document.getElementById('market-user-score-badge');
+          if (scoreBadge) {
+            scoreBadge.innerText = 'มี ' + res.newScore + ' แต้ม';
+          }
+          
+          // Render coupon code in the display area
+          const couponCodeEl = document.getElementById('redeemed-coupon-code');
+          const couponDetailsEl = document.getElementById('redeemed-coupon-details');
+          const couponContEl = document.getElementById('redeemed-coupon-container');
+          
+          if (couponCodeEl) couponCodeEl.innerText = res.couponCode;
+          if (couponDetailsEl) couponDetailsEl.innerText = 'คูปองใช้เป็นส่วนลดมูลค่า ' + discount + ' บาท สำหรับผลิตภัณฑ์ ' + currentDetailProductName;
+          if (couponContEl) couponContEl.style.display = 'block';
+          
+          showCustomAlert("แลกคูปองสำเร็จ! รหัสคูปองของคุณคือ " + res.couponCode, "success");
+          
+          // เคลียร์แคชโปรไฟล์และบอร์ดผู้รวบรวมแต้ม เพื่อให้โหลดค่าใหม่จากเซิร์ฟเวอร์เมื่อเปิดดูครั้งถัดไป
+          cacheProfile = null;
+          cacheLeaderboard = null;
+          
+          // Triggers user score update in profile tab if visible
+          const profileScoreEl = document.getElementById('profile-score');
+          if (profileScoreEl) profileScoreEl.innerText = res.newScore;
+        } else {
+          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการแลกคูปอง", "error");
+        }
+      }).catch(function(err) {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+      });
+    });
+  }
+
+  function closeProductDetailModal() {
+    document.getElementById('product-detail-modal').style.display = 'none';
+  }
+
+  function openProductModal(mode, productId) {
+    document.getElementById('product-edit-form').reset();
+    document.getElementById('admin-product-preview').style.display = 'none';
+    
+    const titleEl = document.getElementById('product-form-title');
+    const modeEl = document.getElementById('admin-product-mode');
+    const idEl = document.getElementById('admin-product-id');
+    const tambonSelect = document.getElementById('admin-product-tambon');
+    
+    modeEl.value = mode;
+    
+    const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
+    const userTambon = (localStorage.getItem("userTambon") || "").trim();
+
+    // ล็อคตำบลสำหรับ ครูประจำตำบล เพื่อป้องกันการข้ามเขต
+    if (role === "teacher" && userTambon) {
+      tambonSelect.value = formatTambon(userTambon);
+      tambonSelect.disabled = true;
+    } else {
+      tambonSelect.disabled = false;
+      tambonSelect.value = "";
+    }
+
+    if (mode === 'create') {
+      titleEl.innerHTML = '<i class="fas fa-plus-circle mr-2" style="color:var(--primary)"></i>เพิ่มสินค้า OTOP ใหม่';
+      idEl.value = '';
+    } else if (mode === 'edit') {
+      titleEl.innerHTML = '<i class="fas fa-edit mr-2" style="color:var(--primary)"></i>แก้ไขข้อมูลสินค้า';
+      
+      const item = allMarketProducts.find(p => p.productId === productId);
+      if (!item) return;
+
+      idEl.value = item.productId;
+      document.getElementById('admin-product-name').value = item.name;
+      document.getElementById('admin-product-category').value = item.category;
+      document.getElementById('admin-product-price').value = item.price;
+      
+      // ตั้งค่าตำบลของครูหรือของผลิตภัณฑ์เก่า
+      tambonSelect.value = formatTambon(item.tambon);
+      
+      document.getElementById('admin-product-desc').value = item.description;
+      document.getElementById('admin-product-image').value = item.image;
+      document.getElementById('admin-product-contact').value = item.contact;
+
+      if (item.image) {
+        const preview = document.getElementById('admin-product-preview');
+        preview.style.backgroundImage = "url('" + getValidImageUrl(item.image) + "')";
+        preview.style.display = 'block';
+      }
+    }
+
+    document.getElementById('product-form-modal').style.display = 'flex';
+  }
+
+  function closeProductModal() {
+    document.getElementById('product-form-modal').style.display = 'none';
+  }
+
+  function submitProductForm() {
+    const mode = document.getElementById('admin-product-mode').value;
+    const productId = document.getElementById('admin-product-id').value;
+    const name = document.getElementById('admin-product-name').value.trim();
+    const category = document.getElementById('admin-product-category').value;
+    const price = document.getElementById('admin-product-price').value.trim();
+    
+    // ดึงค่าตำบล (ถ้าโดน disable ต้องเอาจากค่าที่ตั้งไว้)
+    const tambonSelect = document.getElementById('admin-product-tambon');
+    const tambon = tambonSelect.disabled ? (localStorage.getItem("userTambon") || "") : tambonSelect.value;
+    
+    const desc = document.getElementById('admin-product-desc').value.trim();
+    const image = document.getElementById('admin-product-image').value.trim();
+    const contact = document.getElementById('admin-product-contact').value.trim();
+
+    if (!name || !category || !price || !tambon || !contact) {
+      return showCustomAlert("กรุณากรอกข้อมูลสำคัญที่มีสัญลักษณ์ดอกจันให้ครบถ้วน", "warning");
+    }
+
+    const payload = {
+      mode: mode,
+      productId: productId,
+      name: name,
+      category: category,
+      price: price,
+      tambon: formatTambon(tambon),
+      description: desc,
+      image: image,
+      contact: contact
+    };
+
+    showLoading(true);
+    apiPost('saveProduct', withAuthData(payload))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === "success") {
+          showCustomAlert(mode === 'create' ? "เพิ่มผลิตภัณฑ์ใหม่เรียบร้อยแล้ว!" : "แก้ไขข้อมูลผลิตภัณฑ์เรียบร้อยแล้ว!", "success");
+          closeProductModal();
+          cacheMarketProducts = null;
+          loadMarketData();
+        } else {
+          showCustomAlert(res.message || "บันทึกผลิตภัณฑ์ล้มเหลว", "error");
+        }
+      }).catch(function() {
+        showLoading(false);
+        showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+      });
+  }
+
+  function editProduct(productId) {
+    openProductModal('edit', productId);
+  }
+
+  function deleteProduct(productId, event) {
+    if (event) event.stopPropagation();
+    if (!productId) return;
+
+    showCustomConfirm("คุณแน่ใจใช่หรือไม่ว่าต้องการลบสินค้าภูมิปัญญาชุมชนชิ้นนี้?", function() {
+      showLoading(true);
+      apiPost('deleteProduct', withAuthData({ productId: productId }))
+        .then(function(res) {
+          showLoading(false);
+          if (res.status === "success") {
+            showCustomAlert("ลบผลิตภัณฑ์ชุมชนเรียบร้อยแล้ว", "success");
+            cacheMarketProducts = null;
+            loadMarketData();
+          } else {
+            showCustomAlert(res.message || "ลบผลิตภัณฑ์ล้มเหลว", "error");
+          }
+        }).catch(function() {
+          showLoading(false);
+          showCustomAlert("เกิดข้อผิดพลาดในการติดต่อเซิร์ฟเวอร์", "error");
+        });
+    });
   }
 
   // --- Evaluation Logic ---
@@ -3471,6 +3977,16 @@ function renderLeaderboard(data) {
   }
 
   window.onload = function() {
+    // โหลดหน้าแสดง OTOP Showcase & Wisdom Market (รองรับทั้งแบบฝังและแบบโหลด Asynchronous จากไฟล์แยก)
+    const container = document.getElementById('market-page');
+    if (container && !container.innerHTML.trim()) {
+      fetch('market.html')
+        .then(function(res) { return res.text(); })
+        .then(function(html) {
+          container.innerHTML = html;
+        }).catch(function(err) { console.error('Failed to load OTOP market:', err); });
+    }
+
     // Restore Theme Colors
     const savedPrimary = localStorage.getItem('appPrimaryColor');
     const savedBg = localStorage.getItem('appBgColor');
