@@ -192,6 +192,12 @@ hr { border:none; border-top:1px solid var(--glass-border); margin:14px 0; }
   color:var(--text-soft); cursor:pointer; font-size:.65rem;
   font-weight:600; flex:1; padding:4px 0; transition:all .25s;
   position:relative; text-transform:uppercase; letter-spacing:.5px;
+  text-align:center;
+}
+.nav-item span {
+  display: block;
+  text-align: center;
+  width: 100%;
 }
 .nav-item i { font-size:1.3rem; transition:all .25s; }
 .nav-item.active {
