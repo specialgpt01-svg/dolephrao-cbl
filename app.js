@@ -1013,6 +1013,17 @@ function withAuthData(data) {
       });
   }
 
+  function getLvlClass(levelStr) {
+    let lvl = String(levelStr || "").toUpperCase();
+    if (lvl.indexOf("GLORIOUS") > -1 || lvl.indexOf("CONQUEROR") > -1) return 'lvl-6';
+    if (lvl.indexOf("ต้นแบบ") > -1 || lvl.indexOf("MASTER") > -1) return 'lvl-5';
+    if (lvl.indexOf("เชี่ยวชาญ") > -1 || lvl.indexOf("DIAMOND") > -1) return 'lvl-4';
+    if (lvl.indexOf("ก้าวหน้า") > -1 || lvl.indexOf("PLATINUM") > -1) return 'lvl-3';
+    if (lvl.indexOf("กลาง") > -1 || lvl.indexOf("GOLD") > -1) return 'lvl-2';
+    if (lvl.indexOf("ต้น") > -1 || lvl.indexOf("SILVER") > -1) return 'lvl-1';
+    return 'lvl-0';
+  }
+
   function loadDashboard() {
     const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
     const myTambon = localStorage.getItem("userTambon") || "";
@@ -1038,9 +1049,17 @@ function withAuthData(data) {
             let rStyle = getRankStyle(user.level);
             let defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=random&color=fff';
             let imgUrl = (user.image && String(user.image).trim() !== "") ? user.image : defaultImg;
+            let lvlClass = getLvlClass(user.level);
+            let glowColor = rStyle.color === '#10b981' ? 'rgba(16, 185, 129, 0.4)' : 
+                            rStyle.color === '#fbbf24' ? 'rgba(251, 191, 36, 0.4)' : 
+                            rStyle.color === '#cbd5e1' ? 'rgba(203, 213, 225, 0.4)' : 
+                            'rgba(16, 185, 129, 0.3)';
             html += '<div class="rank-card" style="border-left: 6px solid ' + rStyle.color + '; background: linear-gradient(to right, white, #fcfcfc);">' +
                        '<div class="rank-number" style="color: ' + rStyle.color + '; width:50px; font-weight:900; font-size:1.3rem;">' + (index + 1) + '</div>' +
-                       '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="border: 3px solid ' + rStyle.color + ';">' +
+                       '<div class="avatar-ring-wrapper avatar-ring-sm" style="--avatar-border-color: ' + rStyle.color + '; --avatar-shadow-color: ' + glowColor + ';">' +
+                         '<div class="profile-avatar-ring ' + lvlClass + '"></div>' +
+                         '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img-sm">' +
+                       '</div>' +
                        '<div class="rank-info">' +
                          '<div style="display:flex; justify-content:space-between; align-items:center;">' +
                            '<span class="rank-name" style="font-size:1.1rem; color:#2d3436;">' + user.name + '</span>' +
@@ -3038,13 +3057,22 @@ function renderLeaderboard(data) {
       let rStyle = getRankStyle(user.level); // ดึงสีมาแต่งขอบรูปและป้ายคะแนน
       let defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=random&color=fff';
       let imgUrl = (user.image && String(user.image).trim() !== "") ? user.image : defaultImg;
+      let lvlClass = getLvlClass(user.level);
+      let glowColor = rStyle.color === '#10b981' ? 'rgba(16, 185, 129, 0.4)' : 
+                      rStyle.color === '#fbbf24' ? 'rgba(251, 191, 36, 0.4)' : 
+                      rStyle.color === '#cbd5e1' ? 'rgba(203, 213, 225, 0.4)' : 
+                      'rgba(16, 185, 129, 0.3)';
       
       let scoreBadgeStyle = (rankNum === 1) ? '' : 'style="background:' + rStyle.color + ';"';
+      let ringSizeClass = (rankNum === 1) ? 'avatar-ring-lg' : 'avatar-ring-md';
       
       html += '<div class="podium-item rank-' + rankNum + '">' +
                 '<div class="podium-avatar-wrapper">' +
                   '<i class="fas fa-crown crown-icon"></i>' + 
-                  '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="podium-img" style="border-color:' + rStyle.color + ';">' +
+                  '<div class="avatar-ring-wrapper ' + ringSizeClass + '" style="--avatar-border-color: ' + rStyle.color + '; --avatar-shadow-color: ' + glowColor + '; margin-bottom: 0;">' +
+                    '<div class="profile-avatar-ring ' + lvlClass + '"></div>' +
+                    '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="podium-img" style="border-color:' + rStyle.color + ';">' +
+                  '</div>' +
                 '</div>' +
                 '<div class="podium-base">' + rankNum + '</div>' + 
                 '<div class="podium-info">' +
@@ -3063,10 +3091,18 @@ function renderLeaderboard(data) {
       let rStyle = getRankStyle(user.level); 
       let defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=random&color=fff';
       let imgUrl = (user.image && String(user.image).trim() !== "") ? user.image : defaultImg;
+      let lvlClass = getLvlClass(user.level);
+      let glowColor = rStyle.color === '#10b981' ? 'rgba(16, 185, 129, 0.4)' : 
+                      rStyle.color === '#fbbf24' ? 'rgba(251, 191, 36, 0.4)' : 
+                      rStyle.color === '#cbd5e1' ? 'rgba(203, 213, 225, 0.4)' : 
+                      'rgba(16, 185, 129, 0.3)';
 
       html += '<div class="rank-card" style="margin-bottom: 8px; padding: 10px 15px; border-left: 4px solid ' + rStyle.color + ';">' +
                  '<div class="rank-number" style="font-size: 1.1rem; width: 30px; color: #7f8c8d;">' + rankNum + '</div>' +
-                 '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img" style="width: 40px; height: 40px; margin: 0 10px;">' +
+                 '<div class="avatar-ring-wrapper avatar-ring-sm" style="--avatar-border-color: ' + rStyle.color + '; --avatar-shadow-color: ' + glowColor + '; margin: 0 10px;">' +
+                   '<div class="profile-avatar-ring ' + lvlClass + '"></div>' +
+                   '<img src="' + imgUrl + '" loading="lazy" onerror="this.onerror=null; this.src=\'' + defaultImg + '\';" class="rank-img-sm">' +
+                 '</div>' +
                  '<div class="rank-info">' +
                    '<div class="rank-name" style="font-size: 0.95rem;">' + user.name + '</div>' +
                    '<div class="rank-score" style="font-size: 0.8rem;">' + user.score + ' แต้ม</div>' +
@@ -4482,80 +4518,237 @@ function renderLeaderboard(data) {
     const width = canvas.width;
     const height = canvas.height;
     const center = width / 2;
-    const radius = center - 12;
+    const radius = center - 16; // เผื่อพื้นที่ให้ขอบทองเหลืองนอกสุด
     const sliceAngle = (2 * Math.PI) / 8;
     
     ctx.clearRect(0, 0, width, height);
     
+    // ================= 1. 3D OUTER SHADOW PLATE (ฐานเงาวงล้อลอยตัวจากพื้น) =================
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, radius + 11, 0, 2 * Math.PI);
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.shadowColor = "rgba(0,0,0,0.65)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    ctx.fill();
+    ctx.restore();
+
+    // ================= 2. ROTATING INNER WHEEL (ส่วนวงล้อหมุนที่แบ่งช่อง) =================
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(currentWheelRotation);
     
-    // 1. ช่องรางวัล
+    // วาดแต่ละซี่สไลด์
     for (let i = 0; i < 8; i++) {
       const startAngle = i * sliceAngle;
       const endAngle = (i + 1) * sliceAngle;
       const slice = wheelSlices[i];
       
+      // วาดแผ่นหน้าของช่องพร้อมมิติหมุนลึก 3D
+      ctx.save();
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.arc(0, 0, radius, startAngle, endAngle);
       ctx.closePath();
+      
+      // พื้นสีของช่องรางวัล
       ctx.fillStyle = slice.color;
       ctx.fill();
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "rgba(255,255,255,0.15)";
-      ctx.stroke();
       
+      // มิติไล่ระดับแสงนูน 3D Depth (Pillowed Specular Overlay)
+      const radGrad = ctx.createRadialGradient(0, 0, 16, 0, 0, radius);
+      radGrad.addColorStop(0, "rgba(255,255,255,0.22)");
+      radGrad.addColorStop(0.65, "rgba(0,0,0,0)");
+      radGrad.addColorStop(0.9, "rgba(0,0,0,0.08)");
+      radGrad.addColorStop(1, "rgba(0,0,0,0.48)"); // ขอบชะลอมืดสร้างมิติความโค้งงอ
+      ctx.fillStyle = radGrad;
+      ctx.fill();
+      ctx.restore();
+      
+      // วาดซี่เหล็กโลหะนูนกั้นระหว่างช่อง (Metallic Divider Spokes)
+      ctx.save();
+      ctx.rotate(startAngle);
+      // เส้นทึบสำหรับเงาด้านล่าง
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius, 0);
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = "rgba(0,0,0,0.38)";
+      ctx.stroke();
+      // เส้นไฮไลท์โลหะนูนขาวสะท้อนแสงด้านบน
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius, 0);
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(255,255,255,0.65)";
+      ctx.stroke();
+      ctx.restore();
+
+      // วาดตัวอักษรรางวัลในช่อง
       ctx.save();
       ctx.rotate(startAngle + sliceAngle / 2);
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
+      
+      // เงาข้อความด้านล่างเพื่อมิติความลอยอักษร
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 1.5;
+      
       ctx.fillStyle = slice.textColor;
-      ctx.font = "black 10px Inter, sans-serif";
+      // ใช้ฟอนต์หนาพรีเมียม
+      ctx.font = "900 11px 'Outfit', 'Inter', sans-serif";
       
       const label = slice.label;
-      ctx.fillText(label, radius - 20, 0);
+      ctx.fillText(label, radius - 18, 0);
       ctx.restore();
     }
+    ctx.restore();
+
+    // ================= 3. STATIC METALLIC GOLDEN OUTER RIM (วงขอบทองเหลือง 3D วาดทับแบบไม่หมุนตามล้อ) =================
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, radius + 11, 0, 2 * Math.PI);
+    ctx.arc(center, center, radius - 2, 0, 2 * Math.PI, true); // สร้างวงแหวนโดนัทครอบขอบล้อ
+    ctx.closePath();
     
-    // 2. หลอดไฟรอบนอก
+    // ไล่ระดับเฉดโลหะทองคำขัดเงาสะท้อนระดับโลก
+    const metalGrad = ctx.createLinearGradient(0, 0, width, height);
+    metalGrad.addColorStop(0, "#b45309"); // น้ำตาลทองแดงเงาเข้ม
+    metalGrad.addColorStop(0.2, "#fef08a"); // เหลืองสะท้อนแสงสูง
+    metalGrad.addColorStop(0.4, "#92400e"); // บรอนซ์เข้ม
+    metalGrad.addColorStop(0.65, "#fffbeb"); // แสงสะท้อนจ้าขอบบน
+    metalGrad.addColorStop(0.85, "#b45309"); // น้ำตาลทองแดงเงา
+    metalGrad.addColorStop(1, "#f59e0b"); // ทองคำเหลือง
+    
+    ctx.fillStyle = metalGrad;
+    ctx.fill();
+    
+    // วาดเส้นนูนขอบนอกและขอบในเพื่อมิติ 3D Beveling
+    ctx.beginPath();
+    ctx.arc(center, center, radius + 11, 0, 2 * Math.PI);
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = "rgba(255,255,255,0.65)";
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.arc(center, center, radius - 2, 0, 2 * Math.PI);
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = "rgba(0,0,0,0.45)";
+    ctx.stroke();
+    ctx.restore();
+
+    // ================= 4. STATIC LIGHT BULBS (ดวงไฟแก้ว 16 ดวงไม่หมุนตามวงล้อ) =================
     const numLights = 16;
-    const lightRadius = 4;
-    const lightsDist = radius + 4;
+    const lightRadius = 4.5;
+    const lightsDist = radius + 4.5;
     const blinkState = Math.floor(Date.now() / 250) % 2 === 0;
     
     for (let i = 0; i < numLights; i++) {
       const angle = (i * (2 * Math.PI)) / numLights;
-      const x = Math.cos(angle) * lightsDist;
-      const y = Math.sin(angle) * lightsDist;
+      const x = center + Math.cos(angle) * lightsDist;
+      const y = center + Math.sin(angle) * lightsDist;
       
-      ctx.beginPath();
-      ctx.arc(x, y, lightRadius, 0, 2 * Math.PI);
-      
+      ctx.save();
       const isEven = i % 2 === 0;
-      if ((isEven && blinkState) || (!isEven && !blinkState)) {
-        ctx.fillStyle = "#fffbeb";
-        ctx.shadowColor = "#f59e0b";
-        ctx.shadowBlur = 8;
+      const isOn = (isEven && blinkState) || (!isEven && !blinkState);
+      
+      if (isOn) {
+        // หลอดไฟส่องสว่างเหลืองสว่างเจิดจ้ามีมิตินูนแก้ว (Luminous Neon Bulb)
+        const lightGrad = ctx.createRadialGradient(x - 1, y - 1, 0, x, y, lightRadius);
+        lightGrad.addColorStop(0, "#ffffff"); // แสงจ้าจุดศูนย์กลางสะท้อนกลม
+        lightGrad.addColorStop(0.3, "#fef08a"); // ขอบเหลืองสว่าง
+        lightGrad.addColorStop(1, "#d97706"); // สีส้มเข้มขอบฐานหลอด
+        
+        ctx.beginPath();
+        ctx.arc(x, y, lightRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = lightGrad;
+        
+        // แสงเรืองรองโกลว์ (Bulb glow shadow)
+        ctx.shadowColor = "#fbbf24";
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.fill();
       } else {
-        ctx.fillStyle = "#4b5563";
-        ctx.shadowBlur = 0;
+        // หลอดไฟดับ: มิติลูกปัดแก้วรมควันสีเทามีไฮไลท์จิ๋วสะท้อนแสง (Frosted glass bead)
+        const lightGrad = ctx.createRadialGradient(x - 1.2, y - 1.2, 0, x, y, lightRadius);
+        lightGrad.addColorStop(0, "#d1d5db"); // จุดไฮไลท์สะท้อนสีเทา
+        lightGrad.addColorStop(0.6, "#4b5563"); // สีเทากลาง
+        lightGrad.addColorStop(1, "#1f2937"); // สีดำฐานหลอด
+        
+        ctx.beginPath();
+        ctx.arc(x, y, lightRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = lightGrad;
+        ctx.fill();
+        
+        // จุดประกายสะท้อนจิ๋วสีขาวเพิ่มความวาววับ (Tiny White Highlight)
+        ctx.beginPath();
+        ctx.arc(x - 1.2, y - 1.2, 0.8, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fill();
       }
-      ctx.fill();
+      ctx.restore();
     }
-    
-    ctx.restore();
-    
-    // 3. ดุมกลางสีทอง
+
+    // ================= 5. ULTRA-PREMIUM GOLDEN CENTER DOME (ดุมทองขอบเบเวลไม่หมุนตามล้อสำหรับรองปุ่มกด) =================
+    // 5.1 ฐานเงารอบล่างสุด
     ctx.save();
     ctx.beginPath();
-    ctx.arc(center, center, 44, 0, 2 * Math.PI);
-    const grad = ctx.createRadialGradient(center, center, 0, center, center, 44);
-    grad.addColorStop(0, "rgba(255,255,255,0.2)");
-    grad.addColorStop(0.5, "rgba(0,0,0,0.5)");
-    grad.addColorStop(1, "rgba(0,0,0,0.8)");
-    ctx.fillStyle = grad;
+    ctx.arc(center, center, 32, 0, 2 * Math.PI);
+    ctx.fillStyle = "rgba(0,0,0,0.32)";
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3.5;
+    ctx.fill();
+    ctx.restore();
+
+    // 5.2 ขอบแหวนทองเหลืองรอบนอกปุ่ม
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, 30, 0, 2 * Math.PI);
+    const centerMetalGrad = ctx.createLinearGradient(center - 30, center - 30, center + 30, center + 30);
+    centerMetalGrad.addColorStop(0, "#fffbeb");
+    centerMetalGrad.addColorStop(0.3, "#f59e0b");
+    centerMetalGrad.addColorStop(0.7, "#b45309");
+    centerMetalGrad.addColorStop(1, "#fef08a");
+    ctx.fillStyle = centerMetalGrad;
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.stroke();
+
+    // 5.3 โดมทองคำ 3D โค้งนูนดึงดูดสายตา
+    ctx.beginPath();
+    ctx.arc(center, center, 24, 0, 2 * Math.PI);
+    const domeGrad = ctx.createRadialGradient(center - 6, center - 6, 0, center, center, 24);
+    domeGrad.addColorStop(0, "#ffffff"); // แสงจ้าบนหน้าโค้งดุมทอง
+    domeGrad.addColorStop(0.25, "#fffbeb"); // เหลืองอ่อนขัดเงา
+    domeGrad.addColorStop(0.8, "#d97706"); // สีทองส้มเข้ม
+    domeGrad.addColorStop(1, "#78350f"); // น้ำตาลขอบลึก
+    ctx.fillStyle = domeGrad;
+    ctx.fill();
+    
+    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = "rgba(0,0,0,0.25)";
+    ctx.stroke();
+    ctx.restore();
+
+    // ================= 6. GLASS COVER DOME SHINE OVERLAY (แผ่นกระจกครอบใสโค้งสะท้อน แสงจ้าไม่หมุนตามล้อ) =================
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, radius + 11, 0, 2 * Math.PI);
+    ctx.clip(); // ตรึงแสงสะท้อนจ้าให้อยู่ภายในวงกลมล้อเท่านั้น
+    
+    const glassGrad = ctx.createLinearGradient(center - radius, center - radius, center + radius, center + radius);
+    glassGrad.addColorStop(0, "rgba(255,255,255,0.32)"); // แสงสะท้อนจ้าขอบบนซ้ายสุดชิค
+    glassGrad.addColorStop(0.35, "rgba(255,255,255,0.08)");
+    glassGrad.addColorStop(0.52, "rgba(255,255,255,0)"); // ไล่เฟดเงียบสนิทตรงกึ่งกลางบอร์ดล้อ
+    glassGrad.addColorStop(0.85, "rgba(0,0,0,0)");
+    glassGrad.addColorStop(1, "rgba(0,0,0,0.18)"); // เงาขอบล่างขวาเพิ่มความลึก 3D
+    
+    ctx.fillStyle = glassGrad;
     ctx.fill();
     ctx.restore();
   }
@@ -4590,100 +4783,162 @@ function renderLeaderboard(data) {
     spinBtn.style.opacity = '0.6';
     spinBtn.style.cursor = 'default';
     
+    // 1. เริ่มหมุนทันทีด้วยความเร็วคงที่เพื่อการตอบสนองที่รวดเร็วทันใจ (Instant Spin Loop)
+    let lastTickCheck = currentWheelRotation;
+    const sliceAngle = (2 * Math.PI) / 8;
+    let baseSpeed = 0.22; // ความเร็วสูงสุดในการหมุนฟรี
+    let spinPhase = "constant"; // สถานะ "constant" (หมุนฟรี), "decelerating" (กำลังเบรก), หรือ "error_braking" (เบรกฉุกเฉิน)
+    
+    let apiResolved = false;
+    let apiError = false;
+    let apiErrorMsg = "";
+    let apiRes = null;
+    
+    // 2. ยิง API เบื้องหลังควบคู่ไปขณะที่วงล้อกำลังหมุนหมุนติ้วอย่างเริงร่า
     apiPost('spinLuckyWheel', withAuthData({}))
       .then(function(res) {
         if (res.status === 'success') {
-          const prizeIndex = res.prizeIndex;
-          const prizeLabel = res.prizeLabel;
-          const prizeType = res.prizeType;
+          apiRes = res;
+          apiResolved = true;
+        } else {
+          apiError = true;
+          apiErrorMsg = res.message || "เกิดข้อผิดพลาดในการคำนวณแต้ม";
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        apiError = true;
+        apiErrorMsg = "ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์";
+      });
+      
+    // 3. ตัวลูปแอนิเมชันสำหรับอัปเดตองศาเฟรม (60 FPS Animation Frame Loop)
+    let startDecelTime = 0;
+    let startDecelRotation = 0;
+    let decelDiff = 0;
+    const decelDuration = 3500; // ระยะเวลาชะลอช้าลดความเร่ง (3.5 วินาที)
+    
+    function spinLoop(now) {
+      if (spinPhase === "constant") {
+        // หมุนฟรีด้วยความเร็วสม่ำเสมอ
+        currentWheelRotation += baseSpeed;
+        
+        // เล่นเสียงปุ่มขอบเสียงติ๊ก
+        const currentTickCheck = currentWheelRotation;
+        const startSector = Math.floor(lastTickCheck / sliceAngle);
+        const endSector = Math.floor(currentTickCheck / sliceAngle);
+        if (startSector !== endSector) {
+          playSynthTick();
+          lastTickCheck = currentTickCheck;
+        }
+        
+        drawLuckyWheel();
+        
+        if (apiResolved) {
+          // ข้อมูลผลรางวัลมาถึงแล้ว เปลี่ยนมาเริ่มชะลอเพื่อหยุดนิ่ง (Deceleration Phase)
+          spinPhase = "decelerating";
+          startDecelTime = performance.now();
+          startDecelRotation = currentWheelRotation;
           
-          animateWheelSpin(prizeIndex, function() {
-            isSpinning = false;
-            spinBtn.disabled = false;
-            spinBtn.style.opacity = '1';
-            spinBtn.style.cursor = 'pointer';
-            
-            localStorage.setItem("userScore", res.newScore);
-            document.getElementById('spin-user-score').innerText = res.newScore;
-            
-            const profileScoreEl = document.getElementById('profile-score');
-            if (profileScoreEl) profileScoreEl.innerText = res.newScore;
-            
-            cacheProfile = null;
-            cacheLeaderboard = null;
-            
-            if (prizeType === "points") {
-              playSynthWin();
-              showCustomAlert("🎉 ยินดีด้วย! คุณหมุนวงล้อได้รับแต้มสะสมเพิ่ม: " + prizeLabel, "success");
-            } else if (prizeType === "coupon") {
-              playSynthFanfare();
-              showCustomAlert("👑 สุดยอดมาก! คุณหมุนวงล้อได้รับ: " + prizeLabel + "\nรหัสคูปองของคุณคือ: " + res.couponCode + "\nคูปองของคุณถูกบันทึกในหน้ากระเป๋าเงินคูปองแล้ว!", "success");
-            } else {
-              playSynthLose();
-              showCustomAlert("🍀 ขอบคุณที่ร่วมสนุกนะ! มาร่วมส่งกิจกรรมเรียนรู้เพื่อลุ้นรางวัลอีกครั้งหน้ากันเถอะ!", "info");
-            }
-          });
+          // คำนวณหาพิกัดองศาเป้าหมายตามช่องรางวัลที่แท้จริง
+          const prizeIndex = apiRes.prizeIndex;
+          const baseStopAngle = (1.5 * Math.PI) - (prizeIndex * sliceAngle) - (sliceAngle / 2);
+          const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.6);
+          const targetAngle = baseStopAngle + randomOffset;
+          
+          // หมุนเผื่อหน้าและชะลออย่างน้อยอีก 3 รอบเพื่อแอนิเมชันที่นุ่มนวลพรีเมียม
+          const fullSpins = 3 + Math.floor(Math.random() * 2);
+          const currentMod = startDecelRotation % (2 * Math.PI);
+          let angleDiff = targetAngle - currentMod;
+          if (angleDiff <= 0) {
+            angleDiff += (2 * Math.PI);
+          }
+          const destinationRotation = startDecelRotation + (fullSpins * 2 * Math.PI) + angleDiff;
+          decelDiff = destinationRotation - startDecelRotation;
+        } else if (apiError) {
+          // หากเบื้องหลังเกิดข้อผิดพลาดในการเรียกดึงแต้ม ให้เบรกวงล้ออย่างกระทันหัน (1 วินาที)
+          spinPhase = "error_braking";
+          startDecelTime = performance.now();
+          startDecelRotation = currentWheelRotation;
+          decelDiff = Math.PI * 2.5; // ค่อยๆชะลอหมุนต่ออีกไม่เกินรอบครึ่งแล้วเบรกสนิท
+        }
+        
+        requestAnimationFrame(spinLoop);
+        
+      } else if (spinPhase === "decelerating") {
+        // แฟคเตอร์ฟิสิกส์ชะลอความหนืด (Quintic Ease-Out Easing)
+        const elapsed = now - startDecelTime;
+        const t = Math.min(elapsed / decelDuration, 1);
+        const ease = 1 - Math.pow(1 - t, 5);
+        
+        currentWheelRotation = startDecelRotation + decelDiff * ease;
+        
+        // เล่นเสียงติ๊กตามขอบช่องช้าลงตามอัตราหมุน
+        const currentTickCheck = currentWheelRotation;
+        const startSector = Math.floor(lastTickCheck / sliceAngle);
+        const endSector = Math.floor(currentTickCheck / sliceAngle);
+        if (startSector !== endSector) {
+          playSynthTick();
+          lastTickCheck = currentTickCheck;
+        }
+        
+        drawLuckyWheel();
+        
+        if (t < 1) {
+          requestAnimationFrame(spinLoop);
+        } else {
+          // หยุดนิ่งและประกาศผลรางวัลลุ้นระทึกอย่างสง่างาม
+          currentWheelRotation = currentWheelRotation % (2 * Math.PI);
+          isSpinning = false;
+          spinBtn.disabled = false;
+          spinBtn.style.opacity = '1';
+          spinBtn.style.cursor = 'pointer';
+          
+          // ซิงก์คะแนนสุทธิหลังการใช้สอย
+          localStorage.setItem("userScore", apiRes.newScore);
+          document.getElementById('spin-user-score').innerText = apiRes.newScore;
+          
+          const profileScoreEl = document.getElementById('profile-score');
+          if (profileScoreEl) profileScoreEl.innerText = apiRes.newScore;
+          
+          cacheProfile = null;
+          cacheLeaderboard = null;
+          
+          const prizeLabel = apiRes.prizeLabel;
+          const prizeType = apiRes.prizeType;
+          
+          if (prizeType === "points") {
+            playSynthWin();
+            showCustomAlert("🎉 ยินดีด้วย! คุณหมุนวงล้อได้รับแต้มสะสมเพิ่ม: " + prizeLabel, "success");
+          } else if (prizeType === "coupon") {
+            playSynthFanfare();
+            showCustomAlert("👑 สุดยอดมาก! คุณหมุนวงล้อได้รับ: " + prizeLabel + "\nรหัสคูปองของคุณคือ: " + apiRes.couponCode + "\nคูปองของคุณถูกบันทึกในหน้ากระเป๋าเงินคูปองแล้ว!", "success");
+          } else {
+            playSynthLose();
+            showCustomAlert("🍀 ขอบคุณที่ร่วมสนุกนะ! มาร่วมส่งกิจกรรมเรียนรู้เพื่อลุ้นรางวัลอีกครั้งหน้ากันเถอะ!", "info");
+          }
+        }
+      } else if (spinPhase === "error_braking") {
+        // การหยุดฉุกเฉินระดับเสี้ยววิในกรณีเกิดข้อผิดพลาดเน็ตหลุด/หรือแต้มไม่พอจริง
+        const elapsed = now - startDecelTime;
+        const t = Math.min(elapsed / 1000, 1);
+        const ease = 1 - Math.pow(1 - t, 3); // Cubic Ease-Out เบรกด่วน
+        
+        currentWheelRotation = startDecelRotation + decelDiff * ease;
+        drawLuckyWheel();
+        
+        if (t < 1) {
+          requestAnimationFrame(spinLoop);
         } else {
           isSpinning = false;
           spinBtn.disabled = false;
           spinBtn.style.opacity = '1';
           spinBtn.style.cursor = 'pointer';
-          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการคำนวณแต้ม", "error");
+          showCustomAlert(apiErrorMsg, "error");
         }
-      })
-      .catch(function(err) {
-        console.error(err);
-        isSpinning = false;
-        spinBtn.disabled = false;
-        spinBtn.style.opacity = '1';
-        spinBtn.style.cursor = 'pointer';
-        showCustomAlert("ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์", "error");
-      });
-  }
-
-  function animateWheelSpin(prizeIndex, callback) {
-    const sliceAngle = (2 * Math.PI) / 8;
-    const baseStopAngle = (1.5 * Math.PI) - (prizeIndex * sliceAngle) - (sliceAngle / 2);
-    const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.6);
-    const targetAngle = baseStopAngle + randomOffset;
-    
-    const fullSpins = 6 + Math.floor(Math.random() * 4);
-    const destinationRotation = currentWheelRotation + (fullSpins * 2 * Math.PI) + targetAngle;
-    
-    const duration = 5000;
-    const startTime = performance.now();
-    const startRotation = currentWheelRotation;
-    const diff = destinationRotation - startRotation;
-    
-    let lastTickCheck = startRotation;
-    
-    function updateAnimation(now) {
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 5);
-      
-      currentWheelRotation = startRotation + diff * ease;
-      
-      const currentTickCheck = currentWheelRotation;
-      const startSector = Math.floor(lastTickCheck / sliceAngle);
-      const endSector = Math.floor(currentTickCheck / sliceAngle);
-      
-      if (startSector !== endSector) {
-        playSynthTick();
-        lastTickCheck = currentTickCheck;
-      }
-      
-      drawLuckyWheel();
-      
-      if (t < 1) {
-        requestAnimationFrame(updateAnimation);
-      } else {
-        currentWheelRotation = currentWheelRotation % (2 * Math.PI);
-        callback();
       }
     }
     
-    requestAnimationFrame(updateAnimation);
+    requestAnimationFrame(spinLoop);
   }
 
   window.openLuckySpinModal = openLuckySpinModal;

@@ -1533,17 +1533,36 @@
 </div>
 
 <!-- Market Action Buttons -->
-<div class="px-4 mt-3 flex gap-2">
-  <button id="btn-lucky-spin" class="btn-primary flex-1" 
-          style="padding:10px; font-size:0.85rem; border-radius:var(--r-pill); background:linear-gradient(135deg, var(--gold), #d97706); box-shadow: 0 4px 12px rgba(217,119,6,0.25);" 
-          onclick="openLuckySpinModal()">
-    <i class="fas fa-dharmachakra mr-1.5"></i> วงล้อนำโชค 🎡
-  </button>
-  <button id="btn-user-coupons" class="btn-primary flex-1" 
-          style="padding:10px; font-size:0.85rem; border-radius:var(--r-pill); background:linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16,185,129,0.25);" 
-          onclick="openCouponWalletModal()">
-    <i class="fas fa-wallet mr-1.5"></i> คูปองของฉัน 🎟️
-  </button>
+<div class="px-4 mt-3">
+  <div class="grid grid-cols-2 gap-3">
+    
+    <!-- Card 1: วงล้อนำโชค OTOP -->
+    <div class="loft-card flex flex-col items-center justify-center text-center" 
+         style="margin:0; padding:12px 8px; cursor:pointer; background:linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(217, 119, 6, 0.05)); border:1.5px solid rgba(251, 191, 36, 0.22); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius:16px;" 
+         onclick="openLuckySpinModal()" 
+         onmouseover="this.style.transform='translateY(-2.5px)'; this.style.borderColor='rgba(251, 191, 36, 0.55)'; this.style.boxShadow='0 8px 16px rgba(251, 191, 36, 0.2)';" 
+         onmouseout="this.style.transform='none'; this.style.borderColor='rgba(251, 191, 36, 0.22)'; this.style.boxShadow='none';">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-black mb-1.5" 
+           style="background:linear-gradient(135deg, #fbbf24, #d97706); box-shadow:0 4px 10px rgba(251, 191, 36, 0.3); flex-shrink:0;">
+        <i class="fas fa-dharmachakra fa-spin" style="animation-duration: 10s;"></i>
+      </div>
+      <span class="font-black text-xs text-theme-inv" style="font-weight:900; font-family:'Prompt',sans-serif; color:var(--text); letter-spacing: 0.1px;">วงล้อนำโชค 🎡</span>
+    </div>
+
+    <!-- Card 2: คูปองของฉัน -->
+    <div class="loft-card flex flex-col items-center justify-center text-center" 
+         style="margin:0; padding:12px 8px; cursor:pointer; background:linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05)); border:1.5px solid rgba(16, 185, 129, 0.22); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius:16px;" 
+         onclick="openCouponWalletModal()" 
+         onmouseover="this.style.transform='translateY(-2.5px)'; this.style.borderColor='rgba(16, 185, 129, 0.55)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.2)';" 
+         onmouseout="this.style.transform='none'; this.style.borderColor='rgba(16, 185, 129, 0.22)'; this.style.boxShadow='none';">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white mb-1.5" 
+           style="background:linear-gradient(135deg, #10b981, #059669); box-shadow:0 4px 10px rgba(16, 185, 129, 0.3); flex-shrink:0;">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <span class="font-black text-xs text-theme-inv" style="font-weight:900; font-family:'Prompt',sans-serif; color:var(--text); letter-spacing: 0.1px;">คูปองของฉัน 🎟️</span>
+    </div>
+
+  </div>
 </div>
 
 <!-- Filters Section -->
@@ -2401,14 +2420,22 @@
              style="width:316px; height:316px; background:radial-gradient(circle, var(--glass), rgba(0,0,0,0.4)); border:4px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.3); overflow:visible;">
           
           <!-- Indicator Pointer -->
-          <div style="position:absolute; top:-12px; left:calc(50% - 14px); width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-top:22px solid var(--gold); filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); z-index:15;"></div>
+          <!-- Indicator Pointer (3D Gold Beveled Needle) -->
+          <div style="position:absolute; top:-16px; left:calc(50% - 16px); width:32px; height:32px; z-index:15; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.45)); pointer-events:none;">
+            <!-- Left gold shadow facet -->
+            <div style="position:absolute; top:0; left:0; width:0; height:0; border-left:16px solid transparent; border-right:0px solid transparent; border-top:28px solid #b45309;"></div>
+            <!-- Right gold highlight facet -->
+            <div style="position:absolute; top:0; left:16px; width:0; height:0; border-left:0px solid transparent; border-right:16px solid transparent; border-top:28px solid #fef08a;"></div>
+            <!-- Center ridge line -->
+            <div style="position:absolute; top:0; left:15.5px; width:1px; height:28px; background:rgba(255,255,255,0.85); box-shadow:0 0 4px #fff;"></div>
+          </div>
           
           <!-- Canvas Wheel -->
           <canvas id="lucky-wheel-canvas" width="300" height="300" style="display:block; border-radius:50%;"></canvas>
           
           <!-- Spin Trigger Button -->
           <button id="btn-spin-trigger" class="flex flex-col items-center justify-center font-black text-white cursor-pointer select-none transition-all active:scale-95" 
-                  style="position:absolute; top:calc(50% - 38px); left:calc(50% - 38px); width:76px; height:76px; border-radius:50%; background:radial-gradient(circle, var(--gold), #d97706); border:4px solid #fff; box-shadow:0 0 15px rgba(217,119,6,0.6); z-index:12; outline:none;"
+                  style="position:absolute; top:calc(50% - 38px); left:calc(50% - 38px); width:76px; height:76px; border-radius:50%; background:radial-gradient(circle, #ffe066 0%, #d97706 60%, #78350f 100%); border:3.5px solid #fff; border-bottom-color:#b45309; border-right-color:#d97706; border-top-color:#fff; border-left-color:#fff; box-shadow: 0 6px 14px rgba(0,0,0,0.55), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 5px rgba(0,0,0,0.4); z-index:12; outline:none;"
                   onclick="triggerSpinWheel()">
             <span style="font-size:0.95rem; line-height:1; text-shadow:0 1px 3px rgba(0,0,0,0.5);">หมุน!</span>
             <span style="font-size:0.55rem; line-height:1; font-weight:normal; opacity:0.9; margin-top:2px;">ใช้ 20 แต้ม</span>
@@ -2417,9 +2444,29 @@
         </div>
 
         <!-- Explaining label -->
-        <p class="text-xxs text-center px-4 leading-relaxed" style="color:var(--text-soft); opacity:0.8;">
-          🎡 ใช้ 20 แต้มต่อการหมุน ลุ้นรางวัลสูงสุด 50 แต้ม หรือคูปองส่วนลด OTOP สุดพิเศษ 20 และ 50 บาท! แต้มของรางวัลจะถูกปรับเข้าโปรไฟล์ของคุณโดยอัตโนมัติ
-        </p>
+        <!-- Beautiful Explaining Card -->
+        <div class="p-3.5 rounded-2xl text-center text-xs mt-1.5 select-none" 
+             style="background:rgba(255,191,36,0.05); border:1px solid rgba(255,191,36,0.18); box-shadow: 0 4px 16px rgba(255,191,36,0.03); width:calc(100% - 16px); max-width:320px; line-height:1.55;">
+          <div class="flex items-center justify-center gap-1.5 font-black mb-2" style="color:var(--gold); font-size:0.82rem; letter-spacing:0.3px;">
+            <i class="fas fa-dharmachakra fa-spin" style="animation-duration: 8s;"></i> กติกาการร่วมสนุกหมุนวงล้อ OTOP 🎡
+          </div>
+          <div style="color:var(--text-soft); font-size:0.75rem; text-align:left;" class="flex flex-col gap-1.5">
+            <div class="flex items-start gap-2">
+              <span style="color:var(--gold); margin-top:2px; font-size:0.8rem;"><i class="fas fa-coins"></i></span>
+              <span>ใช้ <strong style="color:var(--gold); font-weight:900;">20 แต้ม</strong> ต่อการหมุนเสี่ยงทาย 1 ครั้ง</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span style="color:#10b981; margin-top:2px; font-size:0.8rem;"><i class="fas fa-gift"></i></span>
+              <span>ลุ้นรับรางวัลใหญ่สูงสุด <strong style="color:#10b981; font-weight:900;">50 แต้ม</strong> หรือ <strong style="color:var(--gold); font-weight:900;">คูปองส่วนลด OTOP สุดพิเศษ 20 และ 50 บาท!</strong></span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span style="color:#60a5fa; margin-top:2px; font-size:0.8rem;"><i class="fas fa-check-circle"></i></span>
+              <span>แต้มรางวัลจะถูกปรับโอนเข้าสู่โปรไฟล์ของคุณโดยอัตโนมัติในทันที ✨</span>
+            </div>
+          </div>
+        </div>
+
+
 
       </div>
 

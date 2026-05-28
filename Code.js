@@ -2053,6 +2053,7 @@ function updateUserStats(userId) {
   if (numDataRows > 0) {
     userSheet.getRange(2, 5, numDataRows, 1).setValues(levelCol);
     userSheet.getRange(2, 6, numDataRows, 1).setValues(scoreCol);
+    SpreadsheetApp.flush(); // บังคับให้เขียนลงชีตทันทีก่อนการอ่านครั้งถัดไปใน Request เดียวกัน
   }
 
   return { totalScore: totalScore, title: currentUserNewTitle };
@@ -2954,11 +2955,18 @@ function getUserProfileFullData(userId) {
     
     for (let i = 0; i < userData.length; i++) {
       if (normalizeUsername(userData[i][0]) === userStr) {
-        myProfile = {};
-        headers.forEach((h, index) => {
-          let v = userData[i][index];
-          myProfile[h] = (v instanceof Date) ? Utilities.formatDate(v, "GMT+7", "yyyy-MM-dd HH:mm:ss") : String(v);
-        });
+        myProfile = {
+          username: normalizeUsername(userData[i][0]),
+          phone: normalizeUsername(userData[i][0]),
+          fullname: userData[i][2],
+          profileimage: userData[i][3],
+          level: userData[i][4],
+          score: String(userData[i][5] || "0"),
+          totalscore: String(userData[i][5] || "0"), // return both score and totalscore for maximum compatibility!
+          role: String(userData[i][6] || "user").trim().toLowerCase(),
+          tambon: userData[i][7] || "",
+          imagestatus: String(userData[i][9] || "Approved")
+        };
         break; // เจอแล้วหยุดหาเลย ประหยัดเวลา
       }
     }
