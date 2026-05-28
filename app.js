@@ -3983,7 +3983,588 @@ function renderLeaderboard(data) {
     container.innerHTML = html;
   }
 
+  // ================= ระบบกระเป๋าคูปองและประวัติแต้ม (Wallet & Ledger Frontend) =================
+
+  function openCouponWalletModal() {
+    document.getElementById('coupon-wallet-modal').style.display = 'flex';
+    switchWalletTab('coupons');
+  }
+
+  function closeCouponWalletModal() {
+    document.getElementById('coupon-wallet-modal').style.display = 'none';
+  }
+
+  function switchWalletTab(tabName) {
+    const tabCouponsBtn = document.getElementById('tab-wallet-coupons');
+    const tabLedgerBtn = document.getElementById('tab-wallet-ledger');
+    const couponsContent = document.getElementById('wallet-coupons-content');
+    const ledgerContent = document.getElementById('wallet-ledger-content');
+
+    if (tabName === 'coupons') {
+      tabCouponsBtn.style.borderBottom = '3px solid var(--primary)';
+      tabCouponsBtn.style.color = 'var(--primary)';
+      tabLedgerBtn.style.borderBottom = '3px solid transparent';
+      tabLedgerBtn.style.color = 'var(--text-soft)';
+      
+      couponsContent.style.display = 'block';
+      ledgerContent.style.display = 'none';
+      
+      loadUserCoupons();
+    } else {
+      tabLedgerBtn.style.borderBottom = '3px solid var(--primary)';
+      tabLedgerBtn.style.color = 'var(--primary)';
+      tabCouponsBtn.style.borderBottom = '3px solid transparent';
+      tabCouponsBtn.style.color = 'var(--text-soft)';
+      
+      couponsContent.style.display = 'none';
+      ledgerContent.style.display = 'block';
+      
+      loadUserPointsHistory();
+    }
+  }
+
+  function loadUserCoupons() {
+    const container = document.getElementById('wallet-coupons-list');
+    container.innerHTML = `
+      <div class="text-center py-8 text-muted text-sm">
+        <i class="fas fa-circle-notch fa-spin mr-2" style="color:var(--primary)"></i>กำลังดึงข้อมูลคูปองของคุณ...
+      </div>
+    `;
+
+    const username = localStorage.getItem("userPhone");
+    if (!username) {
+      container.innerHTML = `<div class="text-center py-8 text-muted text-sm"><i class="fas fa-exclamation-circle mr-1"></i>ไม่พบเซสชันการเข้าสู่ระบบ</div>`;
+      return;
+    }
+
+    apiGet('getUserCoupons', { username: username })
+      .then(function(res) {
+        if (res.status === 'success') {
+          const list = res.data || [];
+          if (list.length === 0) {
+            container.innerHTML = `
+              <div class="text-center py-10 px-4 text-muted text-sm loft-card" style="background:var(--glass); border:1px dashed var(--glass-border); margin-top: 10px;">
+                <div class="text-4xl mb-3">🎟️</div>
+                <div class="font-bold text-theme-inv mb-1">ยังไม่มีคูปองส่วนลด</div>
+                <div style="color:var(--text-soft); font-size: 0.8rem; line-height: 1.4;">คุณยังไม่มีคูปองในกระเป๋า สะสมแต้มแล้วแลกคูปองที่ตลาดชุมชนกันเลย!</div>
+              </div>
+            `;
+            return;
+          }
+
+          let html = '';
+          list.forEach(function(item) {
+            const isActive = item.status === 'Active';
+            const cardBg = isActive 
+              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(4, 120, 87, 0.04))' 
+              : 'rgba(255, 255, 255, 0.02)';
+            const borderColor = isActive ? 'var(--primary)' : 'var(--glass-border)';
+            const statusLabel = isActive ? '🎟️ ใช้งานได้' : '✔️ ใช้งานแล้ว';
+            
+            html += `
+              <div class="loft-card p-3 rounded-2xl flex flex-col gap-2 relative transition-all" style="background:${cardBg}; border:1px solid ${borderColor}; opacity: ${isActive ? '1' : '0.6'}; margin-top: 5px;">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:${isActive ? 'var(--primary-light)' : 'var(--glass)'}; color:${isActive ? 'var(--primary)' : 'var(--text-soft)'};">
+                    ${statusLabel}
+                  </span>
+                  <span class="text-xs text-muted" style="font-size:0.7rem;"><i class="far fa-clock mr-1"></i>${item.redeemedAt}</span>
+                </div>
+                <div class="flex flex-col mt-1">
+                  <h4 class="font-black text-sm text-theme-inv" style="font-size:0.9rem; line-height:1.2;">${item.productName}</h4>
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span class="text-xs" style="color:var(--text-soft);">มูลค่าส่วนลด:</span>
+                    <span class="text-base font-black text-theme-inv" style="color:var(--gold)">฿${item.discountAmount}</span>
+                    <span class="text-xs text-muted" style="font-size:0.7rem;">(${item.pointsUsed} แต้ม)</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 mt-2 pt-2" style="border-top:1px dashed var(--glass-border);">
+                  <div class="flex-1 font-mono text-center font-bold tracking-widest text-sm p-1.5 rounded-lg text-theme-inv" style="background:rgba(0,0,0,0.25); border:1px solid var(--glass-border);">
+                    ${item.code}
+                  </div>
+                  ${isActive ? `
+                    <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:var(--r-md); background:linear-gradient(135deg, var(--primary), var(--primary-dk));" onclick="copyCouponCode(this, '${item.code}')">
+                      <i class="far fa-copy mr-1"></i>คัดลอกรหัส
+                    </button>
+                  ` : `
+                    <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:var(--r-md); background:var(--glass); color:var(--text-soft); border:1px solid var(--glass-border); box-shadow:none; cursor:default;" disabled>
+                      ใช้แล้ว
+                    </button>
+                  `}
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = `<div class="text-center py-8 text-sm text-red-500"><i class="fas fa-exclamation-circle mr-1"></i>${res.message || 'เกิดข้อผิดพลาดในการโหลดคูปอง'}</div>`;
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        container.innerHTML = `<div class="text-center py-8 text-sm text-red-500"><i class="fas fa-exclamation-circle mr-1"></i>ล้มเหลวในการดึงข้อมูล</div>`;
+      });
+  }
+
+  function loadUserPointsHistory() {
+    const container = document.getElementById('wallet-ledger-list');
+    container.innerHTML = `
+      <div class="text-center py-8 text-muted text-sm">
+        <i class="fas fa-circle-notch fa-spin mr-2" style="color:var(--primary)"></i>กำลังดึงประวัติคะแนนสะสม...
+      </div>
+    `;
+
+    const username = localStorage.getItem("userPhone");
+    if (!username) {
+      container.innerHTML = `<div class="text-center py-8 text-muted text-sm"><i class="fas fa-exclamation-circle mr-1"></i>ไม่พบเซสชันการเข้าสู่ระบบ</div>`;
+      return;
+    }
+
+    apiGet('getUserPointsHistory', { username: username })
+      .then(function(res) {
+        if (res.status === 'success') {
+          const history = res.history || [];
+          if (history.length === 0) {
+            container.innerHTML = `
+              <div class="text-center py-10 px-4 text-muted text-sm loft-card" style="background:var(--glass); border:1px dashed var(--glass-border); margin-top: 10px;">
+                <div class="text-4xl mb-3">📈</div>
+                <div class="font-bold text-theme-inv mb-1">ยังไม่มีประวัติคะแนน</div>
+                <div style="color:var(--text-soft); font-size: 0.8rem; line-height: 1.4;">เริ่มเรียนรู้ ทำแบบทดสอบ และส่งกิจกรรมเพื่อสะสมคะแนนกันเลย!</div>
+              </div>
+            `;
+            return;
+          }
+
+          let html = '<div class="points-timeline flex flex-col gap-2 relative">';
+          history.forEach(function(item) {
+            const isPlus = item.points.startsWith('+');
+            const color = isPlus ? '#10b981' : '#f97316';
+            const icon = item.type === 'quiz' ? 'fa-pen-fancy' 
+                         : item.type === 'log' ? 'fa-book-open' 
+                         : 'fa-ticket-alt';
+            
+            html += `
+              <div class="loft-card p-3 rounded-2xl flex items-center gap-3 transition-all" style="background:var(--glass); border:1px solid var(--glass-border); margin-top: 5px;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0" style="background:${isPlus ? 'rgba(16,185,129,0.12)' : 'rgba(249,115,22,0.12)'}; border:1px solid ${isPlus ? 'rgba(16,185,129,0.2)' : 'rgba(249,115,22,0.2)'}; color:${color}; font-size: 0.7rem;">
+                  <i class="fas ${icon}"></i>
+                </div>
+                <div class="flex-1 flex flex-col min-w-0">
+                  <span class="text-xs font-bold text-theme-inv leading-tight truncate" style="font-size:0.8rem;">${item.description}</span>
+                  <span class="text-xxs text-muted mt-1" style="font-size:0.65rem;"><i class="far fa-clock mr-1"></i>${item.dateStr}</span>
+                </div>
+                <div class="font-black text-xs text-right shrink-0" style="color:${color}; font-size: 0.8rem;">
+                  ${item.points} แต้ม
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = `<div class="text-center py-8 text-sm text-red-500"><i class="fas fa-exclamation-circle mr-1"></i>${res.message || 'เกิดข้อผิดพลาดในการโหลดประวัติแต้ม'}</div>`;
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        container.innerHTML = `<div class="text-center py-8 text-sm text-red-500"><i class="fas fa-exclamation-circle mr-1"></i>ล้มเหลวในการดึงข้อมูล</div>`;
+      });
+  }
+
+  function copyCouponCode(btn, code) {
+    if (!navigator.clipboard) {
+      const textArea = document.createElement("textarea");
+      textArea.value = code;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showCopySuccess(btn);
+      } catch (err) {
+        console.error('Fallback copy failed', err);
+      }
+      document.body.removeChild(textArea);
+      return;
+    }
+    
+    navigator.clipboard.writeText(code).then(function() {
+      showCopySuccess(btn);
+    }, function(err) {
+      console.error('Clipboard copy failed', err);
+    });
+  }
+
+  function showCopySuccess(btn) {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check mr-1"></i>คัดลอกแล้ว! ✔️';
+    btn.style.background = 'linear-gradient(135deg, #10b981, #047857)';
+    setTimeout(function() {
+      btn.innerHTML = originalText;
+      btn.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dk))';
+    }, 2000);
+  }
+
+  // ================= ระบบวงล้อนำโชค OTOP (OTOP Lucky Spin Wheel Frontend) =================
+
+  let isSpinning = false;
+  let currentWheelRotation = 0; // ในหน่วยเรเดียน
+  const wheelSlices = [
+    { label: "ลองใหม่นะ 🍀", type: "none", color: "#374151", textColor: "#ffffff" },
+    { label: "5 แต้ม 🪙", type: "points", color: "#8b5cf6", textColor: "#ffffff" },
+    { label: "10 แต้ม 💎", type: "points", color: "#3b82f6", textColor: "#ffffff" },
+    { label: "ลองใหม่นะ 🍀", type: "none", color: "#374151", textColor: "#ffffff" },
+    { label: "20 แต้ม 🌟", type: "points", color: "#f59e0b", textColor: "#ffffff" },
+    { label: "คูปอง 20 บ. 🎟️", type: "coupon", color: "#10b981", textColor: "#ffffff" },
+    { label: "50 แต้ม 🔥", type: "points", color: "#ef4444", textColor: "#ffffff" },
+    { label: "คูปอง 50 บ. 👑", type: "coupon", color: "#e11d48", textColor: "#ffffff" }
+  ];
+
+  let audioCtx = null;
+  function initAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playSynthTick() {
+    try {
+      initAudioContext();
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.05);
+      
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    } catch (e) {
+      console.warn("Web Audio failed to play tick", e);
+    }
+  }
+
+  function playSynthWin() {
+    try {
+      initAudioContext();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+        gain.gain.setValueAtTime(0, now + idx * 0.1);
+        gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.1 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.25);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.1);
+        osc.stop(now + idx * 0.1 + 0.3);
+      });
+    } catch (e) {}
+  }
+
+  function playSynthFanfare() {
+    try {
+      initAudioContext();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const chords = [
+        [261.63, 329.63, 392.00], // C4, E4, G4
+        [329.63, 392.00, 523.25], // E4, G4, C5
+        [392.00, 523.25, 659.25], // G4, C5, E5
+        [523.25, 659.25, 783.99, 1046.50] // C5, E5, G5, C6
+      ];
+      chords.forEach((chord, chordIdx) => {
+        chord.forEach((freq) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + chordIdx * 0.15);
+          gain.gain.setValueAtTime(0, now + chordIdx * 0.15);
+          gain.gain.linearRampToValueAtTime(0.06, now + chordIdx * 0.15 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + chordIdx * 0.15 + 0.4);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + chordIdx * 0.15);
+          osc.stop(now + chordIdx * 0.15 + 0.45);
+        });
+      });
+    } catch (e) {}
+  }
+
+  function playSynthLose() {
+    try {
+      initAudioContext();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const notes = [392.00, 311.13]; // G4, Eb4
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+        gain.gain.setValueAtTime(0.12, now + idx * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.15 + 0.3);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.15);
+        osc.stop(now + idx * 0.15 + 0.35);
+      });
+    } catch(e) {}
+  }
+
+  function openLuckySpinModal() {
+    document.getElementById('lucky-spin-modal').style.display = 'flex';
+    const userScore = localStorage.getItem("userScore") || "0";
+    document.getElementById('spin-user-score').innerText = userScore;
+    setTimeout(drawLuckyWheel, 100);
+    initAudioContext();
+  }
+
+  function closeLuckySpinModal() {
+    if (isSpinning) return;
+    document.getElementById('lucky-spin-modal').style.display = 'none';
+  }
+
+  function drawLuckyWheel() {
+    const canvas = document.getElementById('lucky-wheel-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const center = width / 2;
+    const radius = center - 12;
+    const sliceAngle = (2 * Math.PI) / 8;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(currentWheelRotation);
+    
+    // 1. ช่องรางวัล
+    for (let i = 0; i < 8; i++) {
+      const startAngle = i * sliceAngle;
+      const endAngle = (i + 1) * sliceAngle;
+      const slice = wheelSlices[i];
+      
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, radius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = slice.color;
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.stroke();
+      
+      ctx.save();
+      ctx.rotate(startAngle + sliceAngle / 2);
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = slice.textColor;
+      ctx.font = "black 10px Inter, sans-serif";
+      
+      const label = slice.label;
+      ctx.fillText(label, radius - 20, 0);
+      ctx.restore();
+    }
+    
+    // 2. หลอดไฟรอบนอก
+    const numLights = 16;
+    const lightRadius = 4;
+    const lightsDist = radius + 4;
+    const blinkState = Math.floor(Date.now() / 250) % 2 === 0;
+    
+    for (let i = 0; i < numLights; i++) {
+      const angle = (i * (2 * Math.PI)) / numLights;
+      const x = Math.cos(angle) * lightsDist;
+      const y = Math.sin(angle) * lightsDist;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, lightRadius, 0, 2 * Math.PI);
+      
+      const isEven = i % 2 === 0;
+      if ((isEven && blinkState) || (!isEven && !blinkState)) {
+        ctx.fillStyle = "#fffbeb";
+        ctx.shadowColor = "#f59e0b";
+        ctx.shadowBlur = 8;
+      } else {
+        ctx.fillStyle = "#4b5563";
+        ctx.shadowBlur = 0;
+      }
+      ctx.fill();
+    }
+    
+    ctx.restore();
+    
+    // 3. ดุมกลางสีทอง
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, 44, 0, 2 * Math.PI);
+    const grad = ctx.createRadialGradient(center, center, 0, center, center, 44);
+    grad.addColorStop(0, "rgba(255,255,255,0.2)");
+    grad.addColorStop(0.5, "rgba(0,0,0,0.5)");
+    grad.addColorStop(1, "rgba(0,0,0,0.8)");
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let lightBlinkInterval = null;
+  function startLightsAnimation() {
+    if (lightBlinkInterval) clearInterval(lightBlinkInterval);
+    lightBlinkInterval = setInterval(function() {
+      if (!isSpinning && document.getElementById('lucky-spin-modal') && document.getElementById('lucky-spin-modal').style.display === 'flex') {
+        drawLuckyWheel();
+      }
+    }, 250);
+  }
+
+  function triggerSpinWheel() {
+    if (isSpinning) return;
+    
+    const userScore = Number(localStorage.getItem("userScore") || "0");
+    if (userScore < 20) {
+      showCustomAlert("คะแนนสะสมของคุณไม่เพียงพอสำหรับการหมุนวงล้อ (ใช้ 20 แต้ม, ปัจจุบันคุณมี " + userScore + " แต้ม)", "warning");
+      return;
+    }
+    
+    isSpinning = true;
+    initAudioContext();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    
+    const spinBtn = document.getElementById('btn-spin-trigger');
+    spinBtn.disabled = true;
+    spinBtn.style.opacity = '0.6';
+    spinBtn.style.cursor = 'default';
+    
+    apiPost('spinLuckyWheel', withAuthData({}))
+      .then(function(res) {
+        if (res.status === 'success') {
+          const prizeIndex = res.prizeIndex;
+          const prizeLabel = res.prizeLabel;
+          const prizeType = res.prizeType;
+          
+          animateWheelSpin(prizeIndex, function() {
+            isSpinning = false;
+            spinBtn.disabled = false;
+            spinBtn.style.opacity = '1';
+            spinBtn.style.cursor = 'pointer';
+            
+            localStorage.setItem("userScore", res.newScore);
+            document.getElementById('spin-user-score').innerText = res.newScore;
+            
+            const profileScoreEl = document.getElementById('profile-score');
+            if (profileScoreEl) profileScoreEl.innerText = res.newScore;
+            
+            cacheProfile = null;
+            cacheLeaderboard = null;
+            
+            if (prizeType === "points") {
+              playSynthWin();
+              showCustomAlert("🎉 ยินดีด้วย! คุณหมุนวงล้อได้รับแต้มสะสมเพิ่ม: " + prizeLabel, "success");
+            } else if (prizeType === "coupon") {
+              playSynthFanfare();
+              showCustomAlert("👑 สุดยอดมาก! คุณหมุนวงล้อได้รับ: " + prizeLabel + "\nรหัสคูปองของคุณคือ: " + res.couponCode + "\nคูปองของคุณถูกบันทึกในหน้ากระเป๋าเงินคูปองแล้ว!", "success");
+            } else {
+              playSynthLose();
+              showCustomAlert("🍀 ขอบคุณที่ร่วมสนุกนะ! มาร่วมส่งกิจกรรมเรียนรู้เพื่อลุ้นรางวัลอีกครั้งหน้ากันเถอะ!", "info");
+            }
+          });
+        } else {
+          isSpinning = false;
+          spinBtn.disabled = false;
+          spinBtn.style.opacity = '1';
+          spinBtn.style.cursor = 'pointer';
+          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการคำนวณแต้ม", "error");
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        isSpinning = false;
+        spinBtn.disabled = false;
+        spinBtn.style.opacity = '1';
+        spinBtn.style.cursor = 'pointer';
+        showCustomAlert("ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์", "error");
+      });
+  }
+
+  function animateWheelSpin(prizeIndex, callback) {
+    const sliceAngle = (2 * Math.PI) / 8;
+    const baseStopAngle = (1.5 * Math.PI) - (prizeIndex * sliceAngle) - (sliceAngle / 2);
+    const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.6);
+    const targetAngle = baseStopAngle + randomOffset;
+    
+    const fullSpins = 6 + Math.floor(Math.random() * 4);
+    const destinationRotation = currentWheelRotation + (fullSpins * 2 * Math.PI) + targetAngle;
+    
+    const duration = 5000;
+    const startTime = performance.now();
+    const startRotation = currentWheelRotation;
+    const diff = destinationRotation - startRotation;
+    
+    let lastTickCheck = startRotation;
+    
+    function updateAnimation(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 5);
+      
+      currentWheelRotation = startRotation + diff * ease;
+      
+      const currentTickCheck = currentWheelRotation;
+      const startSector = Math.floor(lastTickCheck / sliceAngle);
+      const endSector = Math.floor(currentTickCheck / sliceAngle);
+      
+      if (startSector !== endSector) {
+        playSynthTick();
+        lastTickCheck = currentTickCheck;
+      }
+      
+      drawLuckyWheel();
+      
+      if (t < 1) {
+        requestAnimationFrame(updateAnimation);
+      } else {
+        currentWheelRotation = currentWheelRotation % (2 * Math.PI);
+        callback();
+      }
+    }
+    
+    requestAnimationFrame(updateAnimation);
+  }
+
+  window.openLuckySpinModal = openLuckySpinModal;
+  window.closeLuckySpinModal = closeLuckySpinModal;
+  window.triggerSpinWheel = triggerSpinWheel;
+  window.drawLuckyWheel = drawLuckyWheel;
+  window.startLightsAnimation = startLightsAnimation;
+
+  window.openCouponWalletModal = openCouponWalletModal;
+  window.closeCouponWalletModal = closeCouponWalletModal;
+  window.switchWalletTab = switchWalletTab;
+  window.loadUserCoupons = loadUserCoupons;
+  window.loadUserPointsHistory = loadUserPointsHistory;
+  window.copyCouponCode = copyCouponCode;
+
   window.onload = function() {
+    startLightsAnimation();
     // โหลดหน้าแสดง OTOP Showcase & Wisdom Market (รองรับทั้งแบบฝังและแบบโหลด Asynchronous จากไฟล์แยก)
     const container = document.getElementById('market-page');
     if (container && !container.innerHTML.trim()) {

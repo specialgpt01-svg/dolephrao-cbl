@@ -241,6 +241,15 @@ function doGet(e) {
       case 'getUserCertificates':
         result = { status: "success", history: getPassedHistory(e.parameter.username || e.parameter.phone) };
         break;
+      case 'getUserCoupons':
+        result = getUserCoupons(e.parameter.username || e.parameter.phone);
+        break;
+      case 'getUserPointsHistory':
+        result = getUserPointsHistory(e.parameter.username || e.parameter.phone);
+        break;
+      case 'getUserBadges':
+        result = getUserBadges(e.parameter.username || e.parameter.phone);
+        break;
       case 'getAdminSources':
         result = getAdminSources(actor);
         break;
@@ -331,6 +340,7 @@ function doPost(e) {
       case 'saveProduct': result = saveProduct(data, actor); break;
       case 'deleteProduct': result = deleteProduct(data, actor); break;
       case 'redeemCoupon': result = redeemCoupon(data); break;
+      case 'spinLuckyWheel': result = spinLuckyWheel(data); break;
       default:              result = { status: 'error', message: 'Unknown action: ' + action };
     }
     return jsonResponse(result);
@@ -1955,7 +1965,9 @@ function updateUserStats(userId) {
        }
     }
   }
-  let totalScore = quizScore + learningScore;
+  const spinBalance = getUserSpinBalance_(userStr);
+  let totalScore = quizScore + learningScore - getUserSpentPoints_(userStr) - spinBalance.spent + spinBalance.won;
+  if (totalScore < 0) totalScore = 0;
 
   // 2. อ่านข้อมูล Users และอัปเดตคะแนนใน Array (ยังไม่เขียน Sheet)
   const userSheet = SS.getSheetByName("Users");
@@ -3318,14 +3330,6 @@ function redeemCoupon(data) {
       return { status: "error", message: "คะแนนสะสมของคุณไม่เพียงพอสำหรับการแลกส่วนลดนี้ (มี " + currentScore + " แต้ม, ต้องการ " + cost + " แต้ม)" };
     }
 
-    // Deduct points
-    const newScore = currentScore - cost;
-    sheet.getRange(foundRow, 6).setValue(newScore); // Column 6 is Score (1-based)
-    
-    // Clear Cache Service for user auth state
-    const cache = CacheService.getScriptCache();
-    cache.remove("auth_" + username);
-
     // Generate unique coupon code
     const codeLength = 6;
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -3337,7 +3341,6 @@ function redeemCoupon(data) {
     // Create / ensure Coupons sheet is initialized
     const couponSheetHeaders = ["CouponID", "Username", "PointsUsed", "DiscountAmount", "ProductID", "ProductName", "Code", "RedeemedAt", "Status"];
     const couponSheet = ensureSheetWithHeaders("Coupons", couponSheetHeaders);
-    const nextRow = couponSheet.getLastRow() + 1;
     couponSheet.appendRow([
       "C-" + Date.now(),
       username,
@@ -3350,11 +3353,472 @@ function redeemCoupon(data) {
       "Active"
     ]);
 
+    // Recalculate stats and rank correctly via updateUserStats
+    const statsResult = updateUserStats(username);
+    const newScore = statsResult.totalScore;
+
+    // Clear Cache Service for user auth state
+    const cache = CacheService.getScriptCache();
+    cache.remove("auth_" + username);
+
     return {
       status: "success",
       couponCode: couponCode,
       newScore: newScore,
       message: "แลกคูปองส่วนลดสำเร็จ!"
+    };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+// ================= ฟังก์ชันสนับสนุนระบบคูปองและการหักแต้ม (Wallet & Spent Points Helper) =================
+
+function getUserSpentPoints_(username) {
+  const uName = normalizeUsername(username);
+  if (!uName) return 0;
+  
+  const couponSheet = SS.getSheetByName("Coupons");
+  if (!couponSheet) return 0;
+  
+  const values = couponSheet.getDataRange().getValues();
+  if (values.length <= 1) return 0;
+  
+  let spent = 0;
+  for (let i = 1; i < values.length; i++) {
+    if (normalizeUsername(values[i][1]) === uName && String(values[i][8] || "").trim() !== "Cancelled") {
+      spent += Number(values[i][2]) || 0; // Index 2 is PointsUsed
+    }
+  }
+  return spent;
+}
+
+function getUserCoupons(username) {
+  try {
+    const uName = normalizeUsername(username);
+    if (!uName) return { status: "error", message: "ไม่พบชื่อผู้ใช้สำหรับการสืบค้น" };
+    
+    const couponSheetHeaders = ["CouponID", "Username", "PointsUsed", "DiscountAmount", "ProductID", "ProductName", "Code", "RedeemedAt", "Status"];
+    const sheet = ensureSheetWithHeaders("Coupons", couponSheetHeaders);
+    const values = sheet.getDataRange().getValues();
+    if (values.length <= 1) return { status: "success", data: [] };
+    
+    const list = [];
+    // เรียงลำดับย้อนหลังเพื่อเอาคูปองที่แลกใหม่ขึ้นก่อน
+    for (let i = values.length - 1; i >= 1; i--) {
+      if (normalizeUsername(values[i][1]) === uName) {
+        list.push({
+          couponId: String(values[i][0] || ""),
+          pointsUsed: Number(values[i][2]) || 0,
+          discountAmount: Number(values[i][3]) || 0,
+          productId: String(values[i][4] || ""),
+          productName: String(values[i][5] || ""),
+          code: String(values[i][6] || ""),
+          redeemedAt: values[i][7] ? Utilities.formatDate(new Date(couponValuesDate_(values[i][7])), "GMT+7", "dd/MM/yyyy HH:mm") : "",
+          status: String(values[i][8] || "Active")
+        });
+      }
+    }
+    return { status: "success", data: list };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+// ช่วยจัดการแปลงเวลาของ Coupons อย่างปลอดภัย
+function couponValuesDate_(val) {
+  if (val instanceof Date) return val;
+  try {
+    return new Date(val);
+  } catch(e) {
+    return new Date();
+  }
+}
+
+function getUserPointsHistory(username) {
+  try {
+    const userStr = normalizeUsername(username);
+    if (!userStr) return { status: "error", message: "ไม่พบชื่อผู้ใช้สำหรับสืบค้นประวัติคะแนน" };
+    
+    const history = [];
+    
+    // 1. ดึงประวัติคะแนนจากแบบทดสอบฐานต่าง ๆ
+    const logSheet = SS.getSheetByName("Logs");
+    if (logSheet) {
+      const values = logSheet.getDataRange().getValues();
+      if (values.length > 1) {
+        const headers = values[0].map(h => String(h || '').trim().toLowerCase());
+        const phoneIdx = headers.indexOf("phone") > -1 ? headers.indexOf("phone") : 0;
+        const sourceIdIdx = headers.indexOf("sourceid") > -1 ? headers.indexOf("sourceid") : 1;
+        const scoreIdx = headers.indexOf("score") > -1 ? headers.indexOf("score") : 2;
+        const statusIdx = headers.indexOf("status") > -1 ? headers.indexOf("status") : 3;
+        const updatedAtIdx = headers.indexOf("updatedat") > -1 ? headers.indexOf("updatedat") : 4;
+        const baseIdIdx = headers.indexOf("baseid");
+        
+        for (let i = 1; i < values.length; i++) {
+          if (normalizeUsername(values[i][phoneIdx]) === userStr && String(values[i][statusIdx] || '').trim().toLowerCase() === "pass") {
+            const scoreText = String(values[i][scoreIdx] || '');
+            const scoreNum = parseInt(scoreText.split('/')[0]) || 0;
+            const gain = scoreNum * 10;
+            const date = values[i][updatedAtIdx] ? couponValuesDate_(values[i][updatedAtIdx]) : new Date();
+            const sourceId = String(values[i][sourceIdIdx] || '').trim();
+            const baseId = baseIdIdx > -1 ? String(values[i][baseIdIdx] || '').trim() : '';
+            const label = getSourceNameAndBaseName_(sourceId, baseId);
+            
+            history.push({
+              type: "quiz",
+              description: "ทำแบบทดสอบผ่านเกณฑ์: " + label,
+              points: "+" + gain,
+              value: gain,
+              date: date
+            });
+          }
+        }
+      }
+    }
+    
+    // 2. ดึงประวัติคะแนนจากการส่งบันทึกกิจกรรมเรียนรู้ที่อนุมัติแล้ว
+    const learningSheet = SS.getSheetByName("LearningLogs");
+    if (learningSheet) {
+      const logData = learningSheet.getDataRange().getValues();
+      if (logData.length > 1) {
+        for (let i = 1; i < logData.length; i++) {
+          const logUser = normalizeUsername(logData[i][2]);
+          const status = String(logData[i][6] || "").trim();
+          if (logUser === userStr && status === "Approved") {
+            const score = Number(logData[i][7]) || 0;
+            const activityName = String(logData[i][4] || "บันทึกกิจกรรม").trim();
+            const date = logData[i][9] ? couponValuesDate_(logData[i][9]) : (logData[i][1] ? couponValuesDate_(logData[i][1]) : new Date());
+            
+            history.push({
+              type: "log",
+              description: "ส่งบันทึกเรียนรู้อนุมัติ: " + activityName,
+              points: "+" + score,
+              value: score,
+              date: date
+            });
+          }
+        }
+      }
+    }
+    
+    // 3. ดึงประวัติคะแนนที่จ่ายไปสำหรับการแลกคูปอง OTOP
+    const couponSheet = SS.getSheetByName("Coupons");
+    if (couponSheet) {
+      const couponValues = couponSheet.getDataRange().getValues();
+      if (couponValues.length > 1) {
+        for (let i = 1; i < couponValues.length; i++) {
+          const cUser = normalizeUsername(couponValues[i][1]);
+          const status = String(couponValues[i][8] || "").trim();
+          if (cUser === userStr && status !== "Cancelled") {
+            const cost = Number(couponValues[i][2]) || 0;
+            const pName = String(couponValues[i][5] || "").trim();
+            const date = couponValues[i][7] ? couponValuesDate_(couponValues[i][7]) : new Date();
+            
+            history.push({
+              type: "coupon",
+              description: "ใช้แต้มแลกคูปอง OTOP: " + pName,
+              points: "-" + cost,
+              value: -cost,
+              date: date
+            });
+          }
+        }
+      }
+    }
+
+    // 4. ดึงประวัติการหมุนวงล้อนำโชค OTOP
+    const spinSheet = SS.getSheetByName("LuckySpins");
+    if (spinSheet) {
+      const spinValues = spinSheet.getDataRange().getValues();
+      if (spinValues.length > 1) {
+        for (let i = 1; i < spinValues.length; i++) {
+          const sUser = normalizeUsername(spinValues[i][1]);
+          if (sUser === userStr) {
+            const spent = Number(spinValues[i][2]) || 0;
+            const pType = String(spinValues[i][3] || "").trim().toLowerCase();
+            const pValue = Number(spinValues[i][4]) || 0;
+            const pName = String(spinValues[i][5] || "").trim();
+            const date = spinValues[i][7] ? couponValuesDate_(spinValues[i][7]) : new Date();
+            
+            // เพิ่มรายการแต้มเสียค่าสปิน
+            if (spent > 0) {
+              history.push({
+                type: "spin_spend",
+                description: "หมุนวงล้อนำโชค OTOP 🎡",
+                points: "-" + spent,
+                value: -spent,
+                date: new Date(date.getTime() - 1000) // เพื่อให้ค่าสปินแสดงก่อนรางวัลที่ได้
+              });
+            }
+            
+            // เพิ่มรายการรางวัลหากสุ่มได้แต้ม
+            if (pType === "points" && pValue > 0) {
+              history.push({
+                type: "spin_win",
+                description: "ถูกรางวัลวงล้อ: " + pName,
+                points: "+" + pValue,
+                value: pValue,
+                date: date
+              });
+            } else if (pType === "coupon") {
+              history.push({
+                type: "spin_coupon",
+                description: "ถูกรางวัลวงล้อ: " + pName,
+                points: "+0",
+                value: 0,
+                date: date
+              });
+            } else if (pType === "none") {
+              history.push({
+                type: "spin_none",
+                description: "หมุนวงล้อนำโชค: " + pName,
+                points: "+0",
+                value: 0,
+                date: date
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // เรียงประวัติตามเวลาจากใหม่สุดไปเก่าสุด
+    history.sort((a, b) => b.date.getTime() - a.date.getTime());
+    
+    const formatted = history.map(function(item) {
+      return {
+        type: item.type,
+        description: item.description,
+        points: item.points,
+        dateStr: Utilities.formatDate(item.date, "GMT+7", "dd/MM/yyyy HH:mm")
+      };
+    });
+    
+    return { status: "success", history: formatted };
+  } catch (e) {
+    return { status: "error", message: e.toString(), history: [] };
+  }
+}
+
+function getSourceNameAndBaseName_(sourceId, baseId) {
+  const sId = String(sourceId || "").trim();
+  const bId = String(baseId || "").trim();
+  
+  let sName = "แหล่งเรียนรู้";
+  const sourceValues = getSheetValues("Sources");
+  if (sourceValues && sourceValues.length > 0) {
+    for (let i = 1; i < sourceValues.length; i++) {
+      if (String(sourceValues[i][0]).trim() === sId) {
+        sName = String(sourceValues[i][2] || "แหล่งเรียนรู้").trim();
+        break;
+      }
+    }
+  }
+  
+  if (bId) {
+    const baseValues = getSheetValues("Bases");
+    if (baseValues && baseValues.length > 0) {
+      for (let i = 1; i < baseValues.length; i++) {
+        if (String(baseValues[i][0]).trim() === bId) {
+          const bName = String(baseValues[i][2] || "").trim();
+          if (bName) return sName + " - " + bName;
+        }
+      }
+    }
+  }
+  return sName;
+}
+
+// ================= ฟังก์ชันสนับสนุนระบบวงล้อนำโชค OTOP (OTOP Lucky Spin Wheel Backend) =================
+
+function getUserSpinBalance_(username) {
+  const uName = normalizeUsername(username);
+  if (!uName) return { spent: 0, won: 0 };
+  
+  const spinSheet = SS.getSheetByName("LuckySpins");
+  if (!spinSheet) return { spent: 0, won: 0 };
+  
+  const values = spinSheet.getDataRange().getValues();
+  if (values.length <= 1) return { spent: 0, won: 0 };
+  
+  let spent = 0;
+  let won = 0;
+  for (let i = 1; i < values.length; i++) {
+    if (normalizeUsername(values[i][1]) === uName) {
+      spent += Number(values[i][2]) || 0; // PointsSpent
+      if (String(values[i][3] || '').trim().toLowerCase() === "points") {
+        won += Number(values[i][4]) || 0; // PrizeValue
+      }
+    }
+  }
+  return { spent: spent, won: won };
+}
+
+function spinLuckyWheel(data) {
+  try {
+    const rawUser = pickUserId(data);
+    const username = normalizeUsername(rawUser);
+    if (!username) return { status: "error", message: "ไม่พบข้อมูลชื่อผู้ใช้สำหรับการสปิน" };
+    
+    const cost = 20; // 20 points per spin
+    
+    // 1. ตรวจสอบแต้มสะสมปัจจุบันของผู้ใช้
+    const userSheet = SS.getSheetByName("Users");
+    if (!userSheet) return { status: "error", message: "ไม่พบระบบข้อมูลสมาชิก" };
+    
+    const values = userSheet.getDataRange().getValues();
+    let foundRow = -1;
+    let currentScore = 0;
+    for (let i = 1; i < values.length; i++) {
+      if (normalizeUsername(values[i][0]) === username) {
+        foundRow = i + 1;
+        currentScore = Number(values[i][5]) || 0;
+        break;
+      }
+    }
+    
+    if (foundRow === -1) return { status: "error", message: "ไม่พบข้อมูลสมาชิกในระบบ" };
+    if (currentScore < cost) {
+      return { status: "error", message: "คะแนนสะสมของคุณไม่เพียงพอสำหรับการสปิน (มี " + currentScore + " แต้ม, ต้องการ " + cost + " แต้ม)" };
+    }
+    
+    // 2. คำนวณรางวัลตามสัดส่วนความน่าจะเป็น (Weighted Probability)
+    // Slices:
+    // 0: ลองใหม่นะ (none, 0) - 25%
+    // 1: 5 แต้ม (points, 5) - 25%
+    // 2: 10 แต้ม (points, 10) - 20%
+    // 3: ลองใหม่นะ (none, 0) - 10%
+    // 4: 20 แต้ม (points, 20) - 10%
+    // 5: คูปอง 20 บ. (coupon, 20) - 5%
+    // 6: 50 แต้ม (points, 50) - 4%
+    // 7: คูปอง 50 บ. (coupon, 50) - 1%
+    
+    const roll = Math.random() * 100;
+    let prizeIndex = 0;
+    let prizeLabel = "ลองใหม่นะ 🍀";
+    let prizeType = "none";
+    let prizeValue = 0;
+    
+    if (roll < 25) {
+      prizeIndex = 0;
+      prizeLabel = "ลองใหม่นะ 🍀";
+      prizeType = "none";
+      prizeValue = 0;
+    } else if (roll < 50) {
+      prizeIndex = 1;
+      prizeLabel = "5 แต้ม 🪙";
+      prizeType = "points";
+      prizeValue = 5;
+    } else if (roll < 70) {
+      prizeIndex = 2;
+      prizeLabel = "10 แต้ม 💎";
+      prizeType = "points";
+      prizeValue = 10;
+    } else if (roll < 80) {
+      prizeIndex = 3;
+      prizeLabel = "ลองใหม่นะ 🍀";
+      prizeType = "none";
+      prizeValue = 0;
+    } else if (roll < 90) {
+      prizeIndex = 4;
+      prizeLabel = "20 แต้ม 🌟";
+      prizeType = "points";
+      prizeValue = 20;
+    } else if (roll < 95) {
+      prizeIndex = 5;
+      prizeLabel = "คูปองส่วนลด OTOP 20 บ. 🎟️";
+      prizeType = "coupon";
+      prizeValue = 20;
+    } else if (roll < 99) {
+      prizeIndex = 6;
+      prizeLabel = "50 แต้ม 🔥";
+      prizeType = "points";
+      prizeValue = 50;
+    } else {
+      prizeIndex = 7;
+      prizeLabel = "คูปองส่วนลด OTOP 50 บ. 👑";
+      prizeType = "coupon";
+      prizeValue = 50;
+    }
+    
+    let couponCode = "";
+    let couponProduct = "";
+    
+    // 3. หากได้รับรางวัลเป็นคูปอง OTOP -> ทำการคัดสรรรหัสคูปอง
+    if (prizeType === "coupon") {
+      // ดึงสินค้าชุมชนที่มีอยู่เพื่อนำมาเป็นรางวัล หรือมอบรางวัลเป็นคูปองทั่วไป
+      const productSheet = SS.getSheetByName("Products");
+      let productName = "ผลิตภัณฑ์ภูมิปัญญาชุมชน";
+      let productId = "OTOP-GEN";
+      
+      if (productSheet) {
+        const prodData = productSheet.getDataRange().getValues();
+        if (prodData.length > 1) {
+          const randomIndex = Math.floor(Math.random() * (prodData.length - 1)) + 1;
+          productId = String(prodData[randomIndex][0] || "OTOP-GEN").trim();
+          productName = String(prodData[randomIndex][1] || "ผลิตภัณฑ์ภูมิปัญญาชุมชน").trim();
+        }
+      }
+      
+      couponProduct = productName;
+      
+      // สุ่มรหัสคูปองนำโชค
+      const codeLength = 6;
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      couponCode = "SPIN-";
+      for (let i = 0; i < codeLength; i++) {
+        couponCode += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      // บันทึกลงตาราง Coupons ด้วย PointsUsed = 0 (เพราะแต้มแลกถูกตัดจากการหมุน 20 แต้มไปแล้ว!)
+      const couponSheetHeaders = ["CouponID", "Username", "PointsUsed", "DiscountAmount", "ProductID", "ProductName", "Code", "RedeemedAt", "Status"];
+      const couponSheet = ensureSheetWithHeaders("Coupons", couponSheetHeaders);
+      couponSheet.appendRow([
+        "C-" + Date.now(),
+        username,
+        0, // PointsUsed = 0
+        prizeValue, // DiscountAmount
+        productId,
+        "รางวัลวงล้อ: " + productName,
+        couponCode,
+        new Date(),
+        "Active"
+      ]);
+    }
+    
+    // 4. บันทึกลง LuckySpins sheet
+    const spinSheetHeaders = ["SpinID", "Username", "PointsSpent", "PrizeType", "PrizeValue", "PrizeName", "CouponCode", "SpunAt"];
+    const spinSheet = ensureSheetWithHeaders("LuckySpins", spinSheetHeaders);
+    spinSheet.appendRow([
+      "SPIN-" + Date.now(),
+      username,
+      cost,
+      prizeType,
+      prizeValue,
+      prizeLabel,
+      couponCode,
+      new Date()
+    ]);
+    
+    // 5. ประมวลผลบวกลบคะแนนพร้อมอันดับ ROV ในชีต Users อย่างปลอดภัย
+    const statsResult = updateUserStats(username);
+    const newScore = statsResult.totalScore;
+    
+    // เคลียร์แคชล็อกอินค้าง
+    const cache = CacheService.getScriptCache();
+    cache.remove("auth_" + username);
+    
+    return {
+      status: "success",
+      prizeIndex: prizeIndex,
+      prizeLabel: prizeLabel,
+      prizeType: prizeType,
+      prizeValue: prizeValue,
+      couponCode: couponCode,
+      productName: couponProduct,
+      newScore: newScore,
+      message: "หมุนวงล้อนำโชคสำเร็จ!"
     };
   } catch (e) {
     return { status: "error", message: e.toString() };
