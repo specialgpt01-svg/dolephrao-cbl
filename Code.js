@@ -289,6 +289,9 @@ function doGet(e) {
       case 'getAdminDashboardStats':
         result = getAdminDashboardStats(actor, e.parameter.tambon || "ทั้งหมด");
         break;
+      case 'getActivities':
+        result = getActivities(e.parameter.username || e.parameter.phone, actor);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + action };
     }
@@ -341,6 +344,10 @@ function doPost(e) {
       case 'deleteProduct': result = deleteProduct(data, actor); break;
       case 'redeemCoupon': result = redeemCoupon(data); break;
       case 'spinLuckyWheel': result = spinLuckyWheel(data); break;
+      case 'createActivity': result = createActivity(data, actor); break;
+      case 'deleteActivity': result = deleteActivity(data, actor); break;
+      case 'checkInSource': result = checkInSource(data); break;
+      case 'checkInActivity': result = checkInActivity(data); break;
       default:              result = { status: 'error', message: 'Unknown action: ' + action };
     }
     return jsonResponse(result);
@@ -3583,6 +3590,70 @@ function getUserPointsHistory(username) {
       }
     }
 
+    // 5. ดึงประวัติคะแนนจากการเช็กอินแหล่งเรียนรู้จริง
+    const sourceCheckInSheet = SS.getSheetByName("SourceCheckIns");
+    if (sourceCheckInSheet) {
+      const checkInData = sourceCheckInSheet.getDataRange().getValues();
+      if (checkInData.length > 1) {
+        const sourceSheet = SS.getSheetByName("Sources");
+        const sourceMap = {};
+        if (sourceSheet) {
+          const sValues = sourceSheet.getDataRange().getValues();
+          for (let i = 1; i < sValues.length; i++) {
+            sourceMap[String(sValues[i][0]).trim()] = String(sValues[i][2] || '').trim();
+          }
+        }
+        for (let i = 1; i < checkInData.length; i++) {
+          const cUser = normalizeUsername(checkInData[i][1]);
+          if (cUser === userStr) {
+            const sId = String(checkInData[i][2]).trim();
+            const sName = sourceMap[sId] || "แหล่งเรียนรู้";
+            const score = Number(checkInData[i][3]) || 0;
+            const date = checkInData[i][4] ? couponValuesDate_(checkInData[i][4]) : new Date();
+            history.push({
+              type: "checkin_source",
+              description: "เช็กอินแหล่งเรียนรู้: " + sName,
+              points: "+" + score,
+              value: score,
+              date: date
+            });
+          }
+        }
+      }
+    }
+
+    // 6. ดึงประวัติคะแนนจากการสแกนร่วมกิจกรรม
+    const activityCheckInSheet = SS.getSheetByName("ActivityCheckIns");
+    if (activityCheckInSheet) {
+      const checkInData = activityCheckInSheet.getDataRange().getValues();
+      if (checkInData.length > 1) {
+        const activitySheet = SS.getSheetByName("Activities");
+        const activityMap = {};
+        if (activitySheet) {
+          const actValues = activitySheet.getDataRange().getValues();
+          for (let i = 1; i < actValues.length; i++) {
+            activityMap[String(actValues[i][0]).trim()] = String(actValues[i][1] || '').trim();
+          }
+        }
+        for (let i = 1; i < checkInData.length; i++) {
+          const cUser = normalizeUsername(checkInData[i][1]);
+          if (cUser === userStr) {
+            const actId = String(checkInData[i][2]).trim();
+            const actName = activityMap[actId] || "กิจกรรม";
+            const score = Number(checkInData[i][3]) || 0;
+            const date = checkInData[i][4] ? couponValuesDate_(checkInData[i][4]) : new Date();
+            history.push({
+              type: "checkin_activity",
+              description: "เช็กอินร่วมกิจกรรม: " + actName,
+              points: "+" + score,
+              value: score,
+              date: date
+            });
+          }
+        }
+      }
+    }
+
     // เรียงประวัติตามเวลาจากใหม่สุดไปเก่าสุด
     history.sort((a, b) => b.date.getTime() - a.date.getTime());
     
@@ -3819,6 +3890,446 @@ function spinLuckyWheel(data) {
       productName: couponProduct,
       newScore: newScore,
       message: "หมุนวงล้อนำโชคสำเร็จ!"
+    };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+// ================= ระบบหอเกียรติยศและเหรียญตราความสำเร็จ (OTOP Honorary Badges Shelf Backend) =================
+
+function getUserBadges(username) {
+  try {
+    const userStr = normalizeUsername(username);
+    if (!userStr) return { status: "error", message: "ไม่พบข้อมูลชื่อผู้ใช้" };
+    
+    let quizCount = 0;
+    let logCount = 0;
+    let couponCount = 0;
+    let spinCount = 0;
+    let totalScore = 0;
+    
+    // 1. นับแบบทดสอบที่ผ่าน
+    const logSheet = SS.getSheetByName("Logs");
+    if (logSheet) {
+      const values = logSheet.getDataRange().getValues();
+      if (values.length > 1) {
+        const headers = values[0].map(h => String(h || '').trim().toLowerCase());
+        const phoneIdx = headers.indexOf("phone") > -1 ? headers.indexOf("phone") : 0;
+        const statusIdx = headers.indexOf("status") > -1 ? headers.indexOf("status") : 3;
+        
+        for (let i = 1; i < values.length; i++) {
+          if (normalizeUsername(values[i][phoneIdx]) === userStr && String(values[i][statusIdx] || '').trim().toLowerCase() === "pass") {
+            quizCount++;
+          }
+        }
+      }
+    }
+    
+    // 2. นับบันทึกกิจกรรมที่ผ่านอนุมัติ
+    const learningSheet = SS.getSheetByName("LearningLogs");
+    if (learningSheet) {
+      const values = learningSheet.getDataRange().getValues();
+      if (values.length > 1) {
+        for (let i = 1; i < values.length; i++) {
+          if (normalizeUsername(values[i][2]) === userStr && String(values[i][6] || '').trim() === "Approved") {
+            logCount++;
+          }
+        }
+      }
+    }
+    
+    // 3. นับคูปองส่วนลดที่แลก
+    const couponSheet = SS.getSheetByName("Coupons");
+    if (couponSheet) {
+      const values = couponSheet.getDataRange().getValues();
+      if (values.length > 1) {
+        for (let i = 1; i < values.length; i++) {
+          if (normalizeUsername(values[i][1]) === userStr && String(values[i][8] || '').trim() !== "Cancelled") {
+            couponCount++;
+          }
+        }
+      }
+    }
+    
+    // 4. นับจำนวนครั้งหมุนวงล้อ
+    const spinSheet = SS.getSheetByName("LuckySpins");
+    if (spinSheet) {
+      const values = spinSheet.getDataRange().getValues();
+      if (values.length > 1) {
+        for (let i = 1; i < values.length; i++) {
+          if (normalizeUsername(values[i][1]) === userStr) {
+            spinCount++;
+          }
+        }
+      }
+    }
+    
+    // 5. ดึงแต้มสะสม
+    const userSheet = SS.getSheetByName("Users");
+    if (userSheet) {
+      const values = userSheet.getDataRange().getValues();
+      for (let i = 1; i < values.length; i++) {
+        if (normalizeUsername(values[i][0]) === userStr) {
+          totalScore = Number(values[i][5]) || 0;
+          break;
+        }
+      }
+    }
+    
+    // สร้างลิสต์เหรียญตรา 8 เหรียญ
+    const badges = [
+      {
+        id: "badge_quiz_1",
+        name: "ผู้เริ่มต้นเรียนรู้",
+        icon: "fa-seedling",
+        description: "ทำแบบทดสอบผ่าน 1 ครั้ง",
+        color: "#10b981", // Emerald Green
+        currentValue: quizCount,
+        targetValue: 1,
+        unlocked: quizCount >= 1
+      },
+      {
+        id: "badge_quiz_5",
+        name: "นักล่าความรู้",
+        icon: "fa-book-reader",
+        description: "ทำแบบทดสอบผ่าน 5 ครั้ง",
+        color: "#3b82f6", // Blue
+        currentValue: quizCount,
+        targetValue: 5,
+        unlocked: quizCount >= 5
+      },
+      {
+        id: "badge_quiz_10",
+        name: "ปราชญ์แห่งพร้าว",
+        icon: "fa-graduation-cap",
+        description: "ทำแบบทดสอบผ่าน 10 ครั้ง",
+        color: "#8b5cf6", // Purple
+        currentValue: quizCount,
+        targetValue: 10,
+        unlocked: quizCount >= 10
+      },
+      {
+        id: "badge_log_1",
+        name: "ผู้สร้างสรรค์กิจกรรม",
+        icon: "fa-lightbulb",
+        description: "ส่งบันทึกกิจกรรมอนุมัติ 1 ครั้ง",
+        color: "#f59e0b", // Amber
+        currentValue: logCount,
+        targetValue: 1,
+        unlocked: logCount >= 1
+      },
+      {
+        id: "badge_log_5",
+        name: "นักกิจกรรมดีเด่น",
+        icon: "fa-medal",
+        description: "ส่งบันทึกกิจกรรมอนุมัติ 5 ครั้ง",
+        color: "#d97706", // Bronze
+        currentValue: logCount,
+        targetValue: 5,
+        unlocked: logCount >= 5
+      },
+      {
+        id: "badge_coupon_1",
+        name: "ผู้สนับสนุนชุมชน",
+        icon: "fa-shopping-bag",
+        description: "แลกคูปองส่วนลด OTOP 1 ครั้ง",
+        color: "#ec4899", // Pink
+        currentValue: couponCount,
+        targetValue: 1,
+        unlocked: couponCount >= 1
+      },
+      {
+        id: "badge_spin_5",
+        name: "ยอดนักเสี่ยงโชค",
+        icon: "fa-dharmachakra",
+        description: "หมุนวงล้อนำโชคครบ 5 ครั้ง",
+        color: "#06b6d4", // Cyan
+        currentValue: spinCount,
+        targetValue: 5,
+        unlocked: spinCount >= 5
+      },
+      {
+        id: "badge_conqueror",
+        name: "Glorious Conqueror",
+        icon: "fa-crown",
+        description: "สะสมแต้มสะสมครบ 1,000 แต้ม",
+        color: "#fbbf24", // Gold
+        currentValue: totalScore,
+        targetValue: 1000,
+        unlocked: totalScore >= 1000
+      }
+    ];
+    
+    return { status: "success", badges: badges };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+// ================= ระบบสแกน QR Code เช็กอินแหล่งเรียนรู้จริงและกิจกรรม (OTOP QR Check-in & Activities Backend) =================
+
+function getActivities(username, actor) {
+  try {
+    const userStr = normalizeUsername(username || actor.phone);
+    if (!userStr) return { status: "error", message: "ไม่พบข้อมูลชื่อผู้ใช้" };
+
+    const activitySheet = ensureSheetWithHeaders("Activities", ["ActivityID", "Name", "Details", "Points", "CreatedBy", "CreatedAt"]);
+    const checkInSheet = ensureSheetWithHeaders("ActivityCheckIns", ["CheckInID", "Phone", "ActivityID", "PointsWon", "CreatedAt"]);
+
+    const actValues = activitySheet.getDataRange().getValues();
+    const checkInValues = checkInSheet.getDataRange().getValues();
+
+    // Map checked-in activities for this user
+    const checkedInActs = new Set();
+    for (let i = 1; i < checkInValues.length; i++) {
+      if (normalizeUsername(checkInValues[i][1]) === userStr) {
+        checkedInActs.add(String(checkInValues[i][2]).trim());
+      }
+    }
+
+    const list = [];
+    for (let i = 1; i < actValues.length; i++) {
+      const actId = String(actValues[i][0]).trim();
+      list.push({
+        activityId: actId,
+        name: String(actValues[i][1] || '').trim(),
+        details: String(actValues[i][2] || '').trim(),
+        points: Number(actValues[i][3]) || 0,
+        createdBy: String(actValues[i][4] || '').trim(),
+        createdAt: String(actValues[i][5] || '').trim(),
+        checkedIn: checkedInActs.has(actId)
+      });
+    }
+
+    // Sort by latest created
+    list.reverse();
+
+    return { status: "success", activities: list };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function createActivity(data, actor) {
+  try {
+    if (!isAdmin(actor) && !isTeacher(actor)) {
+      return { status: "error", message: "ไม่มีสิทธิ์ในการสร้างกิจกรรม" };
+    }
+
+    const name = String(data.name || '').trim();
+    const details = String(data.details || '').trim();
+    const points = Number(data.points) || 0;
+
+    if (!name || points <= 0) {
+      return { status: "error", message: "กรุณาระบุชื่อกิจกรรมและคะแนนแต้มสะสมให้ถูกต้อง" };
+    }
+
+    const activitySheet = ensureSheetWithHeaders("Activities", ["ActivityID", "Name", "Details", "Points", "CreatedBy", "CreatedAt"]);
+    const values = activitySheet.getDataRange().getValues();
+
+    // Generate unique ActivityID
+    let maxNo = 0;
+    for (let i = 1; i < values.length; i++) {
+      const raw = String(values[i][0] || '').trim();
+      const m = raw.match(/(\d+)$/);
+      if (m) {
+        const n = Number(m[1]);
+        if (!isNaN(n) && n > maxNo) maxNo = n;
+      }
+    }
+    const actId = "ACT" + ("0000" + (maxNo + 1)).slice(-4);
+
+    activitySheet.appendRow([
+      actId,
+      name,
+      details,
+      points,
+      normalizeUsername(actor.phone),
+      new Date().toISOString()
+    ]);
+
+    return { status: "success", activityId: actId };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function deleteActivity(data, actor) {
+  try {
+    if (!isAdmin(actor) && !isTeacher(actor)) {
+      return { status: "error", message: "ไม่มีสิทธิ์ในการลบกิจกรรม" };
+    }
+
+    const activityId = String(data.activityId || '').trim();
+    if (!activityId) return { status: "error", message: "ไม่พบรหัสกิจกรรมที่ต้องการลบ" };
+
+    const activitySheet = ensureSheetWithHeaders("Activities", ["ActivityID", "Name", "Details", "Points", "CreatedBy", "CreatedAt"]);
+    const values = activitySheet.getDataRange().getValues();
+    
+    let foundRow = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][0]).trim() === activityId) {
+        foundRow = i + 1; // 1-indexed plus header row
+        break;
+      }
+    }
+
+    if (foundRow > -1) {
+      activitySheet.deleteRow(foundRow);
+      return { status: "success", message: "ลบกิจกรรมเรียบร้อยแล้ว" };
+    } else {
+      return { status: "error", message: "ไม่พบกิจกรรมดังกล่าวในระบบ" };
+    }
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function checkInSource(data) {
+  try {
+    const userStr = normalizeUsername(data.phone || data.username);
+    const sourceId = String(data.sourceId || '').trim();
+
+    if (!userStr || !sourceId) {
+      return { status: "error", message: "ข้อมูลทำเช็กอินไม่ครบถ้วน" };
+    }
+
+    // 1. ตรวจสอบว่ามีแหล่งเรียนรู้นี้อยู่จริงในระบบ
+    const sourceSheet = SS.getSheetByName("Sources");
+    if (!sourceSheet) return { status: "error", message: "ระบบแหล่งเรียนรู้ไม่พร้อมใช้งาน" };
+    
+    const sValues = sourceSheet.getDataRange().getValues();
+    let sourceName = "";
+    for (let i = 1; i < sValues.length; i++) {
+      if (String(sValues[i][0]).trim() === sourceId) {
+        sourceName = String(sValues[i][2] || '').trim();
+        break;
+      }
+    }
+    
+    if (!sourceName) {
+      return { status: "error", message: "ไม่พบข้อมูลแหล่งเรียนรู้ดังกล่าวในระบบ" };
+    }
+
+    // 2. ตรวจสอบประวัติว่าสแกนไปแล้วหรือยัง
+    const checkInSheet = ensureSheetWithHeaders("SourceCheckIns", ["CheckInID", "Phone", "SourceID", "PointsWon", "CreatedAt"]);
+    const checkInValues = checkInSheet.getDataRange().getValues();
+
+    for (let i = 1; i < checkInValues.length; i++) {
+      if (normalizeUsername(checkInValues[i][1]) === userStr && String(checkInValues[i][2]).trim() === sourceId) {
+        return { status: "error", message: "คุณเคยทำการเช็กอินแหล่งเรียนรู้นี้ไปแล้ว!" };
+      }
+    }
+
+    // 3. ทำบันทึกการเช็กอินแหล่งเรียนรู้ (+20 แต้มพิเศษ)
+    const pointsWon = 20;
+    const checkInId = "CI_SRC_" + new Date().getTime() + "_" + Math.floor(Math.random() * 1000);
+    checkInSheet.appendRow([
+      checkInId,
+      userStr,
+      sourceId,
+      pointsWon,
+      new Date().toISOString()
+    ]);
+
+    // 4. เขียนบันทึกแต้มลงชีต Logs เป็นประวัติธุรกรรม
+    const logsSheet = SS.getSheetByName("Logs");
+    if (logsSheet) {
+      logsSheet.appendRow([
+        "CI_" + new Date().getTime(),
+        sourceId,
+        userStr,
+        "Pass",
+        "เช็กอินแหล่งเรียนรู้: " + sourceName,
+        pointsWon,
+        new Date().toISOString()
+      ]);
+    }
+
+    // 5. อัปเดตสถิติรวมของนักศึกษาในทันที
+    const statsResult = updateUserStats(userStr);
+
+    return { 
+      status: "success", 
+      message: "เช็กอินสำเร็จ! คุณได้รับแต้มสะสมพิเศษ +20 คะแนน", 
+      sourceName: sourceName,
+      newScore: statsResult.totalScore 
+    };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function checkInActivity(data) {
+  try {
+    const userStr = normalizeUsername(data.phone || data.username);
+    const activityId = String(data.activityId || '').trim();
+
+    if (!userStr || !activityId) {
+      return { status: "error", message: "ข้อมูลสแกนร่วมกิจกรรมไม่ครบถ้วน" };
+    }
+
+    // 1. ค้นหากิจกรรมว่าแอดมินสร้างไว้จริงในระบบ
+    const activitySheet = ensureSheetWithHeaders("Activities", ["ActivityID", "Name", "Details", "Points", "CreatedBy", "CreatedAt"]);
+    const actValues = activitySheet.getDataRange().getValues();
+    
+    let actName = "";
+    let pointsWon = 0;
+    for (let i = 1; i < actValues.length; i++) {
+      if (String(actValues[i][0]).trim() === activityId) {
+        actName = String(actValues[i][1] || '').trim();
+        pointsWon = Number(actValues[i][3]) || 0;
+        break;
+      }
+    }
+
+    if (!actName || pointsWon <= 0) {
+      return { status: "error", message: "ไม่พบกิจกรรมดังกล่าว หรือแต้มคะแนนกิจกรรมไม่ถูกต้อง" };
+    }
+
+    // 2. ตรวจสอบประวัติการสแกนซ้ำ
+    const checkInSheet = ensureSheetWithHeaders("ActivityCheckIns", ["CheckInID", "Phone", "ActivityID", "PointsWon", "CreatedAt"]);
+    const checkInValues = checkInSheet.getDataRange().getValues();
+
+    for (let i = 1; i < checkInValues.length; i++) {
+      if (normalizeUsername(checkInValues[i][1]) === userStr && String(checkInValues[i][2]).trim() === activityId) {
+        return { status: "error", message: "คุณเคยทำรายการเช็กอินเข้าร่วมกิจกรรมนี้ไปแล้ว!" };
+      }
+    }
+
+    // 3. ทำบันทึกการเช็กอิน
+    const checkInId = "CI_ACT_" + new Date().getTime() + "_" + Math.floor(Math.random() * 1000);
+    checkInSheet.appendRow([
+      checkInId,
+      userStr,
+      activityId,
+      pointsWon,
+      new Date().toISOString()
+    ]);
+
+    // 4. เขียนบันทึกแต้มลงชีต Logs
+    const logsSheet = SS.getSheetByName("Logs");
+    if (logsSheet) {
+      logsSheet.appendRow([
+        "CI_" + new Date().getTime(),
+        activityId,
+        userStr,
+        "Pass",
+        "เช็กอินเข้าร่วมกิจกรรม: " + actName,
+        pointsWon,
+        new Date().toISOString()
+      ]);
+    }
+
+    // 5. อัปเดตยอดแต้มรวมในทันที
+    const statsResult = updateUserStats(userStr);
+
+    return {
+      status: "success",
+      message: "เช็กอินกิจกรรมสำเร็จ! คุณได้รับแต้มสะสมพิเศษ +" + pointsWon + " คะแนน",
+      activityName: actName,
+      newScore: statsResult.totalScore
     };
   } catch (e) {
     return { status: "error", message: e.toString() };

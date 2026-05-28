@@ -154,6 +154,9 @@ function withAuthData(data) {
   }
 
   function showPage(pageId) {
+    if (pageId !== 'scan-page') {
+      stopQRScanner();
+    }
     document.querySelectorAll('.page-section').forEach(function(page) { page.style.display = 'none'; });
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
@@ -183,6 +186,7 @@ function withAuthData(data) {
       if(pageId === 'map-page') { setNavActive('nav-map'); loadDistrictMap(); }
       if(pageId === 'leaderboard-page') { setNavActive('nav-leaderboard'); loadLeaderboard(); }
       if(pageId === 'profile-page') { setNavActive('nav-profile'); loadProfileData(); }
+      if(pageId === 'scan-page') { setNavActive('nav-scan'); }
       
       if(pageId === 'log-page') { setNavActive('nav-log'); loadMyLogs(1); }
       if(pageId === 'manage-page') { setNavActive('nav-manage'); }
@@ -3083,6 +3087,7 @@ function renderLeaderboard(data) {
       } else {
         renderHistoryUI(cacheHistory);
       }
+      loadUserBadges();
       return;
     }
     
@@ -3097,6 +3102,7 @@ function renderLeaderboard(data) {
           cacheProfile = res.profile;
           renderProfileUI(res.profile);
           renderHistoryInitial();
+          loadUserBadges();
         } else {
           showCustomAlert("ไม่พบข้อมูลของคุณในระบบ", "error");
         }
@@ -4204,6 +4210,136 @@ function renderLeaderboard(data) {
     }, 2000);
   }
 
+  // ================= ระบบหอเกียรติยศและเหรียญตราความสำเร็จ (Honorary Badges Shelf Frontend) =================
+
+  function loadUserBadges() {
+    const container = document.getElementById('badges-shelf-container');
+    if (!container) return;
+
+    container.innerHTML = '<div class="text-center py-4 text-muted text-sm col-span-4">' +
+                            '<i class="fas fa-circle-notch fa-spin mr-2" style="color:var(--primary)"></i>กำลังโหลดเหรียญเกียรติยศ...' +
+                          '</div>';
+
+    const myPhone = localStorage.getItem("userPhone") || "";
+    if (!myPhone) return;
+
+    apiGet('getUserBadges', { phone: myPhone })
+      .then(function(res) {
+        if (res.status === "success" && Array.isArray(res.badges)) {
+          renderBadgesUI(res.badges);
+        } else {
+          container.innerHTML = '<div class="text-center py-4 text-danger text-sm col-span-4">' +
+                                  '<i class="fas fa-exclamation-triangle mr-2"></i>' + (res.message || 'ไม่สามารถโหลดเหรียญเกียรติยศได้') +
+                                '</div>';
+        }
+      })
+      .catch(function(err) {
+        console.error("Failed to load user badges", err);
+        container.innerHTML = '<div class="text-center py-4 text-danger text-sm col-span-4">' +
+                                '<i class="fas fa-exclamation-triangle mr-2"></i>เกิดข้อผิดพลาดในการเชื่อมต่อ' +
+                              '</div>';
+      });
+  }
+
+  function renderBadgesUI(badges) {
+    const container = document.getElementById('badges-shelf-container');
+    if (!container) return;
+
+    let html = '';
+    badges.forEach(function(badge) {
+      const escapedName = badge.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+      const escapedDesc = badge.description.replace(/'/g, "\\'").replace(/"/g, '\\"');
+      
+      const progressPercent = Math.min((badge.currentValue / badge.targetValue) * 100, 100);
+      const orbClass = badge.unlocked ? 'badge-3d-gold' : 'badge-3d-locked';
+
+      html += `
+        <div class="flex flex-col items-center text-center p-2 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+             style="background: var(--glass); border: 1px solid var(--glass-border);"
+             onclick="viewBadgeDetail('${escapedName}', '${escapedDesc}', ${badge.unlocked}, ${badge.currentValue}, ${badge.targetValue}, '${badge.color}', '${badge.icon}')">
+          
+          <!-- Premium 3D Gold / Locked Orb -->
+          <div class="badge-3d-orb ${orbClass} mb-2">
+            <i class="fas ${badge.icon} badge-3d-icon"></i>
+            ${!badge.unlocked ? `
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-700 rounded-full flex items-center justify-center border border-gray-400 z-10" style="background:#374151; font-size:0.65rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                <i class="fas fa-lock text-white"></i>
+              </div>
+            ` : `
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center border border-yellow-200 z-10" style="background:#fbbf24; font-size:0.65rem; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">
+                <i class="fas fa-check text-amber-950 font-black"></i>
+              </div>
+            `}
+          </div>
+
+          <!-- Badge Name -->
+          <span class="text-theme-inv font-bold mb-1 leading-tight text-center" style="font-size: 0.68rem; height: 26px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+            ${badge.name}
+          </span>
+
+          <!-- Progress / Target -->
+          <div class="w-full mt-1">
+            <div class="flex justify-between items-center text-muted mb-0.5" style="font-size: 0.58rem; font-weight: 600;">
+              <span>${progressPercent >= 100 ? 'เสร็จสิ้น' : badge.unlocked ? 'ปลดล็อก' : 'ก้าวหน้า'}</span>
+              <span>${badge.currentValue}/${badge.targetValue}</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full" style="height: 4.5px; background: rgba(156,163,175,0.25); overflow:hidden;">
+              <div class="h-full rounded-full transition-all duration-500" 
+                   style="width: ${progressPercent}%; background: ${badge.unlocked ? 'linear-gradient(90deg, #facc15, #d97706)' : 'linear-gradient(90deg, #9ca3af, #6b7280)'};">
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function viewBadgeDetail(name, desc, unlocked, current, target, color, icon) {
+    let message = '';
+    if (unlocked) {
+      message = `<div class="text-center py-2">
+        <div class="flex justify-center mb-4">
+          <div class="badge-3d-orb badge-3d-gold w-20 h-20" style="transform: scale(1.15);">
+            <i class="fas ${icon} badge-3d-icon" style="font-size: 2.2rem;"></i>
+          </div>
+        </div>
+        <h4 class="font-black text-xl mb-2 text-theme-inv" style="background: linear-gradient(135deg, #fbbf24, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));">${name}</h4>
+        <p class="text-theme-inv font-semibold text-sm mb-4">🎉 ยินดีด้วย! คุณได้ปลดล็อกเหรียญเกียรติยศนี้เรียบร้อยแล้ว!</p>
+        <div class="p-3 rounded-xl text-left text-xs mb-3" style="background:var(--glass); border:1px solid var(--glass-border); line-height:1.5;">
+          <strong>รายละเอียดภารกิจ:</strong> ${desc}<br>
+          <strong>สถิติการสะสม:</strong> ปลดล็อกแล้ว (${current}/${target})
+        </div>
+      </div>`;
+      showCustomAlert(message, "success");
+    } else {
+      const remaining = target - current;
+      const progressPercent = Math.min((current / target) * 100, 100).toFixed(0);
+      message = `<div class="text-center py-2">
+        <div class="flex justify-center mb-4">
+          <div class="badge-3d-orb badge-3d-locked w-20 h-20" style="transform: scale(1.15);">
+            <i class="fas ${icon} badge-3d-icon" style="font-size: 2rem;"></i>
+          </div>
+        </div>
+        <h4 class="font-black text-xl mb-2 text-theme-inv">${name}</h4>
+        <p class="text-muted text-sm mb-4">🔒 เหรียญรางวัลนี้กำลังรอการพิชิตของคุณ</p>
+        <div class="p-3 rounded-xl text-left text-xs mb-4" style="background:var(--glass); border:1px solid var(--glass-border); line-height:1.5;">
+          <strong>เงื่อนไขการปลดล็อก:</strong> ${desc}<br>
+          <strong>ความคืบหน้าปัจจุบัน:</strong> ${current} / ${target} (${progressPercent}%)<br>
+          <strong>ต้องการสะสมอีก:</strong> <span class="font-bold text-amber-500">${remaining} หน่วย</span> เพื่อพิชิตเหรียญรางวัลนี้!
+        </div>
+        <div class="w-full bg-gray-200 rounded-full mb-2" style="height: 8px; background: rgba(156,163,175,0.2); overflow:hidden;">
+          <div class="h-full rounded-full transition-all duration-500" 
+               style="width: ${progressPercent}%; background: linear-gradient(90deg, #9ca3af, #4b5563);">
+          </div>
+        </div>
+      </div>`;
+      showCustomAlert(message, "info");
+    }
+  }
+
   // ================= ระบบวงล้อนำโชค OTOP (OTOP Lucky Spin Wheel Frontend) =================
 
   let isSpinning = false;
@@ -4562,6 +4698,391 @@ function renderLeaderboard(data) {
   window.loadUserCoupons = loadUserCoupons;
   window.loadUserPointsHistory = loadUserPointsHistory;
   window.copyCouponCode = copyCouponCode;
+
+  // ================= ระบบสแกน QR Code เช็กอินแหล่งเรียนรู้จริงและกิจกรรม (OTOP QR Check-in & Activities Frontend) =================
+
+  let html5QrcodeScanner = null;
+
+  function startQRScanner() {
+    initAudioContext();
+    const readerContainer = document.getElementById('reader-container');
+    const startBtn = document.getElementById('btn-start-scanner');
+    const stopBtn = document.getElementById('btn-stop-scanner');
+    const laser = document.getElementById('scanner-laser');
+
+    if (!readerContainer) return;
+
+    if (html5QrcodeScanner) {
+      stopQRScanner();
+    }
+
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'block';
+    if (laser) laser.style.display = 'block';
+
+    html5QrcodeScanner = new Html5Qrcode("reader");
+
+    const config = { 
+      fps: 10, 
+      qrbox: function(width, height) {
+        const size = Math.min(width, height) * 0.7;
+        return { width: size, height: size };
+      }
+    };
+
+    html5QrcodeScanner.start(
+      { facingMode: "environment" }, 
+      config,
+      onQRScanSuccess,
+      function(errorMessage) {
+        // Quiet mode
+      }
+    ).catch(function(err) {
+      console.warn("Camera start failed, trying fallback check", err);
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length > 0) {
+          html5QrcodeScanner.start(cameras[cameras.length - 1].id, config, onQRScanSuccess, () => {})
+            .catch(e => {
+              showCustomAlert("ไม่สามารถเปิดใช้งานกล้องถ่ายรูปได้ กรุณาใช้รหัสเช็กอินแมนนวลด้านล่างเป็นทางเลือกสำรอง", "warning");
+              stopQRScanner();
+            });
+        } else {
+          showCustomAlert("ไม่พบกล้องถ่ายรูปบนอุปกรณ์ของคุณ กรุณาใช้รหัสเช็กอินแมนนวลด้านล่างเป็นทางเลือกสำรอง", "warning");
+          stopQRScanner();
+        }
+      }).catch(e => {
+        showCustomAlert("ไม่สามารถระบุกล้องถ่ายรูปได้ กรุณาใช้รหัสเช็กอินแมนนวลด้านล่างเป็นทางเลือกสำรอง", "warning");
+        stopQRScanner();
+      });
+    });
+  }
+
+  function stopQRScanner() {
+    const startBtn = document.getElementById('btn-start-scanner');
+    const stopBtn = document.getElementById('btn-stop-scanner');
+    const laser = document.getElementById('scanner-laser');
+
+    if (startBtn) startBtn.style.display = 'block';
+    if (stopBtn) stopBtn.style.display = 'none';
+    if (laser) laser.style.display = 'none';
+
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.stop().then(function() {
+        html5QrcodeScanner = null;
+        const reader = document.getElementById('reader');
+        if (reader) reader.innerHTML = "";
+      }).catch(function(err) {
+        console.error("Scanner stop error", err);
+        html5QrcodeScanner = null;
+      });
+    }
+  }
+
+  function onQRScanSuccess(decodedText, decodedResult) {
+    stopQRScanner();
+    playSynthTick();
+
+    const code = String(decodedText || '').trim();
+    if (!code) return;
+
+    if (code.startsWith("source:")) {
+      const sourceId = code.substring(7).trim();
+      processSourceCheckIn(sourceId);
+    } else if (code.startsWith("activity:")) {
+      const activityId = code.substring(9).trim();
+      processActivityCheckIn(activityId);
+    } else {
+      if (code.startsWith("SRC")) {
+        processSourceCheckIn(code);
+      } else if (code.startsWith("ACT")) {
+        processActivityCheckIn(code);
+      } else {
+        showCustomAlert("คิวอาร์โค้ดนี้ไม่มีรูปแบบที่ใช้ในการเช็กอินระบบ LOFT LEARN ได้", "error");
+      }
+    }
+  }
+
+  function checkInViaCodeInput() {
+    const input = document.getElementById('scan-manual-code');
+    if (!input) return;
+
+    const code = String(input.value || '').trim();
+    if (!code) {
+      showCustomAlert("กรุณากรอกรหัสเช็กอินก่อนยืนยัน", "warning");
+      return;
+    }
+
+    if (code.startsWith("SRC")) {
+      processSourceCheckIn(code);
+    } else if (code.startsWith("ACT")) {
+      processActivityCheckIn(code);
+    } else {
+      showCustomAlert("รหัสเช็กอินไม่ถูกต้อง รหัสของแหล่งเรียนรู้ต้องขึ้นต้นด้วย SRC และกิจกรรมขึ้นต้นด้วย ACT", "warning");
+    }
+  }
+
+  function processSourceCheckIn(sourceId) {
+    showLoading(true);
+    apiPost('checkInSource', withAuthData({ sourceId: sourceId }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === "success") {
+          playSynthFanfare();
+          
+          const message = `<div class="text-center py-2">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3" style="background:#fbbf2422; border:2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.6); animation: goldPulse 2s infinite ease-in-out;">
+              <i class="fas fa-camera text-3xl" style="color:#fbbf24"></i>
+            </div>
+            <h4 class="font-black text-xl mb-2 text-theme-inv">${res.sourceName}</h4>
+            <p class="text-theme-inv font-semibold text-sm mb-4">📸 เช็กอินแหล่งเรียนรู้สำเร็จเรียบร้อย!</p>
+            <div class="p-3 rounded-xl text-left text-xs mb-3" style="background:var(--glass); border:1px solid var(--glass-border); line-height:1.5;">
+              คุณได้เดินทางมาถึงสถานที่จริง และสแกนสถิติเสร็จสิ้น ระบบมอบแต้มสะสมพิเศษเข้าโปรไฟล์คุณทันที
+            </div>
+            <div class="inline-block px-4 py-1.5 rounded-full font-black text-white" style="background: linear-gradient(135deg, #10b981, #059669); font-size:0.85rem; box-shadow: 0 4px 10px rgba(16,185,129,0.3);">
+              ได้รับ +20 แต้มสะสม 🪙
+            </div>
+          </div>`;
+          
+          showCustomAlert(message, "success", "เช็กอินสำเร็จ 🎖️");
+
+          localStorage.setItem("userScore", res.newScore);
+          const scoreEl = document.getElementById('profile-score');
+          if (scoreEl) scoreEl.innerText = res.newScore;
+          
+          cacheProfile = null;
+          cacheHistory = null;
+          
+        } else {
+          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการเช็กอิน", "error");
+        }
+      })
+      .catch(function() {
+        showLoading(false);
+        showCustomAlert("ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์", "error");
+      });
+  }
+
+  function processActivityCheckIn(activityId) {
+    showLoading(true);
+    apiPost('checkInActivity', withAuthData({ activityId: activityId }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === "success") {
+          playSynthFanfare();
+          
+          const message = `<div class="text-center py-2">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3" style="background:#fbbf2422; border:2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.6); animation: goldPulse 2s infinite ease-in-out;">
+              <i class="fas fa-qrcode text-3xl" style="color:#fbbf24"></i>
+            </div>
+            <h4 class="font-black text-xl mb-2 text-theme-inv">${res.activityName}</h4>
+            <p class="text-theme-inv font-semibold text-sm mb-4">🎟️ สแกนเข้าร่วมกิจกรรมสำเร็จเรียบร้อย!</p>
+            <div class="p-3 rounded-xl text-left text-xs mb-3" style="background:var(--glass); border:1px solid var(--glass-border); line-height:1.5;">
+              ยินดีต้อนรับเข้าสู่งานกิจกรรมการเรียนรู้ของ สกร. ทางระบบบันทึกความร่วมมือและมอบคะแนนให้คุณแล้ว
+            </div>
+            <div class="inline-block px-4 py-1.5 rounded-full font-black text-white" style="background: linear-gradient(135deg, #fbbf24, #d97706); font-size:0.85rem; box-shadow: 0 4px 10px rgba(217,119,6,0.3);">
+              เช็กอินกิจกรรมสำเร็จ! 🪙
+            </div>
+          </div>`;
+          
+          showCustomAlert(message, "success", "เช็กอินกิจกรรม 🎖️");
+
+          localStorage.setItem("userScore", res.newScore);
+          const scoreEl = document.getElementById('profile-score');
+          if (scoreEl) scoreEl.innerText = res.newScore;
+          
+          cacheProfile = null;
+          cacheHistory = null;
+
+        } else {
+          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการเช็กอิน", "error");
+        }
+      })
+      .catch(function() {
+        showLoading(false);
+        showCustomAlert("ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์", "error");
+      });
+  }
+
+  // ================= แผงจัดการกิจกรรมของครู/ผู้ดูแลระบบ (Admin Activities Control Logic) =================
+
+  function openAdminActivitiesPanel() {
+    showPage('admin-activities-page');
+    loadAdminActivities();
+  }
+
+  function loadAdminActivities() {
+    const container = document.getElementById('admin-activities-list-container');
+    if (!container) return;
+
+    container.innerHTML = '<div class="text-center py-4 text-muted text-sm">' +
+                            '<i class="fas fa-circle-notch fa-spin mr-2" style="color:var(--primary)"></i>กำลังโหลดกิจกรรม...' +
+                          '</div>';
+
+    apiGet('getActivities', withAuthParams())
+      .then(function(res) {
+        if (res.status === "success" && Array.isArray(res.activities)) {
+          renderAdminActivitiesUI(res.activities);
+        } else {
+          container.innerHTML = '<div class="text-center py-4 text-danger text-sm">' +
+                                  '<i class="fas fa-exclamation-triangle mr-2"></i>' + (res.message || 'ล้มเหลวในการดึงกิจกรรม') +
+                                '</div>';
+        }
+      })
+      .catch(function() {
+        container.innerHTML = '<div class="text-center py-4 text-danger text-sm">' +
+                                '<i class="fas fa-exclamation-triangle mr-2"></i>เกิดข้อผิดพลาดในการเชื่อมต่อ' +
+                              '</div>';
+      });
+  }
+
+  function renderAdminActivitiesUI(activities) {
+    const container = document.getElementById('admin-activities-list-container');
+    if (!container) return;
+
+    if (activities.length === 0) {
+      container.innerHTML = '<div class="text-center py-6 text-muted text-xs">' +
+                              '<i class="fas fa-folder-open text-2xl mb-2 opacity-50 block"></i>' +
+                              'ไม่มีกิจกรรมใด ๆ ในระบบตอนนี้แอดมินสามารถสร้างเพิ่มด้านบนได้ทันที!' +
+                            '</div>';
+      return;
+    }
+
+    let html = '';
+    activities.forEach(function(act) {
+      const escapedName = act.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+      const escapedCode = String(act.activityId).trim();
+      
+      html += `
+        <div class="p-3 rounded-xl flex items-center justify-between transition-all"
+             style="background: var(--glass); border: 1px solid var(--glass-border);">
+          <div class="min-width:0; max-width:65%; text-align:left;">
+            <h5 class="font-bold text-sm text-theme-inv mb-0.5 truncate">${act.name}</h5>
+            <p class="text-xxs text-muted mb-1 truncate" style="margin: 0 0 4px;">${act.details || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+            <div class="flex items-center gap-1.5">
+              <span class="user-badge" style="padding: 2px 6px; font-size: 0.65rem; background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(217,119,6,0.15)); border-color: rgba(251,191,36,0.3); color:#fbbf24;">
+                รหัส: ${act.activityId}
+              </span>
+              <span class="user-badge" style="padding: 2px 6px; font-size: 0.65rem; background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.15)); border-color: rgba(16,185,129,0.3); color:#10b981;">
+                +${act.points} แต้ม 🪙
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex gap-1.5">
+            <button class="btn-primary" style="padding: 6px 8px; font-size: 0.75rem; border-radius: 8px; background: linear-gradient(135deg, var(--primary), var(--primary-dk));"
+                    onclick="showActivityQRModal('${escapedCode}', '${escapedName}', ${act.points})">
+              <i class="fas fa-qrcode"></i> QR
+            </button>
+            <button class="btn-primary" style="padding: 6px 8px; font-size: 0.75rem; border-radius: 8px; background: linear-gradient(135deg, #ef4444, #dc2626);"
+                    onclick="deleteActivity('${escapedCode}')">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function submitCreateActivity() {
+    const nameInput = document.getElementById('act-form-name');
+    const detailsInput = document.getElementById('act-form-details');
+    const pointsInput = document.getElementById('act-form-points');
+
+    if (!nameInput || !detailsInput || !pointsInput) return;
+
+    const name = String(nameInput.value || '').trim();
+    const details = String(detailsInput.value || '').trim();
+    const points = parseInt(pointsInput.value) || 0;
+
+    if (!name || points <= 0) {
+      showCustomAlert("กรุณาระบุชื่อกิจกรรมและคะแนนแต้มสะสมให้ถูกต้อง (คะแนนต้องมากกว่า 0)", "warning");
+      return;
+    }
+
+    showLoading(true);
+    apiPost('createActivity', withAuthData({ name: name, details: details, points: points }))
+      .then(function(res) {
+        showLoading(false);
+        if (res.status === "success") {
+          playSynthFanfare();
+          showCustomAlert("สร้างกิจกรรมเช็กอินและออก QR Code รหัส " + res.activityId + " เรียบร้อยแล้ว!", "success");
+          
+          // Reset
+          nameInput.value = '';
+          detailsInput.value = '';
+          pointsInput.value = '';
+
+          loadAdminActivities();
+        } else {
+          showCustomAlert(res.message || "เกิดข้อผิดพลาดในการสร้างกิจกรรม", "error");
+        }
+      })
+      .catch(function() {
+        showLoading(false);
+        showCustomAlert("ล้มเหลวในการเชื่อมต่อระบบเซิร์ฟเวอร์", "error");
+      });
+  }
+
+  function deleteActivity(activityId) {
+    showCustomConfirm("ต้องการลบกิจกรรมรหัส " + activityId + " หรือไม่? (ประวัติการเช็กอินแต้มสะสมเดิมจะไม่ถูกลบเพื่อความปลอดภัยข้อมูล)", function() {
+      showLoading(true);
+      apiPost('deleteActivity', withAuthData({ activityId: activityId }))
+        .then(function(res) {
+          showLoading(false);
+          if (res.status === "success") {
+            playSynthTick();
+            showCustomAlert("ลบกิจกรรมดังกล่าวเรียบร้อยแล้ว", "success");
+            loadAdminActivities();
+          } else {
+            showCustomAlert(res.message || "เกิดข้อผิดพลาดในการลบกิจกรรม", "error");
+          }
+        })
+        .catch(function() {
+          showLoading(false);
+          showCustomAlert("ล้มเหลวในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+        });
+    });
+  }
+
+  function showActivityQRModal(activityId, name, points) {
+    const modal = document.getElementById('qr-viewer-modal');
+    const title = document.getElementById('qr-viewer-title');
+    const pointsEl = document.getElementById('qr-viewer-points');
+    const img = document.getElementById('qr-viewer-img');
+    const code = document.getElementById('qr-viewer-code');
+
+    if (!modal || !img) return;
+
+    title.innerText = name;
+    pointsEl.innerText = "เช็กอินเพื่อรับ +" + points + " คะแนน 🪙";
+    code.innerText = activityId;
+
+    const qrData = "activity:" + activityId;
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(qrData);
+
+    modal.style.display = 'flex';
+  }
+
+  function closeQRViewerModal() {
+    const modal = document.getElementById('qr-viewer-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  window.loadUserBadges = loadUserBadges;
+  window.viewBadgeDetail = viewBadgeDetail;
+
+  window.startQRScanner = startQRScanner;
+  window.stopQRScanner = stopQRScanner;
+  window.onQRScanSuccess = onQRScanSuccess;
+  window.checkInViaCodeInput = checkInViaCodeInput;
+  window.openAdminActivitiesPanel = openAdminActivitiesPanel;
+  window.loadAdminActivities = loadAdminActivities;
+  window.submitCreateActivity = submitCreateActivity;
+  window.deleteActivity = deleteActivity;
+  window.showActivityQRModal = showActivityQRModal;
+  window.closeQRViewerModal = closeQRViewerModal;
 
   window.onload = function() {
     startLightsAnimation();
