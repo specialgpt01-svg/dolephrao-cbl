@@ -1499,6 +1499,7 @@
     </div>
   </div>
 </div>
+</div> <!-- Close #market-page early to escape its z-index stacking context -->
 
 <!-- ─── Product View Details Modal ─── -->
 <div id="product-detail-modal" class="modal-overlay" style="display:none; z-index:10010;" onclick="closeProductDetailModal()">
@@ -1852,7 +1853,6 @@
   border: 1.5px solid var(--primary-glow);
 }
 </style>
-</div>
 
   <!-- ═══════════════════════════════════════════════════════
        BOTTOM NAV
