@@ -348,6 +348,8 @@ function doPost(e) {
       case 'deleteActivity': result = deleteActivity(data, actor); break;
       case 'checkInSource': result = checkInSource(data); break;
       case 'checkInActivity': result = checkInActivity(data); break;
+      case 'verifyCouponAdmin': result = verifyCouponAdmin(data, actor); break;
+      case 'useCouponAdmin': result = useCouponAdmin(data, actor); break;
       default:              result = { status: 'error', message: 'Unknown action: ' + action };
     }
     return jsonResponse(result);
@@ -1973,7 +1975,31 @@ function updateUserStats(userId) {
     }
   }
   const spinBalance = getUserSpinBalance_(userStr);
-  let totalScore = quizScore + learningScore - getUserSpentPoints_(userStr) - spinBalance.spent + spinBalance.won;
+
+  // 1.1 คำนวณคะแนนจากการเช็กอินแหล่งเรียนรู้จริง
+  let checkInScore = 0;
+  const sourceCheckInSheet = SS.getSheetByName("SourceCheckIns");
+  if (sourceCheckInSheet) {
+    const checkInData = sourceCheckInSheet.getDataRange().getValues();
+    for (let i = 1; i < checkInData.length; i++) {
+      if (normalizeUsername(checkInData[i][1]) === userStr) {
+        checkInScore += Number(checkInData[i][3]) || 0;
+      }
+    }
+  }
+
+  // 1.2 คำนวณคะแนนจากการสแกนร่วมกิจกรรมของแอดมิน
+  const activityCheckInSheet = SS.getSheetByName("ActivityCheckIns");
+  if (activityCheckInSheet) {
+    const checkInData = activityCheckInSheet.getDataRange().getValues();
+    for (let i = 1; i < checkInData.length; i++) {
+      if (normalizeUsername(checkInData[i][1]) === userStr) {
+        checkInScore += Number(checkInData[i][3]) || 0;
+      }
+    }
+  }
+
+  let totalScore = quizScore + learningScore + checkInScore - getUserSpentPoints_(userStr) - spinBalance.spent + spinBalance.won;
   if (totalScore < 0) totalScore = 0;
 
   // 2. อ่านข้อมูล Users และอัปเดตคะแนนใน Array (ยังไม่เขียน Sheet)
@@ -2917,8 +2943,8 @@ function getUserProfileFullData(userId) {
   try {
     const userStr = normalizeUsername(userId);
 
-    // คะแนนและ Rank ถูกอัปเดตอัตโนมัติตอน submitQuiz / reviewLog แล้ว
-    // ไม่จำเป็นต้องเรียก updateUserStats ซ้ำที่นี่ (ลดเวลาโหลดอย่างมาก)
+    // อัปเดตและคำนวณแต้มสะสมล่าสุดรวมถึงกิจกรรมเช็กอินเพื่อความถูกต้องของข้อมูล (Self-healing score sync)
+    updateUserStats(userStr);
 
     // ดึงเฉพาะข้อมูล Profile ของคนนี้คนเดียว
     const userSheet = SS.getSheetByName("Users");
@@ -4331,6 +4357,133 @@ function checkInActivity(data) {
       activityName: actName,
       newScore: statsResult.totalScore
     };
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+// ================= แผงจัดการและตัดสิทธิ์คูปองส่วนลดสำหรับครู/ผู้ดูแลระบบ (Admin Coupon Redemption Backend Actions) =================
+
+function verifyCouponAdmin(data, actor) {
+  if (!isAdmin(actor) && !isTeacher(actor)) {
+    return { status: "error", message: "ไม่มีสิทธิ์ใช้งานการตรวจสอบคูปอง" };
+  }
+
+  try {
+    const code = String(data.couponCode || '').trim();
+    if (!code) return { status: "error", message: "กรุณาระบุรหัสคูปอง" };
+
+    const couponSheet = SS.getSheetByName("Coupons");
+    if (!couponSheet) return { status: "error", message: "ไม่พบข้อมูลคูปองในฐานข้อมูล" };
+
+    const values = couponSheet.getDataRange().getValues();
+    if (values.length <= 1) return { status: "error", message: "ไม่พบคูปองใดๆ ในฐานข้อมูล" };
+
+    let foundCoupon = null;
+    let studentName = "";
+
+    // ค้นหาคูปองจาก Code (Index 6)
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][6]).trim() === code) {
+        const studentPhone = String(values[i][1]).trim();
+        
+        // ค้นหาชื่อจริงของนักศึกษาจากชีต Users เพื่อแสดงผลให้ครูตรวจสอบ
+        const userSheet = SS.getSheetByName("Users");
+        if (userSheet) {
+          const userValues = userSheet.getDataRange().getValues();
+          for (let j = 1; j < userValues.length; j++) {
+            if (normalizeUsername(userValues[j][0]) === normalizeUsername(studentPhone)) {
+              studentName = String(userValues[j][2] || '').trim(); // Index 2 is FullName
+              break;
+            }
+          }
+        }
+
+        foundCoupon = {
+          couponId: String(values[i][0] || ""),
+          username: studentPhone,
+          studentName: studentName || "ไม่พบชื่อผู้เรียน",
+          pointsUsed: Number(values[i][2]) || 0,
+          discountAmount: Number(values[i][3]) || 0,
+          productId: String(values[i][4] || ""),
+          productName: String(values[i][5] || ""),
+          code: String(values[i][6] || ""),
+          redeemedAt: values[i][7] ? Utilities.formatDate(new Date(couponValuesDate_(values[i][7])), "GMT+7", "dd/MM/yyyy HH:mm") : "",
+          status: String(values[i][8] || "Active")
+        };
+        break;
+      }
+    }
+
+    if (!foundCoupon) {
+      return { status: "error", message: "ไม่พบรหัสคูปอง '" + code + "' นี้ในระบบ กรุณาตรวจสอบรหัสอีกครั้ง" };
+    }
+
+    return { status: "success", coupon: foundCoupon };
+
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function useCouponAdmin(data, actor) {
+  if (!isAdmin(actor) && !isTeacher(actor)) {
+    return { status: "error", message: "ไม่มีสิทธิ์ใช้งานการทำรายการคูปอง" };
+  }
+
+  try {
+    const code = String(data.couponCode || '').trim();
+    if (!code) return { status: "error", message: "กรุณาระบุรหัสคูปอง" };
+
+    const couponSheet = SS.getSheetByName("Coupons");
+    if (!couponSheet) return { status: "error", message: "ไม่พบข้อมูลคูปองในฐานข้อมูล" };
+
+    const values = couponSheet.getDataRange().getValues();
+    if (values.length <= 1) return { status: "error", message: "ไม่พบรหัสคูปองนี้ในระบบ" };
+
+    let rowIndex = -1;
+    let currentStatus = "";
+    let studentPhone = "";
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][6]).trim() === code) {
+        rowIndex = i + 1; // 1-based index in sheets
+        currentStatus = String(values[i][8] || "Active").trim();
+        studentPhone = String(values[i][1]).trim();
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      return { status: "error", message: "ไม่พบรหัสคูปองนี้ในระบบ" };
+    }
+
+    if (currentStatus !== "Active") {
+      return { status: "error", message: "คูปองนี้ไม่สามารถใช้ได้ เนื่องจากอยู่ในสถานะ '" + (currentStatus === "Used" ? "ใช้งานแล้ว" : "ยกเลิกแล้ว") + "'" };
+    }
+
+    // อัปเดตสถานะในชีต
+    couponSheet.getRange(rowIndex, 9).setValue("Used"); // Column 9 is Status
+    
+    // บันทึก Log การใช้คูปองในชีต Logs
+    const logsSheet = SS.getSheetByName("Logs");
+    if (logsSheet) {
+      logsSheet.appendRow([
+        "USE_CPN_" + new Date().getTime(),
+        code,
+        studentPhone,
+        "Redeemed",
+        "ตัดยอดคูปองรหัส: " + code + " โดย " + (actor.phone || actor.username),
+        0,
+        new Date().toISOString()
+      ]);
+    }
+
+    // ซิงก์แต้มสะสม
+    updateUserStats(studentPhone);
+
+    return { status: "success", message: "บันทึกการใช้คูปองรหัส '" + code + "' สำเร็จแล้ว!" };
+
   } catch (e) {
     return { status: "error", message: e.toString() };
   }

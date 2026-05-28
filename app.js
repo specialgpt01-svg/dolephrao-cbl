@@ -3242,8 +3242,8 @@ function renderLeaderboard(data) {
 
       document.getElementById('profile-tambon').innerText = me.tambon || "ไม่ระบุ";
       document.getElementById('profile-level').innerHTML = '<span style="color:' + rStyle.color + '; font-weight:bold;"><i class="fas ' + rStyle.icon + '"></i> ' + rStyle.title + '</span>';
-      document.getElementById('profile-score').innerText = me.totalscore || "0";
-      localStorage.setItem("userScore", me.totalscore || "0");
+      document.getElementById('profile-score').innerText = me.score || "0";
+      localStorage.setItem("userScore", me.score || "0");
       
       const imgUrl = me.profileimage || "";
       const imgStatus = String(me.imagestatus || "Approved");
@@ -3515,18 +3515,18 @@ function renderLeaderboard(data) {
       apiGet('getUserProfile', { phone: myPhone })
         .then(function(res) {
           if (res.status === "success" && res.profile) {
-            localStorage.setItem("userScore", res.profile.totalscore || "0");
+            localStorage.setItem("userScore", res.profile.score || "0");
             
             // อัปเดตป้ายแต้มในหน้าผลิตภัณฑ์ถ้าเปิดโมดอลรายละเอียดค้างไว้
             const scoreBadge = document.getElementById('market-user-score-badge');
             if (scoreBadge) {
-              scoreBadge.innerText = 'มี ' + (res.profile.totalscore || "0") + ' แต้ม';
+              scoreBadge.innerText = 'มี ' + (res.profile.score || "0") + ' แต้ม';
             }
             
             // อัปเดตหน้าโปรไฟล์ด้วย
             const profileScoreEl = document.getElementById('profile-score');
             if (profileScoreEl) {
-              profileScoreEl.innerText = res.profile.totalscore || "0";
+              profileScoreEl.innerText = res.profile.score || "0";
             }
           }
         }).catch(function(err) {
@@ -5070,8 +5070,158 @@ function renderLeaderboard(data) {
     if (modal) modal.style.display = 'none';
   }
 
+  // ================= แผงควบคุมการสแกนและตัดสิทธิ์คูปองร้านค้าชุมชนสำหรับครู/ผู้ดูแลระบบ (Admin Coupon Redemption Frontend Logic) =================
+
+  function openAdminCouponsPanel() {
+    showPage('admin-coupons-page');
+    const input = document.getElementById('coupon-search-code');
+    if (input) input.value = '';
+    const container = document.getElementById('coupon-detail-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="text-center py-10 px-4 text-muted text-xs" style="background:var(--glass); border:1px dashed var(--glass-border); border-radius:16px;">
+          <i class="fas fa-qrcode text-3xl mb-2 opacity-50 block" style="color:var(--gold)"></i>
+          กรุณาป้อนรหัสคูปองด้านบนเพื่อตรวจสอบข้อมูลสิทธิ์ส่วนลด
+        </div>
+      `;
+    }
+  }
+
+  function verifyCouponAdmin() {
+    const input = document.getElementById('coupon-search-code');
+    if (!input) return;
+
+    const code = String(input.value || '').trim().toUpperCase();
+    if (!code) {
+      showCustomAlert("กรุณากรอกรหัสคูปองก่อนทำการตรวจสอบ", "warning");
+      return;
+    }
+
+    const container = document.getElementById('coupon-detail-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="text-center py-8 text-muted text-sm">
+        <i class="fas fa-circle-notch fa-spin mr-2" style="color:var(--primary)"></i>กำลังตรวจสอบรหัสคูปอง...
+      </div>
+    `;
+
+    apiPost('verifyCouponAdmin', withAuthData({ couponCode: code }))
+      .then(function(res) {
+        if (res.status === 'success' && res.coupon) {
+          renderCouponDetailAdminUI(res.coupon);
+        } else {
+          container.innerHTML = `
+            <div class="text-center py-8 px-4 text-danger text-sm" style="background:var(--glass); border:1px solid rgba(239,68,68,0.2); border-radius:16px;">
+              <i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>
+              ${res.message || 'ไม่พบข้อมูลรหัสคูปองนี้ในระบบ'}
+            </div>
+          `;
+        }
+      })
+      .catch(function(err) {
+        console.error("Failed to verify coupon", err);
+        container.innerHTML = `
+          <div class="text-center py-8 px-4 text-danger text-sm" style="background:var(--glass); border:1px solid rgba(239,68,68,0.2); border-radius:16px;">
+            <i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>
+            เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์
+          </div>
+        `;
+      });
+  }
+
+  function renderCouponDetailAdminUI(coupon) {
+    const container = document.getElementById('coupon-detail-container');
+    if (!container) return;
+
+    const isActive = coupon.status === 'Active';
+    const statusText = isActive ? '🎟️ คูปองพร้อมใช้งาน (ยังไม่ถูกใช้)' : (coupon.status === 'Used' ? '✔️ คูปองนี้ถูกใช้งานไปแล้ว' : '❌ คูปองนี้ถูกยกเลิกแล้ว');
+    const statusClass = isActive ? 'background: rgba(16,185,129,0.15); color:#10b981; border: 1px solid rgba(16,185,129,0.3);' : 'background: rgba(239,68,68,0.15); color:#ef4444; border: 1px solid rgba(239,68,68,0.3);';
+
+    let html = `
+      <div class="flex flex-col gap-4 mt-2">
+        <!-- Status Badge Banner -->
+        <div class="p-3 rounded-xl text-center text-xs font-bold" style="${statusClass}">
+          ${statusText}
+        </div>
+
+        <!-- Coupon Info Grid -->
+        <div class="p-4 rounded-2xl flex flex-col gap-3" style="background:rgba(0,0,0,0.15); border:1px solid var(--glass-border);">
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">รหัสคูปอง:</span>
+            <strong class="font-mono text-theme-inv tracking-wider" style="font-size:0.85rem;">${coupon.code}</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">ชื่อนักศึกษาผู้ถือสิทธิ์:</span>
+            <strong class="text-theme-inv">${coupon.studentName}</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">เบอร์โทรผู้ใช้:</span>
+            <strong class="text-theme-inv">${coupon.username}</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">สินค้าส่วนลด OTOP:</span>
+            <strong class="text-theme-inv text-right max-w-[60%] truncate">${coupon.productName}</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">มูลค่าส่วนลดสินค้า:</span>
+            <strong class="text-base text-theme-inv" style="color:var(--gold)">฿${coupon.discountAmount}</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+            <span style="color:var(--text-soft)">แต้มที่ใช้แลกซื้อ:</span>
+            <strong class="text-theme-inv">${coupon.pointsUsed} แต้ม 🪙</strong>
+          </div>
+          <div class="flex justify-between items-center text-xs">
+            <span style="color:var(--text-soft)">วันเวลาที่แลกซื้อ:</span>
+            <strong class="text-theme-inv">${coupon.redeemedAt}</strong>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        ${isActive ? `
+          <button class="btn-primary w-100 py-3" style="background:linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 14px rgba(16,185,129,0.3); font-size: 0.85rem;" onclick="useCouponAdminConfirm('${coupon.code}')">
+            <i class="fas fa-ticket-alt mr-1"></i> บันทึกการใช้คูปอง (ตัดสิทธิ์ส่วนลด)
+          </button>
+        ` : `
+          <div class="p-3.5 rounded-xl text-center text-xs text-muted" style="background:var(--glass); border:1px solid var(--glass-border); line-height:1.4;">
+            <i class="fas fa-lock mr-1"></i> คูปองนี้ถูกทำเครื่องหมายว่าใช้งานหรือยกเลิกแล้วในตารางหลังบ้าน จึงไม่สามารถตัดสิทธิ์ซ้ำซ้อนได้อีกเพื่อความปลอดภัยของข้อมูล
+          </div>
+        `}
+      </div>
+    `;
+
+    container.innerHTML = html;
+  }
+
+  function useCouponAdminConfirm(code) {
+    showCustomConfirm("ต้องการยืนยันบันทึกรหัสคูปอง '" + code + "' เป็นสถานะ 'ใช้งานแล้ว' หรือไม่? (ระบบจะลงบันทึกถาวรทันที)", function() {
+      showLoading(true);
+      apiPost('useCouponAdmin', withAuthData({ couponCode: code }))
+        .then(function(res) {
+          showLoading(false);
+          if (res.status === 'success') {
+            playSynthFanfare();
+            showCustomAlert(res.message || "บันทึกตัดสิทธิ์การใช้งานคูปองสำเร็จแล้ว!", "success", "ตัดยอดสำเร็จ 🎟️");
+            // รีเฟรชหน้าจอข้อมูลคูปองเพื่อเปลี่ยนเป็นสีเทาทันที
+            verifyCouponAdmin();
+          } else {
+            showCustomAlert(res.message || "เกิดข้อผิดพลาดในการทำรายการ", "error");
+          }
+        })
+        .catch(function(err) {
+          showLoading(false);
+          console.error("Failed to redeem coupon via admin", err);
+          showCustomAlert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+        });
+    });
+  }
+
   window.loadUserBadges = loadUserBadges;
   window.viewBadgeDetail = viewBadgeDetail;
+
+  window.openAdminCouponsPanel = openAdminCouponsPanel;
+  window.verifyCouponAdmin = verifyCouponAdmin;
+  window.useCouponAdminConfirm = useCouponAdminConfirm;
 
   window.startQRScanner = startQRScanner;
   window.stopQRScanner = stopQRScanner;

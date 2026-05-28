@@ -1601,3 +1601,93 @@ select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(16,185,129
   55% { top: 100%; }
   100% { top: 0%; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   PREMIUM 3D HONORARY BADGES STYLES (LOFT 2026)
+   ═══════════════════════════════════════════════════════ */
+.badge-3d-orb {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.badge-3d-orb::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  width: 80%;
+  height: 35%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.05) 100%);
+  border-radius: 50% 50% 50% 50% / 80% 80% 30% 30%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.badge-3d-orb::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.badge-3d-orb:hover::before {
+  animation: shimmerSheen 1.2s ease-out;
+}
+
+.badge-3d-gold {
+  background: radial-gradient(circle at 35% 35%, #fffbeb, #fbbf24 35%, #d97706 70%, #92400e 95%);
+  border: 2px solid #fef08a;
+  box-shadow: 
+    0 5px 12px rgba(217,119,6,0.4), 
+    inset 0 2px 4px rgba(255,255,255,0.6), 
+    inset 0 -3px 5px rgba(0,0,0,0.4);
+  animation: goldPulse 3s infinite ease-in-out;
+}
+
+.badge-3d-locked {
+  background: radial-gradient(circle at 35% 35%, #f9fafb, #d1d5db 35%, #4b5563 70%, #111827 95%);
+  border: 2px solid #e5e7eb;
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.25), 
+    inset 0 2px 3px rgba(255,255,255,0.3), 
+    inset 0 -3px 4px rgba(0,0,0,0.5);
+  opacity: 0.7;
+}
+
+.badge-3d-icon {
+  font-size: 1.35rem;
+  z-index: 2;
+}
+
+.badge-3d-gold .badge-3d-icon {
+  color: white !important;
+  text-shadow: 0 1.5px 3px rgba(120,53,4,0.85);
+}
+
+.badge-3d-locked .badge-3d-icon {
+  color: #9ca3af !important;
+  text-shadow: 0 1.5px 3px rgba(0,0,0,0.7);
+}
+
+@keyframes shimmerSheen {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
+@keyframes goldPulse {
+  0% { box-shadow: 0 4px 12px rgba(217,119,6,0.35), inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.4); }
+  50% { box-shadow: 0 4px 18px rgba(217,119,6,0.65), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -3px 5px rgba(0,0,0,0.3); }
+  100% { box-shadow: 0 4px 12px rgba(217,119,6,0.35), inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.4); }
+}
