@@ -444,12 +444,74 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════════
+       MANAGE HUB PAGE — For Teachers & Admin
+  ═══════════════════════════════════════════════════════ -->
+  <div id="manage-page" class="page-section" style="display:none;">
+    <div class="header-bar" style="justify-content:center; padding: 10px 15px;">
+      <h3><i class="fas fa-toolbox mr-2" style="color:var(--primary-soft)"></i>ระบบจัดการข้อมูล</h3>
+    </div>
+
+    <div class="px-4 mt-4 pb-4">
+      <div class="grid grid-cols-1 gap-4">
+        
+        <!-- Card 1: ตรวจงานนักศึกษา -->
+        <div class="loft-card" style="margin:0; padding:20px; cursor:pointer; background:linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.05)); border:1.5px solid rgba(139, 92, 246, 0.25); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);" onclick="showPage('approve-page')" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='rgba(139, 92, 246, 0.6)'; this.style.boxShadow='0 12px 24px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(139, 92, 246, 0.25)'; this.style.boxShadow='none';">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-white" style="background:linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow:0 8px 20px rgba(139, 92, 246, 0.3); flex-shrink:0;">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-black text-base text-theme-inv mb-1" style="margin:0 0 4px; font-weight:800; font-family:'Prompt',sans-serif; color:var(--text);">ตรวจงานนักศึกษา</h4>
+              <p class="text-xs text-muted leading-normal" style="margin:0; font-size:0.75rem; color:var(--text-soft);">อนุมัติบันทึกกิจกรรมการเรียนรู้ และพิจารณาข้อเสนอแนะของนักศึกษา</p>
+            </div>
+            <i class="fas fa-chevron-right text-muted opacity-50 flex-shrink-0"></i>
+          </div>
+        </div>
+
+        <!-- Card 2: จัดการสมาชิก -->
+        <div class="loft-card" style="margin:0; padding:20px; cursor:pointer; background:linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05)); border:1.5px solid rgba(16, 185, 129, 0.25); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);" onclick="showPage('user-mgmt-page')" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='rgba(16, 185, 129, 0.6)'; this.style.boxShadow='0 12px 24px rgba(16, 185, 129, 0.2)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(16, 185, 129, 0.25)'; this.style.boxShadow='none';">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-white" style="background:linear-gradient(135deg, #10b981, #059669); box-shadow:0 8px 20px rgba(16, 185, 129, 0.3); flex-shrink:0;">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-black text-base text-theme-inv mb-1" style="margin:0 0 4px; font-weight:800; font-family:'Prompt',sans-serif; color:var(--text);">จัดการสมาชิก</h4>
+              <p class="text-xs text-muted leading-normal" style="margin:0; font-size:0.75rem; color:var(--text-soft);">อนุมัติรูปโปรไฟล์ ค้นหา/คัดกรอง และแก้ไขข้อมูลสมาชิกในพื้นที่</p>
+            </div>
+            <i class="fas fa-chevron-right text-muted opacity-50 flex-shrink-0"></i>
+          </div>
+        </div>
+
+        <!-- Card 3: ระบบหลังบ้าน -->
+        <div class="loft-card" style="margin:0; padding:20px; cursor:pointer; background:linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(217, 119, 6, 0.05)); border:1.5px solid rgba(251, 191, 36, 0.25); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);" onclick="showPage('admin-page')" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='rgba(251, 191, 36, 0.6)'; this.style.boxShadow='0 12px 24px rgba(251, 191, 36, 0.2)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(251, 191, 36, 0.25)'; this.style.boxShadow='none';">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-black" style="background:linear-gradient(135deg, #fbbf24, #d97706); box-shadow:0 8px 20px rgba(251, 191, 36, 0.3); flex-shrink:0;">
+              <i class="fas fa-tools"></i>
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-black text-base text-theme-inv mb-1" style="margin:0 0 4px; font-weight:800; font-family:'Prompt',sans-serif; color:var(--text);">ระบบหลังบ้าน</h4>
+              <p class="text-xs text-muted leading-normal" style="margin:0; font-size:0.75rem; color:var(--text-soft);">จัดการแหล่งเรียนรู้ ฐานการเรียนรู้ แบบทดสอบ OTOP และกิจกรรม สกร.</p>
+            </div>
+            <i class="fas fa-chevron-right text-muted opacity-50 flex-shrink-0"></i>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
        APPROVE PAGE
   ═══════════════════════════════════════════════════════ -->
   <div id="approve-page" class="page-section" style="display:none;">
-    <div class="header-bar">
-      <h3><i class="fas fa-clipboard-check mr-2" style="color:var(--primary-soft)"></i>ตรวจงานนักศึกษา</h3>
-      <span class="user-badge" id="teacher-tambon-badge">ตำบล…</span>
+    <div class="header-bar" style="justify-content:space-between; padding: 10px 15px;">
+      <h3 style="font-size: 1rem;"><i class="fas fa-clipboard-check mr-2" style="color:var(--primary-soft)"></i>ตรวจงานนักศึกษา</h3>
+      <div class="flex items-center gap-2">
+        <span class="user-badge" id="teacher-tambon-badge" style="font-size: 0.7rem; padding: 3px 8px;">ตำบล…</span>
+        <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:var(--r-pill); background:var(--glass); border:1px solid var(--card-border); color:var(--text); box-shadow:none;" onclick="showPage('manage-page')">
+          <i class="fas fa-arrow-left mr-1"></i> ย้อนกลับ
+        </button>
+      </div>
     </div>
     
     <!-- Approve Tabs -->
@@ -514,9 +576,14 @@
        USER MANAGEMENT PAGE — For Teachers & Admin
   ═══════════════════════════════════════════════════════ -->
   <div id="user-mgmt-page" class="page-section" style="display:none;">
-    <div class="header-bar">
-      <h3><i class="fas fa-users-cog mr-2" style="color:var(--primary-soft)"></i>จัดการสมาชิก</h3>
-      <span class="user-badge" id="user-mgmt-tambon-badge">ตำบล…</span>
+    <div class="header-bar" style="justify-content:space-between; padding: 10px 15px;">
+      <h3 style="font-size: 1rem;"><i class="fas fa-users-cog mr-2" style="color:var(--primary-soft)"></i>จัดการสมาชิก</h3>
+      <div class="flex items-center gap-2">
+        <span class="user-badge" id="user-mgmt-tambon-badge" style="font-size: 0.7rem; padding: 3px 8px;">ตำบล…</span>
+        <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:var(--r-pill); background:var(--glass); border:1px solid var(--card-border); color:var(--text); box-shadow:none;" onclick="showPage('manage-page')">
+          <i class="fas fa-arrow-left mr-1"></i> ย้อนกลับ
+        </button>
+      </div>
     </div>
 
     <div class="px-4 mt-4 pb-4">
@@ -650,9 +717,14 @@
        ADMIN PAGE
   ═══════════════════════════════════════════════════════ -->
   <div id="admin-page" class="page-section" style="display:none;">
-    <div class="header-bar">
-      <h3><i class="fas fa-tools mr-2" style="color:var(--primary-soft)"></i>หน้าหลังบ้าน</h3>
-      <span class="user-badge">Admin</span>
+    <div class="header-bar" style="justify-content:space-between; padding: 10px 15px;">
+      <h3 style="font-size: 1rem;"><i class="fas fa-tools mr-2" style="color:var(--primary-soft)"></i>หน้าหลังบ้าน</h3>
+      <div class="flex items-center gap-2">
+        <span class="user-badge" style="font-size: 0.7rem; padding: 3px 8px;">Admin</span>
+        <button class="btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:var(--r-pill); background:var(--glass); border:1px solid var(--card-border); color:var(--text); box-shadow:none;" onclick="showPage('manage-page')">
+          <i class="fas fa-arrow-left mr-1"></i> ย้อนกลับ
+        </button>
+      </div>
     </div>
 
     <!-- Admin Tabs Navigation -->
@@ -1798,17 +1870,11 @@
     <div class="nav-item" id="nav-log" onclick="showPage('log-page')" style="display:none;">
       <i class="fas fa-book-open"></i><span>บันทึก</span>
     </div>
-    <div class="nav-item" id="nav-approve" onclick="showPage('approve-page')" style="display:none;">
-      <i class="fas fa-clipboard-check"></i><span>ตรวจงาน</span>
-    </div>
-    <div class="nav-item" id="nav-user-mgmt" onclick="showPage('user-mgmt-page')" style="display:none;">
-      <i class="fas fa-users-cog"></i><span>สมาชิก</span>
+    <div class="nav-item" id="nav-manage" onclick="showPage('manage-page')" style="display:none;">
+      <i class="fas fa-toolbox"></i><span>จัดการ</span>
     </div>
     <div class="nav-item" id="nav-dashboard" onclick="showPage('dashboard-page')" style="display:none;">
       <i class="fas fa-chart-line"></i><span>ภาพรวม</span>
-    </div>
-    <div class="nav-item" id="nav-admin" onclick="showPage('admin-page')" style="display:none;">
-      <i class="fas fa-tools"></i><span>หลังบ้าน</span>
     </div>
     <div class="nav-item" id="nav-leaderboard" onclick="showPage('leaderboard-page')">
       <i class="fas fa-trophy"></i><span>อันดับ</span>

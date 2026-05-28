@@ -141,11 +141,16 @@ function withAuthData(data) {
 
   function updateNavByRole() {
     const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
-    document.getElementById('nav-log').style.display = (role === "user") ? "flex" : "none";
-    document.getElementById('nav-approve').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
-    document.getElementById('nav-user-mgmt').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
-    document.getElementById('nav-dashboard').style.display = (role === "teacher" || role === "admin") ? "flex" : "none";
-    document.getElementById('nav-admin').style.display = (role === "admin" || role === "teacher") ? "flex" : "none";
+    
+    const logNav = document.getElementById('nav-log');
+    if (logNav) logNav.style.display = (role === "user") ? "flex" : "none";
+    
+    const isStaff = (role === "teacher" || role === "admin");
+    const manageNav = document.getElementById('nav-manage');
+    if (manageNav) manageNav.style.display = isStaff ? "flex" : "none";
+    
+    const dashNav = document.getElementById('nav-dashboard');
+    if (dashNav) dashNav.style.display = isStaff ? "flex" : "none";
   }
 
   function showPage(pageId) {
@@ -169,28 +174,30 @@ function withAuthData(data) {
       const navItems = document.querySelectorAll('.bottom-nav .nav-item');
       navItems.forEach(function(item) { item.classList.remove('active'); });
       
-      if(pageId === 'home-page' || pageId === 'detail-page') { document.getElementById('nav-home').classList.add('active'); if(pageId === 'home-page') loadHomePageData(); }
-      if(pageId === 'map-page') { document.getElementById('nav-map').classList.add('active'); loadDistrictMap(); }
-      if(pageId === 'leaderboard-page') { document.getElementById('nav-leaderboard').classList.add('active'); loadLeaderboard(); }
-      if(pageId === 'profile-page') { document.getElementById('nav-profile').classList.add('active'); loadProfileData(); }
+      const setNavActive = (id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+      };
+
+      if(pageId === 'home-page' || pageId === 'detail-page') { setNavActive('nav-home'); if(pageId === 'home-page') loadHomePageData(); }
+      if(pageId === 'map-page') { setNavActive('nav-map'); loadDistrictMap(); }
+      if(pageId === 'leaderboard-page') { setNavActive('nav-leaderboard'); loadLeaderboard(); }
+      if(pageId === 'profile-page') { setNavActive('nav-profile'); loadProfileData(); }
       
-      if(pageId === 'log-page') { document.getElementById('nav-log').classList.add('active'); loadMyLogs(1); }
-      if(pageId === 'approve-page') { document.getElementById('nav-approve').classList.add('active'); loadPendingLogs(); }
-      if(pageId === 'user-mgmt-page') { document.getElementById('nav-user-mgmt').classList.add('active'); loadUserMgmt(); }
-      if(pageId === 'dashboard-page') { document.getElementById('nav-dashboard').classList.add('active'); loadDashboard(); }
+      if(pageId === 'log-page') { setNavActive('nav-log'); loadMyLogs(1); }
+      if(pageId === 'manage-page') { setNavActive('nav-manage'); }
+      if(pageId === 'approve-page') { setNavActive('nav-manage'); loadPendingLogs(); }
+      if(pageId === 'user-mgmt-page') { setNavActive('nav-manage'); loadUserMgmt(); }
+      if(pageId === 'dashboard-page') { setNavActive('nav-dashboard'); loadDashboard(); }
       if(pageId === 'proposal-page') { loadUserProposals(); }
-      if(pageId === 'market-page') { 
-        const navEl = document.getElementById('nav-market');
-        if (navEl) navEl.classList.add('active'); 
-        loadMarketData(); 
-      }
+      if(pageId === 'market-page') { setNavActive('nav-market'); loadMarketData(); }
       if(pageId === 'admin-page') {
         const role = String(localStorage.getItem("userRole") || "user").trim().toLowerCase();
         if (role !== "admin" && role !== "teacher") {
           showCustomAlert("หน้านี้สำหรับผู้ดูแลระบบ/ครูประจำตำบลเท่านั้น", "warning");
           return showPage('home-page');
         }
-        document.getElementById('nav-admin').classList.add('active');
+        setNavActive('nav-manage');
         
         // Reset to first tab when entering admin page
         switchAdminTab('stats');
