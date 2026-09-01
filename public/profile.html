@@ -745,38 +745,50 @@
         `;
       }
 
-      // Optimistically show user profile if cached in localStorage
-      try {
-        const cachedUser = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('nfe_user') || 'null');
-        if (cachedUser) {
-          userProfileData = cachedUser;
-          document.getElementById('guest-login-section').style.display = 'none';
-          document.getElementById('user-profile-section').style.display = 'block';
-          renderProfileHeader();
-        }
-      } catch (e) {}
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUser = urlParams.get('user') || urlParams.get('username') || urlParams.get('phone') || urlParams.get('targetUserId') || urlParams.get('studentId') || '';
 
-      apiGet('getProfile', withAuthParams({}))
+      // Optimistically show user profile if cached in localStorage (only if viewing own profile)
+      if (!targetUser) {
+        try {
+          const cachedUser = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('nfe_user') || 'null');
+          if (cachedUser) {
+            userProfileData = cachedUser;
+            document.getElementById('guest-login-section').style.display = 'none';
+            document.getElementById('user-profile-section').style.display = 'block';
+            renderProfileHeader();
+          }
+        } catch (e) {}
+      }
+
+      const queryParams = targetUser ? { targetUserId: targetUser, targetUsername: targetUser, targetPhone: targetUser, user: targetUser, username: targetUser, phone: targetUser } : {};
+
+      apiGet('getProfile', withAuthParams(queryParams))
         .then(res => {
           if (res && (res.status === 'success' || res.user || res.profile)) {
             userProfileData = res.user || res.profile || res;
-            try {
-              localStorage.setItem('userData', JSON.stringify(userProfileData));
-              localStorage.setItem('nfe_user', JSON.stringify(userProfileData));
-              const uName = userProfileData.fullName || userProfileData.full_name || userProfileData.name || '';
-              if (uName) localStorage.setItem('userName', uName);
-            } catch(e) {}
+            if (!targetUser) {
+              try {
+                localStorage.setItem('userData', JSON.stringify(userProfileData));
+                localStorage.setItem('nfe_user', JSON.stringify(userProfileData));
+                const uName = userProfileData.fullName || userProfileData.full_name || userProfileData.name || '';
+                if (uName) localStorage.setItem('userName', uName);
+              } catch(e) {}
+            }
 
             document.getElementById('guest-login-section').style.display = 'none';
             document.getElementById('user-profile-section').style.display = 'block';
             renderProfileHeader();
-            if (typeof loadUserCertificates === 'function') loadUserCertificates();
-            if (typeof loadUserHours === 'function') loadUserHours();
-            const urlParams = new URLSearchParams(window.location.search);
+            if (typeof loadUserCertificates === 'function') loadUserCertificates(targetUser);
+            if (typeof loadUserHours === 'function') loadUserHours(targetUser);
             const initialTab = urlParams.get('tab');
             if (initialTab) switchProfileTab(initialTab);
           } else {
-            showGuestLogin();
+            if (!targetUser) {
+              showGuestLogin();
+            } else {
+              showToast((res && res.message) || 'ไม่พบข้อมูลผู้เรียนที่ระบุ', 'error');
+            }
           }
         })
         .catch(err => {

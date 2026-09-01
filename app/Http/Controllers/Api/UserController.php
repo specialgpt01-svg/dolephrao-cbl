@@ -29,22 +29,46 @@ class UserController extends Controller
     public function getProfile(Request $request): JsonResponse
     {
         $actor = AuthService::buildActorFromRequest($request);
+        $targetUser = trim(
+            $request->input('targetUserId') ?? $request->input('targetUsername') ??
+            $request->input('targetPhone') ?? $request->input('user') ??
+            $request->input('username') ?? $request->input('phone') ?? ''
+        );
+
         $username = $actor['username'] ?? '';
-        if (!$username) {
+        if (!$username && !$targetUser) {
             return response()->json(['status' => 'error', 'message' => 'กรุณาเข้าสู่ระบบ'], 401);
         }
 
-        $user = User::where('username', $username)->first();
+        $searchKey = $targetUser ?: $username;
+        $normSearch = AuthService::normalizeUsername($searchKey);
+
+        $user = User::where('username', $normSearch)
+            ->orWhere('phone', $normSearch)
+            ->orWhere('username', $searchKey)
+            ->orWhere('phone', $searchKey)
+            ->when(is_numeric($searchKey), fn($q) => $q->orWhere('id', (int)$searchKey))
+            ->first();
+
+        if (!$user && $username) {
+            $user = User::where('username', $username)->orWhere('phone', $username)->first();
+        }
+
         if (!$user) {
-            return response()->json(null);
+            return response()->json(['status' => 'error', 'message' => 'ไม่พบข้อมูลผู้เรียน'], 404);
         }
 
         $profileData = $user->toProfileArray();
-        $profileData['nfeHours'] = (float) NfeHour::where('username', $user->username)
+        $userIdentifiers = array_values(array_filter(array_unique([
+            $user->username,
+            $user->phone,
+            (string)$user->id
+        ])));
+        $profileData['nfeHours'] = (float) NfeHour::whereIn('username', $userIdentifiers)
             ->where('status', 'Active')
             ->sum('hours');
 
-        CacheService::forgetUserProfile($username);
+        CacheService::forgetUserProfile($user->username);
 
         return response()->json(['status' => 'success', 'profile' => $profileData, 'user' => $profileData]);
     }
@@ -109,43 +133,33 @@ class UserController extends Controller
         }
 
         if ($actor['role'] === 'teacher') {
-            $rawTambon = $actor['tambon'];
-            $clean = AuthService::normalizeTambon($rawTambon);
-            $query->where(function($q) use ($rawTambon, $clean) {
-                if ($rawTambon) {
-                    $q->where('tambon', $rawTambon);
-                }
-                if ($clean !== '' && $clean !== 'all') {
-                    $q->orWhere('tambon', 'LIKE', '%' . $clean . '%');
-                }
-            });
-        } else {
-            $inputTambon = trim((string) ($request->input('tambon') ?? ''));
-            $clean = AuthService::normalizeTambon($inputTambon);
-            if ($inputTambon && !in_array($inputTambon, ['all', 'ทั้งหมด'], true) && $clean !== 'all' && $clean !== '') {
-                $query->where(function($q) use ($inputTambon, $clean) {
-                    $q->where('tambon', $inputTambon)
-                      ->orWhere('tambon', 'LIKE', '%' . $clean . '%');
-                });
+            $teacherTambon = AuthService::normalizeTambon($actor['tambon'] ?? '');
+            if ($teacherTambon) {
+                $query->where('tambon', $teacherTambon);
             }
         }
 
-        $users = $query->orderByDesc('score')->get()->map(fn($u) => [
-            'username'     => $u->username,
-            'phone'        => $u->phone,
-            'fullName'     => $u->full_name,
-            'profileImage' => $u->profile_image,
-            'level'        => $u->level,
-            'score'        => (int) $u->score,
-            'role'         => $u->role,
-            'tambon'       => $u->tambon,
-            'userCategory' => $u->user_category ?? 'ประชาชนทั่วไป',
-            'ageGroup'     => $u->age_group ?? '',
-            'occupation'   => $u->occupation ?? '',
-            'imageStatus'  => $u->image_status,
-        ]);
+        $data = $query->orderByDesc('score')
+            ->get()
+            ->map(fn($u) => [
+                'id'            => $u->id,
+                'username'      => $u->username,
+                'phone'         => $u->phone,
+                'fullName'      => $u->full_name,
+                'role'          => $u->role,
+                'tambon'        => $u->tambon,
+                'institutionId' => $u->institution_id,
+                'score'         => (int) $u->score,
+                'level'         => $u->level,
+                'profileImage'  => $u->profile_image,
+                'imageStatus'   => $u->image_status,
+                'userCategory'  => $u->user_category ?? 'ประชาชนทั่วไป',
+                'ageGroup'      => $u->age_group ?? '',
+                'occupation'    => $u->occupation ?? '',
+                'createdAt'     => $u->created_at ? $u->created_at->format('d/m/Y') : null,
+            ]);
 
-        return response()->json($users);
+        return response()->json($data);
     }
 
     /**
@@ -153,28 +167,54 @@ class UserController extends Controller
      */
     public function getEPortfolio(Request $request): JsonResponse
     {
-        $targetUsername = AuthService::normalizeUsername(
+        $rawTarget = trim(
             $request->input('targetUsername') ?? $request->input('targetPhone') ??
+            $request->input('targetUserId') ?? $request->input('targetId') ??
+            $request->input('studentId') ?? $request->input('user') ??
             $request->input('username') ?? $request->input('phone') ?? ''
         );
+        $targetUsername = AuthService::normalizeUsername($rawTarget);
         $actor = AuthService::buildActorFromRequest($request);
 
-        if (!$targetUsername) {
-            return response()->json(['status' => 'error', 'message' => 'ไม่พบผู้เรียน']);
+        if (!$targetUsername && !$rawTarget) {
+            if ($actor && !empty($actor['username'])) {
+                $targetUsername = $actor['username'];
+                $rawTarget = $actor['username'];
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'ไม่พบข้อมูลผู้เรียน']);
+            }
         }
 
-        $user = User::where('username', $targetUsername)->first();
+        $user = User::where('username', $targetUsername)
+            ->orWhere('phone', $targetUsername)
+            ->orWhere('username', $rawTarget)
+            ->orWhere('phone', $rawTarget)
+            ->when(is_numeric($rawTarget), fn($q) => $q->orWhere('id', (int)$rawTarget))
+            ->first();
+
+        if (!$user && $actor && !empty($actor['username'])) {
+            $user = User::where('username', $actor['username'])->orWhere('phone', $actor['username'])->first();
+        }
+
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'ไม่พบข้อมูลผู้เรียน']);
         }
 
+        $userIdentifiers = array_values(array_filter(array_unique([
+            $user->username,
+            $user->phone,
+            $targetUsername,
+            $rawTarget,
+            (string)$user->id
+        ])));
+
         $actorId   = $actor ? $actor['username'] : null;
         $actorRole = $actor ? $actor['role'] : '';
-        $isOwner   = $actorId && $actorId === $targetUsername;
+        $isOwner   = $actorId && ($actorId === $user->username || $actorId === $user->phone);
         $canView   = in_array($actorRole, ['admin', 'teacher']) || $isOwner || true;
 
         // 1. Quizzes (Both Pass and Fail or attempts)
-        $quizLogs = QuizLog::where('username', $targetUsername)
+        $quizLogs = QuizLog::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->get();
 
@@ -187,7 +227,7 @@ class UserController extends Controller
         $bases = Base::whereIn('id', $baseIds)->get()->keyBy('id');
 
         // Also fetch Certificates to link with quiz logs
-        $userCerts = Certificate::where('username', $targetUsername)
+        $userCerts = Certificate::whereIn('username', $userIdentifiers)
             ->where('status', '!=', 'Revoked')
             ->get();
 
@@ -262,13 +302,13 @@ class UserController extends Controller
         })->toArray();
 
         // 2. Check-in Logs (Sources and Activities)
-        $sourceCheckIns = SourceCheckIn::where('username', $targetUsername)
+        $sourceCheckIns = SourceCheckIn::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->get();
         $sCheckInSourceIds = $sourceCheckIns->pluck('source_id')->unique()->filter()->values();
         $sNames = Source::whereIn('id', $sCheckInSourceIds)->pluck('name', 'id');
 
-        $activityCheckIns = ActivityCheckIn::where('username', $targetUsername)
+        $activityCheckIns = ActivityCheckIn::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->get();
 
@@ -297,7 +337,7 @@ class UserController extends Controller
         });
 
         // 3. Learning Logs (Approved portfolio items)
-        $logs = LearningLog::where('username', $targetUsername)
+        $logs = LearningLog::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->get()
             ->map(fn($l) => [
@@ -311,7 +351,7 @@ class UserController extends Controller
             ])->toArray();
 
         // 4. Upskill Videos Logs
-        $upskills = UpskillLearningLog::where('username', $targetUsername)
+        $upskills = UpskillLearningLog::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->get()
             ->map(fn($u) => [

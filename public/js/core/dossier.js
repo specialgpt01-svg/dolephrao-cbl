@@ -220,14 +220,16 @@
   }
 
   function openStudentLearningDossier(targetIdentifier) {
-    const userTarget = targetIdentifier || localStorage.getItem('userPhone') || localStorage.getItem('userName') || '';
+    let userTarget = targetIdentifier;
+    if (!userTarget && typeof userProfileData !== 'undefined' && userProfileData) {
+      userTarget = userProfileData.phone || userProfileData.username || userProfileData.id || '';
+    }
     if (!userTarget) {
-      if (typeof showToast === 'function') {
-        showToast('กรุณาระบุรหัสผู้เรียนหรือเข้าสู่ระบบ', 'warning');
-      } else {
-        alert('กรุณาระบุรหัสผู้เรียน');
-      }
-      return;
+      const urlParams = new URLSearchParams(window.location.search);
+      userTarget = urlParams.get('user') || urlParams.get('username') || urlParams.get('phone') || urlParams.get('targetUserId') || urlParams.get('studentId') || '';
+    }
+    if (!userTarget) {
+      userTarget = localStorage.getItem('userPhone') || localStorage.getItem('userName') || '';
     }
 
     injectDossierModal();
@@ -236,13 +238,21 @@
 
     // Reset fields to loading state
     document.getElementById('dossier-fullname').innerText = 'กำลังโหลดข้อมูลผู้เรียน...';
-    document.getElementById('dossier-phone').innerText = userTarget;
+    document.getElementById('dossier-phone').innerText = userTarget || 'กำลังดึงข้อมูล...';
     document.getElementById('dossier-quizzes-table-body').innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl text-amber-500 mb-2"></i><p>กำลังดึงประวัติการเรียนรู้...</p></td></tr>';
 
     if (typeof apiGet === 'function') {
-      apiGet('getEPortfolio', withAuthParams({ targetPhone: userTarget, targetUsername: userTarget }))
+      const p = {
+        targetPhone: userTarget,
+        targetUsername: userTarget,
+        targetUserId: userTarget,
+        user: userTarget,
+        username: userTarget,
+        phone: userTarget
+      };
+      apiGet('getEPortfolio', withAuthParams(p))
         .then(res => {
-          if (res && res.status === 'success' && res.profile) {
+          if (res && res.status === 'success' && (res.profile || res.user)) {
             currentDossierData = res;
             renderDossierContent(res);
           } else {
