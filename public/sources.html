@@ -1801,6 +1801,7 @@
         const coverImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : rawCover;
         const coverPos = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
         const parsedPos = typeof parseCoverPos === 'function' ? parseCoverPos(coverPos) : { x: 50, y: 50, zoom: 100 };
+        const tambon = s.TambonName || s.tambon || s.info?.tambon || s.info?.tambon_name || 'ไม่ระบุ';
         const basesCount = Array.isArray(s.bases) ? s.bases.length : (s.baseCount || 0);
         const evalData = s.evaluation || s.info?.evaluation || null;
         const isStandardPassed = evalData && (evalData.totalScore >= 21 || evalData.total_score >= 21);
@@ -1819,7 +1820,7 @@
               <!-- Badges Overlay -->
               <div class="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
                 <span class="px-2.5 py-0.5 rounded-full bg-slate-950/80 backdrop-blur-md text-[10px] font-extrabold text-sky-300 border border-slate-700/80">
-                  <i class="fas fa-map-pin mr-1 text-sky-400"></i>${escapeHtml(typeof formatTambon === 'function' ? formatTambon(tambon) : tambon)}
+                  <i class="fas fa-map-pin mr-1 text-sky-400"></i>${escapeHtml(typeof formatTambon === 'function' ? formatTambon(tambon) : ((tambon.startsWith('ศกร.') || tambon.startsWith('ศศช.') || tambon.startsWith('ตำบล') || tambon === 'ไม่ระบุ') ? tambon : 'ตำบล' + tambon))}
                 </span>
                 ${isStandardPassed 
                   ? `<span class="px-2 py-0.5 rounded-full bg-emerald-950/80 text-[10px] font-black text-emerald-400 border border-emerald-500/40">
@@ -1935,6 +1936,7 @@
 
       // Set Workspace Header Details
       const name = source.SourceName || source.sourceName || source.name || sourceId;
+      const desc = source.Description || source.description || '';
       const tambon = source.TambonName || source.tambon || '';
       const rawCover = source.CoverImageURL || source.cover_image || source.coverImage || '';
       const coverImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : rawCover;
