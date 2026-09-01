@@ -1593,10 +1593,17 @@
         .then(res => {
           if (res && res.status === 'success') {
             showToast('อัปเดตรูปโปรไฟล์สำเร็จเรียบร้อย!', 'success');
+            const newImg = res.profileImage || base64;
             if (userProfileData) {
-              userProfileData.profileImage = base64;
-              userProfileData.profile_image = base64;
-              userProfileData.avatar = base64;
+              userProfileData.profileImage = newImg;
+              userProfileData.profile_image = newImg;
+              userProfileData.avatar = newImg;
+              userProfileData.image = newImg;
+            }
+            localStorage.setItem('userAvatar', newImg);
+            const resolvedImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(newImg) : newImg;
+            if (avatarBox) {
+              avatarBox.innerHTML = `<img src="${resolvedImg}" class="w-full h-full object-cover rounded-full">`;
             }
           } else {
             showToast(res.message || 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้', 'error');

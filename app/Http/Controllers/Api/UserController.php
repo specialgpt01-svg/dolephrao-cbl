@@ -439,8 +439,8 @@ class UserController extends Controller
             $request->input('targetPhone') ?? $request->input('phone') ??
             $request->input('username') ?? $actor['username'] ?? ''
         );
-        $fullName      = trim($request->input('fullName') ?? '');
-        $profileImage  = $request->input('profileImage');
+        $fullName      = trim($request->input('fullName') ?? $request->input('full_name') ?? '');
+        $profileImage  = $request->input('profileImage') ?? $request->input('profile_image') ?? $request->input('avatar') ?? $request->input('image');
         $requestedRole = $request->has('role') ? strtolower(trim($request->input('role') ?? '')) : null;
 
         if (!$targetUserId) {
@@ -466,7 +466,8 @@ class UserController extends Controller
         $updates = [];
         if ($fullName) $updates['full_name'] = $fullName;
         if ($profileImage !== null) {
-            $updates['profile_image'] = $profileImage;
+            $savedImage = $this->saveBase64ImageFile($profileImage, 'profile_' . $targetUserId);
+            $updates['profile_image'] = $savedImage;
             $updates['image_status']  = 'Approved';
         }
         if ($request->has('tambon') && trim($request->input('tambon'))) {
@@ -499,7 +500,11 @@ class UserController extends Controller
         CacheService::forgetUserProfile($targetUserId);
         CacheService::invalidateLeaderboard();
 
-        return response()->json(['status' => 'success']);
+        return response()->json([
+            'status'       => 'success',
+            'profileImage' => $user->profile_image ?? '',
+            'message'      => 'บันทึกข้อมูลเรียบร้อยแล้ว'
+        ]);
     }
 
     /**
@@ -941,6 +946,39 @@ class UserController extends Controller
             'currentLevel' => $user ? (int) $user->level : 1,
             'transactions' => $items,
         ]);
+    }
+
+    /**
+     * Helper to automatically convert base64 image data URLs into stored files
+     */
+    protected function saveBase64ImageFile(?string $dataUrl, string $prefix = 'profile'): string
+    {
+        if (empty($dataUrl)) return '';
+        $dataUrl = trim($dataUrl);
+
+        if (preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches)) {
+            $ext = strtolower($matches[1]);
+            if ($ext === 'jpeg') $ext = 'jpg';
+            if (!in_array($ext, ['jpg', 'png', 'gif', 'webp', 'svg'])) $ext = 'jpg';
+
+            $data = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1));
+            if ($data && strlen($data) <= 15 * 1024 * 1024) {
+                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.' . $ext;
+                $dir = 'uploads/images/' . date('Y/m');
+                \Illuminate\Support\Facades\Storage::disk('public')->put($dir . '/' . $filename, $data);
+                return '/storage/' . $dir . '/' . $filename;
+            }
+        } elseif (strlen($dataUrl) > 1000 && !str_starts_with($dataUrl, 'http') && !str_starts_with($dataUrl, '/storage/')) {
+            $data = base64_decode($dataUrl);
+            if ($data && strlen($data) <= 15 * 1024 * 1024) {
+                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.jpg';
+                $dir = 'uploads/images/' . date('Y/m');
+                \Illuminate\Support\Facades\Storage::disk('public')->put($dir . '/' . $filename, $data);
+                return '/storage/' . $dir . '/' . $filename;
+            }
+        }
+
+        return $dataUrl;
     }
 }
 
