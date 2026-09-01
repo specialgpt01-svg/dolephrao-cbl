@@ -629,9 +629,8 @@
           }
         }
 
-        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
-
-        const cover = s.CoverImageURL || s.cover_image || s.CoverImage || 'assets/loft-logo.svg';
+        const rawCover = s.CoverImageURL || s.cover_image || s.CoverImage || '';
+        const cover = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : (rawCover || 'assets/loft-logo.svg');
         const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
         const tambon = s.TambonName || s.tambon || '';
         const grade = (s.evaluation && s.evaluation.grade) || (s.info && s.info.evaluation && s.info.evaluation.grade) || 'มาตรฐาน สกร.';
@@ -762,7 +761,8 @@
       }
 
       list.innerHTML = sources.map(s => {
-        const cover = s.CoverImageURL || s.cover_image || s.CoverImage || 'assets/loft-logo.svg';
+        const rawCover = s.CoverImageURL || s.cover_image || s.CoverImage || '';
+        const cover = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : (rawCover || 'assets/loft-logo.svg');
         const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
         const tambon = s.TambonName || s.tambon || '';
         let tambonDisplay = tambon ? String(tambon).trim() : '';

@@ -878,8 +878,8 @@
 
       grid.innerHTML = activities.map(act => {
         const actId = act.id || act.activityId || '';
-        const name = act.name || act.activityName || 'กิจกรรมการเรียนรู้';
-        const cover = act.coverImage || act.imageUrl || 'assets/loft-logo.svg';
+        const rawCover = act.coverImage || act.imageUrl || '';
+        const cover = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : (rawCover || 'assets/loft-logo.svg');
         const tambon = act.tambon || '';
         const desc = act.description || act.onlineDescription || '';
         const materials = act.learningMaterials || [];
@@ -1283,8 +1283,8 @@
           const bId    = b.baseId || b.id || '';
           const bTitle = b.baseName || b.name || `ฐานการเรียนรู้ที่ ${i+1}`;
           const bDesc  = b.description || '';
-          const bVideo = b.video_url || b.videoUrl || '';
-          const bCover = b.cover_image || b.coverImage || '';
+          const rawBCover = b.cover_image || b.coverImage || '';
+          const bCover = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawBCover) : rawBCover;
           const bExt   = b.external || (b.info && b.info.external) || '';
 
           return `

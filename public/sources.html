@@ -2133,7 +2133,8 @@
       }
 
       box.style.display = 'block';
-      layer.style.backgroundImage = `url('${url.trim()}')`;
+      const resolvedCoverUrl = typeof getValidImageUrl === 'function' ? getValidImageUrl(url.trim()) : url.trim();
+      layer.style.backgroundImage = `url('${resolvedCoverUrl}')`;
       applyCoverStyles('ws');
       setupCoverDragEvents('ws');
     }
