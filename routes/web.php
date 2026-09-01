@@ -1,16 +1,12 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
 Route::get('/', function () {
@@ -20,4 +16,31 @@ Route::get('/', function () {
 Route::get('/api/downloadCertificate', [\App\Http\Controllers\Api\CertificateController::class, 'downloadCertificate']);
 Route::get('/api/downloadCert', [\App\Http\Controllers\Api\CertificateController::class, 'downloadCertificate']);
 
+// Multi-folder / Subfolder hosting bridge for API routes
+Route::match(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], '{subfolder}/api', function (Request $request, $subfolder) {
+    $targetUri = '/api' . ($request->getQueryString() ? '?' . $request->getQueryString() : '');
+    $subRequest = Request::create(
+        $targetUri,
+        $request->getMethod(),
+        $request->all(),
+        $request->cookies->all(),
+        $request->files->all(),
+        $request->server->all(),
+        $request->getContent()
+    );
+    return app()->handle($subRequest);
+})->where('subfolder', '^(?!api$).*');
 
+Route::match(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], '{subfolder}/api/{any}', function (Request $request, $subfolder, $any) {
+    $targetUri = '/api/' . $any . ($request->getQueryString() ? '?' . $request->getQueryString() : '');
+    $subRequest = Request::create(
+        $targetUri,
+        $request->getMethod(),
+        $request->all(),
+        $request->cookies->all(),
+        $request->files->all(),
+        $request->server->all(),
+        $request->getContent()
+    );
+    return app()->handle($subRequest);
+})->where('subfolder', '^(?!api$).*')->where('any', '.*');
