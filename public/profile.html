@@ -330,6 +330,9 @@
       <button type="button" onclick="switchProfileTab('certs')" id="tab-btn-certs" class="px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 shadow-md whitespace-nowrap transition cursor-pointer shrink-0">
         <i class="fas fa-certificate mr-1.5"></i> ใบประกาศนียบัตรของฉัน
       </button>
+      <button type="button" onclick="switchProfileTab('points')" id="tab-btn-points" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-coins mr-1.5 text-amber-400"></i> ประวัติแต้มสะสม
+      </button>
       <button type="button" onclick="switchProfileTab('idplan')" id="tab-btn-idplan" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
         <i class="fas fa-id-card-clip mr-1.5"></i> แฟ้มสะสมงาน (ID Plan)
       </button>
@@ -411,7 +414,38 @@
 
     </div>
 
-    <!-- ═══════════════════ Tab 2: ID Plan & Portfolio ═══════════════════ -->
+    <!-- ═══════════════════ Tab 2: Points History ═══════════════════ -->
+    <div id="tab-content-points" class="space-y-4" style="display:none;">
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-700/80 space-y-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30 shrink-0">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white m-0 flex items-center gap-2">
+                ประวัติรายการแต้มสะสม (Points Ledger)
+                <span id="profile-points-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500 text-slate-950 shadow">0 แต้ม</span>
+              </h3>
+              <p class="text-xs text-slate-400 m-0 mt-0.5">รายการได้รับแต้มจากการเช็กอิน ทำแบบทดสอบ และการแลกของตกแต่งโปรไฟล์</p>
+            </div>
+          </div>
+          <button type="button" onclick="loadUserPointsLedger()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-700">
+            <i class="fas fa-rotate-right"></i> รีเฟรช
+          </button>
+        </div>
+
+        <div id="user-points-list" class="space-y-2.5 text-xs">
+          <!-- Rendered via JS -->
+          <div class="p-8 text-center text-slate-400">
+            <i class="fas fa-circle-notch fa-spin text-2xl text-amber-500 mb-2"></i>
+            <p>กำลังดึงประวัติแต้มสะสม...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Tab 3: ID Plan & Portfolio ═══════════════════ -->
     <div id="tab-content-idplan" class="space-y-4" style="display:none;">
       <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-700/80 space-y-4">
         <div class="flex items-center justify-between">
@@ -707,7 +741,7 @@
     }
 
     function switchProfileTab(tabName) {
-      ['certs', 'idplan', 'hours', 'cosmetics', 'settings'].forEach(t => {
+      ['certs', 'points', 'idplan', 'hours', 'cosmetics', 'settings'].forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const content = document.getElementById(`tab-content-${t}`);
         if (t === tabName) {
@@ -723,7 +757,12 @@
         }
       });
 
-      if (tabName === 'cosmetics') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUser = urlParams.get('user') || urlParams.get('username') || urlParams.get('phone') || urlParams.get('targetUserId') || urlParams.get('studentId') || '';
+
+      if (tabName === 'points') {
+        loadUserPointsLedger(targetUser);
+      } else if (tabName === 'cosmetics') {
         loadCosmeticsStudio();
       }
     }
@@ -1528,11 +1567,12 @@
         });
     }
 
-    function loadUserHours() {
+    function loadUserHours(targetUser = '') {
       const hoursList = document.getElementById('user-hours-list');
       if (!hoursList) return;
 
-      apiGet('getNFEHistory', withAuthParams({}))
+      const p = targetUser ? { targetUserId: targetUser, targetUsername: targetUser, targetPhone: targetUser, user: targetUser, username: targetUser, phone: targetUser } : {};
+      apiGet('getNFEHistory', withAuthParams(p))
         .then(res => {
           const items = (res && (res.history || res.items || res.data)) || [];
           if (!items || items.length === 0) {
@@ -1568,6 +1608,78 @@
             <div class="py-8 text-center text-slate-500">
               <i class="fas fa-clock text-2xl block mb-2 text-slate-600"></i>
               ยังไม่มีประวัติการบันทึกชั่วโมง กพช.
+            </div>
+          `;
+        });
+    }
+
+    function loadUserPointsLedger(targetUser = '') {
+      const listEl = document.getElementById('user-points-list');
+      const badgeEl = document.getElementById('profile-points-badge');
+      if (!listEl) return;
+
+      const p = targetUser ? { targetUserId: targetUser, targetUsername: targetUser, targetPhone: targetUser, user: targetUser, username: targetUser, phone: targetUser } : {};
+      
+      apiGet('getUserPointsHistory', withAuthParams(p))
+        .then(res => {
+          const items = (res && (res.transactions || res.pointsHistory || res.history || res.items || res.data)) || [];
+          if (badgeEl && res && typeof res.currentScore !== 'undefined') {
+            badgeEl.innerText = `${Number(res.currentScore).toLocaleString()} แต้ม`;
+          } else if (badgeEl && userProfileData && typeof userProfileData.score !== 'undefined') {
+            badgeEl.innerText = `${Number(userProfileData.score).toLocaleString()} แต้ม`;
+          }
+
+          if (!items || items.length === 0) {
+            listEl.innerHTML = `
+              <div class="py-12 text-center text-slate-500 space-y-2">
+                <i class="fas fa-coins text-3xl block text-slate-600"></i>
+                <h5 class="text-slate-300 font-bold m-0">ยังไม่มีบันทึกรายการแต้มสะสม</h5>
+                <p class="text-slate-500 text-xs m-0">ร่วมกิจกรรม ศึกษาดูงาน หรือทำแบบทดสอบเพื่อรับแต้มสะสม</p>
+              </div>
+            `;
+            return;
+          }
+
+          listEl.innerHTML = items.map(pt => {
+            const isPlus = (pt.points || 0) >= 0;
+            const ptsText = (isPlus ? '+' : '') + pt.points + ' แต้ม';
+            const desc = escapeHtml(pt.description || 'กิจกรรมสะสมแต้ม');
+            const type = escapeHtml(pt.type || 'แต้มสะสม');
+            const date = escapeHtml(pt.date || '—');
+
+            let typeIcon = 'fa-coins';
+            let typeColor = 'amber';
+            if (type.includes('เช็กอิน')) { typeIcon = 'fa-map-pin'; typeColor = 'sky'; }
+            else if (type.includes('แบบทดสอบ')) { typeIcon = 'fa-clipboard-check'; typeColor = 'emerald'; }
+            else if (type.includes('ของตกแต่ง') || type.includes('แลก')) { typeIcon = 'fa-palette'; typeColor = 'purple'; }
+
+            return `
+              <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-600 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-${typeColor}-500/20 text-${typeColor}-400 flex items-center justify-center text-sm border border-${typeColor}-500/30 shrink-0">
+                    <i class="fas ${typeIcon}"></i>
+                  </div>
+                  <div>
+                    <strong class="text-white block text-xs">${desc}</strong>
+                    <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+                      <span class="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-[10px]">${type}</span>
+                      <span>🗓️ ${date}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-sm font-black ${isPlus ? 'text-emerald-400' : 'text-rose-400'}">${ptsText}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          console.error("Points ledger error:", err);
+          listEl.innerHTML = `
+            <div class="py-8 text-center text-slate-500">
+              <i class="fas fa-exclamation-circle text-2xl block mb-2 text-slate-600"></i>
+              ไม่สามารถโหลดประวัติแต้มสะสมได้ในขณะนี้
             </div>
           `;
         });

@@ -276,7 +276,7 @@
     const checkins = res.checkins || [];
     const certs = res.certificates || [];
     const upskills = res.upskills || [];
-    const points = res.pointsHistory || [];
+    const points = res.pointsHistory || res.transactions || res.history || res.items || res.data || [];
 
     // 1. Profile Banner
     const name = p.fullName || p.name || p.username || 'ผู้เรียน';

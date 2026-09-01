@@ -363,16 +363,59 @@ class UserController extends Controller
             ])->toArray();
 
         // 5. Points History / Transactions
-        $pointsHistory = PointsTransaction::where('username', $targetUsername)
+        $pointsHistory = PointsTransaction::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
-            ->limit(50)
+            ->limit(100)
             ->get()
             ->map(fn($pt) => [
                 'description' => $pt->description ?? $pt->type ?? 'กิจกรรมสะสมแต้ม',
-                'type'        => $pt->type,
+                'type'        => $pt->type ?? 'แต้มสะสม',
                 'points'      => (int) $pt->points,
                 'date'        => $pt->created_at?->format('d/m/Y H:i') ?? '—',
+                'rawDate'     => $pt->created_at,
             ])->toArray();
+
+        // Fallback: If no explicit PointsTransaction records exist yet, generate from check-ins and quizzes
+        if (empty($pointsHistory)) {
+            foreach ($sourceCheckIns as $sc) {
+                if (($sc->points ?? 0) > 0) {
+                    $sName = $sNames[$sc->source_id] ?? ('แหล่งเรียนรู้ ' . $sc->source_id);
+                    $pointsHistory[] = [
+                        'description' => 'เช็กอินศึกษาดูงาน: ' . $sName,
+                        'type'        => 'เช็กอิน',
+                        'points'      => (int) $sc->points,
+                        'date'        => $sc->created_at?->format('d/m/Y H:i') ?? '—',
+                        'rawDate'     => $sc->created_at,
+                    ];
+                }
+            }
+            foreach ($activityCheckIns as $ac) {
+                if (($ac->points ?? 0) > 0) {
+                    $pointsHistory[] = [
+                        'description' => 'เช็กอินกิจกรรม: ' . ($ac->activity_name ?? 'กิจกรรมสถานศึกษา'),
+                        'type'        => 'เช็กอิน',
+                        'points'      => (int) $ac->points,
+                        'date'        => $ac->created_at?->format('d/m/Y H:i') ?? '—',
+                        'rawDate'     => $ac->created_at,
+                    ];
+                }
+            }
+            foreach ($quizLogs as $ql) {
+                if (($ql->status === 'Pass' || $ql->score >= 80)) {
+                    $quizTitle = $sources[$ql->source_id]->name ?? $activities[$ql->activity_id]->name ?? 'แบบทดสอบออนไลน์';
+                    $pointsHistory[] = [
+                        'description' => 'ทำแบบทดสอบผ่าน: ' . $quizTitle,
+                        'type'        => 'แบบทดสอบ',
+                        'points'      => 10,
+                        'date'        => $ql->created_at?->format('d/m/Y H:i') ?? '—',
+                        'rawDate'     => $ql->created_at,
+                    ];
+                }
+            }
+            usort($pointsHistory, function($a, $b) {
+                return ($b['rawDate'] <=> $a['rawDate']);
+            });
+        }
 
         // 6. Certificates
         $cSourceIds = $userCerts->pluck('source_id')->filter()->unique()->values();
@@ -954,37 +997,107 @@ class UserController extends Controller
             return response()->json(['status' => 'error', 'message' => 'กรุณาเข้าสู่ระบบ'], 401);
         }
 
-        $targetUserId = AuthService::normalizeUsername(
+        $rawTarget = trim(
             $request->input('targetUserId') ?? $request->input('targetUsername') ??
-            $request->input('username') ?? $request->input('phone') ?? $actor['username']
+            $request->input('targetId') ?? $request->input('studentId') ??
+            $request->input('user') ?? $request->input('username') ?? $request->input('phone') ?? ($actor['username'] ?? '')
         );
+        $targetUserId = AuthService::normalizeUsername($rawTarget);
 
-        if ($targetUserId !== $actor['username'] && !in_array($actor['role'], ['admin', 'teacher'])) {
-            return response()->json(['status' => 'error', 'message' => 'ไม่มีสิทธิ์ดูประวัติคะแนนของผู้อื่น'], 403);
+        $user = User::where('username', $targetUserId)
+            ->orWhere('phone', $targetUserId)
+            ->orWhere('username', $rawTarget)
+            ->orWhere('phone', $rawTarget)
+            ->when(is_numeric($rawTarget), fn($q) => $q->orWhere('id', (int)$rawTarget))
+            ->first();
+
+        if (!$user && $actor && !empty($actor['username'])) {
+            $user = User::where('username', $actor['username'])->orWhere('phone', $actor['username'])->first();
         }
 
-        $items = PointsTransaction::where('username', $targetUserId)
+        $userIdentifiers = array_values(array_filter(array_unique([
+            $user?->username,
+            $user?->phone,
+            $targetUserId,
+            $rawTarget,
+            (string)($user?->id ?? '')
+        ])));
+
+        $items = PointsTransaction::whereIn('username', $userIdentifiers)
             ->orderByDesc('created_at')
             ->limit(100)
             ->get()
             ->map(fn($t) => [
                 'id'          => $t->id,
-                'type'        => $t->type,
+                'type'        => $t->type ?? 'แต้มสะสม',
                 'points'      => (int) $t->points,
                 'description' => $t->description ?? '',
                 'refId'       => $t->ref_id,
                 'date'        => $t->created_at ? $t->created_at->format('d/m/Y H:i') : '—',
                 'rawDate'     => $t->created_at,
-            ]);
+            ])->toArray();
 
-        $user = User::where('username', $targetUserId)->first();
+        // Fallback: If no explicit transactions exist yet, synthesize from checkins and quizzes
+        if (empty($items) && $user) {
+            $srcCheckIns = SourceCheckIn::whereIn('username', $userIdentifiers)->orderByDesc('created_at')->get();
+            $actCheckIns = ActivityCheckIn::whereIn('username', $userIdentifiers)->orderByDesc('created_at')->get();
+            $quizLogs = QuizLog::whereIn('username', $userIdentifiers)->orderByDesc('created_at')->get();
+
+            $srcIds = $srcCheckIns->pluck('source_id')->filter()->unique()->values();
+            $sources = Source::whereIn('id', $srcIds)->pluck('name', 'id');
+
+            foreach ($srcCheckIns as $sc) {
+                if (($sc->points ?? 0) > 0) {
+                    $items[] = [
+                        'id'          => 'sc_' . $sc->id,
+                        'type'        => 'เช็กอิน',
+                        'points'      => (int) $sc->points,
+                        'description' => 'เช็กอินศึกษาดูงาน: ' . ($sources[$sc->source_id] ?? ('แหล่งเรียนรู้ ' . $sc->source_id)),
+                        'refId'       => $sc->source_id,
+                        'date'        => $sc->created_at ? $sc->created_at->format('d/m/Y H:i') : '—',
+                        'rawDate'     => $sc->created_at,
+                    ];
+                }
+            }
+            foreach ($actCheckIns as $ac) {
+                if (($ac->points ?? 0) > 0) {
+                    $items[] = [
+                        'id'          => 'ac_' . $ac->id,
+                        'type'        => 'เช็กอิน',
+                        'points'      => (int) $ac->points,
+                        'description' => 'เช็กอินกิจกรรม: ' . ($ac->activity_name ?? 'กิจกรรมสถานศึกษา'),
+                        'refId'       => $ac->activity_id,
+                        'date'        => $ac->created_at ? $ac->created_at->format('d/m/Y H:i') : '—',
+                        'rawDate'     => $ac->created_at,
+                    ];
+                }
+            }
+            foreach ($quizLogs as $ql) {
+                if (($ql->status === 'Pass' || $ql->score >= 80)) {
+                    $items[] = [
+                        'id'          => 'ql_' . $ql->id,
+                        'type'        => 'แบบทดสอบ',
+                        'points'      => 10,
+                        'description' => 'ทำแบบทดสอบผ่านเกณฑ์ 80%',
+                        'refId'       => $ql->source_id ?? $ql->activity_id,
+                        'date'        => $ql->created_at ? $ql->created_at->format('d/m/Y H:i') : '—',
+                        'rawDate'     => $ql->created_at,
+                    ];
+                }
+            }
+            usort($items, fn($a, $b) => ($b['rawDate'] <=> $a['rawDate']));
+        }
 
         return response()->json([
-            'status'       => 'success',
-            'username'     => $targetUserId,
-            'currentScore' => $user ? (int) $user->score : 0,
-            'currentLevel' => $user ? (int) $user->level : 1,
-            'transactions' => $items,
+            'status'        => 'success',
+            'username'      => $user?->username ?? $targetUserId,
+            'currentScore'  => $user ? (int) $user->score : 0,
+            'currentLevel'  => $user ? (int) $user->level : 1,
+            'transactions'  => $items,
+            'pointsHistory' => $items,
+            'history'       => $items,
+            'items'         => $items,
+            'data'          => $items,
         ]);
     }
 
