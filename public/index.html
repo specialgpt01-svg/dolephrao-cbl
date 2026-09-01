@@ -1305,7 +1305,7 @@
       }
 
       grid.innerHTML = featured.map(s => {
-        const cover = s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg';
+        const cover = typeof getValidImageUrl === 'function' ? getValidImageUrl(s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg') : (s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg');
         const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
         const tambon = s.TambonName || s.tambon || '';
         const grade = (s.evaluation && s.evaluation.grade) || (s.info && s.info.evaluation && s.info.evaluation.grade) || 'มาตรฐาน สกร.';
@@ -1344,7 +1344,7 @@
       }
 
       grid.innerHTML = items.map(p => {
-        const img = p.image_url || p.image || 'assets/loft-logo.svg';
+        const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(p.image_url || p.image || 'assets/loft-logo.svg') : (p.image_url || p.image || 'assets/loft-logo.svg');
         const name = p.name || 'สินค้าชุมชน';
         const price = p.price || 0;
         const pts = p.coupon_points || 50;

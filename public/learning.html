@@ -1185,7 +1185,8 @@
       }
 
       grid.innerHTML = sources.map(s => {
-        const cover = s.CoverImageURL || s.cover_image || s.CoverImage || 'assets/loft-logo.svg';
+        const rawCover = s.CoverImageURL || s.cover_image || s.CoverImage || '';
+        const cover = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : (rawCover || 'assets/loft-logo.svg');
         const coverPos = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
         const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
         const tambon = s.TambonName || s.tambon || '';
@@ -1238,7 +1239,8 @@
       currentDetailSource = s;
 
       const coverImgEl = document.getElementById('detail-cover-img');
-      coverImgEl.src = s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg';
+      const rawDetailCover = s.CoverImageURL || s.cover_image || '';
+      coverImgEl.src = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawDetailCover) : (rawDetailCover || 'assets/loft-logo.svg');
       coverImgEl.style.objectPosition = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
       document.getElementById('detail-source-title').innerText = s.SourceName || s.name || '';
       document.getElementById('detail-source-tambon').innerText = '📍 ตำบล' + (s.TambonName || s.tambon || '');

@@ -632,10 +632,20 @@ function getValidImageUrl(url) {
   str = str.replace(/^[\["'`\s]+|[\]"'`\s]+$/g, '');
   if (!str || str === '[') return LOFT_PLACEHOLDER_IMAGE;
 
-  if (str.indexOf('/storage/') > -1) {
-    const sub = str.split('/storage/')[1] || '';
+  if (str.indexOf('/storage/') > -1 || str.indexOf('storage/uploads/') > -1 || str.indexOf('storage/firebase/') > -1 || str.startsWith('storage/')) {
+    let sub = '';
+    if (str.indexOf('/storage/') > -1) {
+      sub = str.split('/storage/')[1] || '';
+    } else {
+      sub = str.replace(/^.*?storage\//, '');
+    }
     const cleanSub = sub.replace(/[\]"'`\s]+$/g, '');
-    return LOFT_BASE_PATH + '/storage/' + cleanSub;
+    return (LOFT_BASE_PATH ? LOFT_BASE_PATH : '') + '/storage/' + cleanSub;
+  }
+
+  if (str.startsWith('assets/') || str.startsWith('/assets/')) {
+    const cleanAsset = str.replace(/^\/?assets\//, '');
+    return (LOFT_BASE_PATH ? LOFT_BASE_PATH : '') + '/assets/' + cleanAsset;
   }
 
   if (str.indexOf('drive.google.com/file/d/') > -1) {

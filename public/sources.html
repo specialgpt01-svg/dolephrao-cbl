@@ -1797,8 +1797,8 @@
         const id = s.SourceID || s.sourceId || s.id || '';
         const name = s.SourceName || s.sourceName || s.name || '(ไม่มีชื่อแหล่ง)';
         const desc = s.Description || s.description || '';
-        const tambon = s.TambonName || s.tambon || 'ไม่ระบุตำบล';
-        const coverImg = s.CoverImageURL || s.cover_image || s.coverImage || '';
+        const rawCover = s.CoverImageURL || s.cover_image || s.coverImage || '';
+        const coverImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : rawCover;
         const coverPos = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
         const parsedPos = typeof parseCoverPos === 'function' ? parseCoverPos(coverPos) : { x: 50, y: 50, zoom: 100 };
         const basesCount = Array.isArray(s.bases) ? s.bases.length : (s.baseCount || 0);
@@ -1936,8 +1936,8 @@
       // Set Workspace Header Details
       const name = source.SourceName || source.sourceName || source.name || sourceId;
       const tambon = source.TambonName || source.tambon || '';
-      const desc = source.Description || source.description || '';
-      const coverImg = source.CoverImageURL || source.cover_image || source.coverImage || '';
+      const rawCover = source.CoverImageURL || source.cover_image || source.coverImage || '';
+      const coverImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawCover) : rawCover;
 
       document.getElementById('ws-breadcrumb-name').innerText = name;
       document.getElementById('ws-source-title').innerText = name;
