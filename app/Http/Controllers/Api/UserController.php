@@ -968,13 +968,19 @@ class UserController extends Controller
             }
         }
 
-        $mode = strtolower(trim((string) ($request->input('mode') ?? 'add'))); // 'add', 'deduct', 'set'
+        $mode = strtolower(trim((string) ($request->input('mode') ?? 'add'))); // 'add', 'deduct', 'set', 'reset'
         $points = (int) ($request->input('points') ?? $request->input('amount') ?? 0);
         $reason = trim((string) ($request->input('reason') ?? $request->input('description') ?? $request->input('note') ?? ''));
 
         $oldScore = (int) $user->score;
 
-        if ($mode === 'set') {
+        if ($mode === 'reset') {
+            $newScore = 0;
+            $delta = -$oldScore;
+            if ($reason === '') {
+                $reason = 'รีเซ็ตคะแนนเริ่มต้นใหม่ (0 แต้ม) โดยผู้ดูแลระบบ';
+            }
+        } elseif ($mode === 'set') {
             $newScore = max(0, $points);
             $delta = $newScore - $oldScore;
         } elseif ($mode === 'deduct') {
@@ -1000,13 +1006,15 @@ class UserController extends Controller
             'level' => $newLevel,
         ]);
 
-        $defaultDescription = $delta >= 0 
-            ? "ปรับเพิ่มคะแนนโดยผู้ดูแลระบบ (+{$delta} แต้ม)"
-            : "ปรับลดคะแนนโดยผู้ดูแลระบบ ({$delta} แต้ม)";
+        $defaultDescription = $mode === 'reset'
+            ? "รีเซ็ตคะแนนเริ่มต้นใหม่ (0 แต้ม) โดยผู้ดูแลระบบ"
+            : ($delta >= 0 
+                ? "ปรับเพิ่มคะแนนโดยผู้ดูแลระบบ (+{$delta} แต้ม)"
+                : "ปรับลดคะแนนโดยผู้ดูแลระบบ ({$delta} แต้ม)");
 
         PointsTransaction::create([
             'username'    => $user->username,
-            'type'        => 'admin_adjustment',
+            'type'        => $mode === 'reset' ? 'admin_reset' : 'admin_adjustment',
             'points'      => $delta,
             'description' => $reason !== '' ? $reason : $defaultDescription,
         ]);
@@ -1014,7 +1022,9 @@ class UserController extends Controller
         CacheService::forgetUserProfile($user->username);
         CacheService::invalidateLeaderboard($user->username);
 
-        $actionWord = $delta > 0 ? "เพิ่มคะแนน +{$delta} แต้ม" : ($delta < 0 ? "หักคะแนน {$delta} แต้ม" : "อัปเดตคะแนน");
+        $actionWord = $mode === 'reset'
+            ? "รีเซ็ตคะแนนเป็น 0 แต้มเริ่มต้นใหม่"
+            : ($delta > 0 ? "เพิ่มคะแนน +{$delta} แต้ม" : ($delta < 0 ? "หักคะแนน {$delta} แต้ม" : "อัปเดตคะแนน"));
 
         return response()->json([
             'status'         => 'success',

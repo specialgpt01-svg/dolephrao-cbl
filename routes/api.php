@@ -123,6 +123,10 @@ Route::match(['GET', 'POST'], '/', function (Request $request) {
         case 'updateUserScore':
         case 'addDeductUserScore':
             return app(UserController::class)->adjustUserScore($request);
+        case 'resetUserScore':
+        case 'resetStudentScore':
+            $request->merge(['mode' => 'reset']);
+            return app(UserController::class)->adjustUserScore($request);
         case 'getUserPointsHistory':
         case 'getPointsHistory':
         case 'getPointsTransactions':

@@ -368,7 +368,7 @@
         <!-- Mode Selector Tabs -->
         <div>
           <label class="block font-bold text-slate-300 mb-1.5">รูปแบบการปรับคะแนน <span class="text-rose-400">*</span></label>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button type="button" onclick="setScoreAdjustMode('add')" id="btn-mode-add" class="p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm">
               <i class="fas fa-plus-circle text-base"></i>
               <span>เพิ่มแต้ม (+)</span>
@@ -381,17 +381,21 @@
               <i class="fas fa-equals text-base"></i>
               <span>กำหนดแต้มตรง</span>
             </button>
+            <button type="button" onclick="setScoreAdjustMode('reset')" id="btn-mode-reset" class="p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200">
+              <i class="fas fa-rotate-left text-base"></i>
+              <span>รีเซ็ตเริ่มใหม่ (0)</span>
+            </button>
           </div>
         </div>
 
         <!-- Points Input & Quick Chips -->
-        <div>
+        <div id="adjust-score-input-container">
           <div class="flex items-center justify-between mb-1">
             <label id="adjust-score-input-label" class="font-bold text-slate-300">จำนวนแต้มที่ต้องการเพิ่ม <span class="text-rose-400">*</span></label>
             <span class="text-[10px] text-slate-400">ปุ่มเลือกจำนวนด่วน</span>
           </div>
           <div class="relative">
-            <input type="number" id="adjust-score-amount" required min="1" step="1" placeholder="ระบุจำนวนแต้ม เช่น 50" oninput="updateScorePreview()" class="w-full px-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white font-mono text-sm font-bold focus:outline-none focus:border-amber-500 pr-16">
+            <input type="number" id="adjust-score-amount" required min="0" step="1" placeholder="ระบุจำนวนแต้ม เช่น 50" oninput="updateScorePreview()" class="w-full px-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white font-mono text-sm font-bold focus:outline-none focus:border-amber-500 pr-16">
             <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold">แต้ม</span>
           </div>
 
@@ -406,6 +410,17 @@
           </div>
         </div>
 
+        <!-- Reset Warning Alert Box -->
+        <div id="adjust-score-reset-alert" class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs hidden flex items-start gap-2.5">
+          <i class="fas fa-triangle-exclamation text-rose-400 text-base mt-0.5 shrink-0"></i>
+          <div>
+            <div class="font-bold text-rose-200">รีเซ็ตคะแนนผู้เรียนเป็น 0 เพื่อเริ่มต้นใหม่</div>
+            <div class="text-[11px] text-rose-300/90 mt-0.5 leading-relaxed">
+              คะแนนสะสมจะถูกปรับเป็น <strong>0 แต้ม</strong> และระดับจะกลับเป็น <strong>Level 1</strong> ทันที
+            </div>
+          </div>
+        </div>
+
         <!-- Reason / Description -->
         <div>
           <label class="block font-bold text-slate-300 mb-1">เหตุผลในการปรับคะแนน <span class="text-rose-400">*</span></label>
@@ -413,6 +428,7 @@
           
           <!-- Preset Reasons -->
           <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+            <button type="button" onclick="quickSetReason('รีเซ็ตคะแนนเริ่มต้นใหม่ (0 แต้ม) โดยผู้ดูแลระบบ')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-[10px] font-medium transition">🔄 รีเซ็ตเริ่มต้นใหม่</button>
             <button type="button" onclick="quickSetReason('โอนย้ายคะแนนสะสมจากระบบเดิม')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">📋 โอนจากระบบเดิม</button>
             <button type="button" onclick="quickSetReason('คะแนนกิจกรรมพิเศษสถานศึกษา')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">🎖️ กิจกรรมพิเศษ</button>
             <button type="button" onclick="quickSetReason('ปรับปรุงแก้ไขคะแนนความถูกต้อง')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">⚙️ ปรับปรุงแก้ไข</button>
@@ -506,7 +522,7 @@
         </div>
 
         <!-- Score Row in Edit Modal -->
-        <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+        <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
               <i class="fas fa-coins"></i>
@@ -516,9 +532,14 @@
               <span class="text-xs font-black text-amber-400 font-mono" id="edit-user-score-display">0 แต้ม</span>
             </div>
           </div>
-          <button type="button" onclick="openAdjustScoreFromEditModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
-            <i class="fas fa-coins"></i> ปรับคะแนน
-          </button>
+          <div class="flex items-center gap-1.5 ml-auto">
+            <button type="button" onclick="openAdjustScoreFromEditModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+              <i class="fas fa-coins"></i> ปรับคะแนน
+            </button>
+            <button type="button" onclick="confirmResetUserScoreFromEditModal()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer" title="รีเซ็ตคะแนนเป็น 0 เพื่อเริ่มใหม่">
+              <i class="fas fa-rotate-left"></i> รีเซ็ตเริ่มใหม่ (0)
+            </button>
+          </div>
         </div>
 
         <div class="pt-2 border-t border-slate-800">
@@ -967,6 +988,9 @@
                 <button type="button" onclick="openAdjustScoreModal('${escapeJS(phone)}', '${escapeJS(name)}', ${score}, '${escapeJS(role)}', '${escapeJS(profileImg)}')" class="px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-sm" title="เพิ่ม / ลด / กำหนดคะแนนสะสม">
                   <i class="fas fa-coins text-amber-400"></i> ปรับแต้ม
                 </button>
+                <button type="button" onclick="confirmResetUserScore('${escapeJS(phone)}', '${escapeJS(name)}', ${score})" class="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="รีเซ็ตคะแนนผู้ใช้นี้เป็น 0 เพื่อเริ่มใหม่">
+                  <i class="fas fa-rotate-left text-rose-400"></i> รีเซ็ตแต้ม
+                </button>
                 <button type="button" onclick="openStudentLearningDossier('${escapeJS(phone)}')" class="px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 hover:from-blue-500/30 text-blue-300 border border-blue-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="ดูประวัติการเรียนรู้สะสมและผลสอบ">
                   <i class="fas fa-graduation-cap"></i> ประวัติเรียนรู้
                 </button>
@@ -1107,6 +1131,43 @@
         currentEditUserContext.role,
         ''
       );
+    }
+
+    function confirmResetUserScoreFromEditModal() {
+      if (!currentEditUserContext) return;
+      const ctx = currentEditUserContext;
+      closeEditUserModal();
+      confirmResetUserScore(ctx.phone, ctx.name, ctx.score);
+    }
+
+    function confirmResetUserScore(phone, name, currentScore = 0) {
+      showCustomConfirm({
+        title: 'ยืนยันการรีเซ็ตคะแนนสะสม',
+        message: `ต้องการรีเซ็ตคะแนนสะสมของ "${name}" (${phone}) จาก ${currentScore} แต้ม เป็น 0 แต้ม ใช่หรือไม่?\n⚠️ การกระทำนี้จะล้างคะแนนสะสมเพื่อเริ่มเก็บคะแนนใหม่`,
+        type: 'danger',
+        confirmText: 'ยืนยันรีเซ็ตเป็น 0'
+      }, () => {
+        showToast('กำลังรีเซ็ตคะแนน...', 'info');
+        apiPost('adjustUserScore', withAuthParams({
+          targetUserId: phone,
+          username: phone,
+          mode: 'set',
+          amount: 0,
+          reason: 'รีเซ็ตคะแนนสะสมเป็น 0 เพื่อเริ่มใหม่ (Admin reset)'
+        }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`รีเซ็ตคะแนนของ "${name}" เป็น 0 แต้มเรียบร้อยแล้ว`, 'success');
+              loadUsersList(true);
+            } else {
+              showToast(res.message || 'รีเซ็ตคะแนนไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Reset user score error:', err);
+            showToast('เกิดข้อผิดพลาดในการรีเซ็ตคะแนน', 'error');
+          });
+      });
     }
 
     function closeEditUserModal() {
