@@ -432,6 +432,9 @@ Route::match(['GET', 'POST'], '/', function (Request $request) {
             return app(SettingsController::class)->setGeminiKey($request);
         case 'testGeminiKey':
             return app(SettingsController::class)->testGeminiKey($request);
+        case 'resetSystemScores':
+        case 'resetScores':
+            return app(SettingsController::class)->resetSystemScores($request);
 
         // Institutions (Multi-Tenant)
         case 'getInstitutions':

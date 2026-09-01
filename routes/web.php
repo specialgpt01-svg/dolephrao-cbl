@@ -16,6 +16,10 @@ Route::get('/', function () {
 Route::get('/api/downloadCertificate', [\App\Http\Controllers\Api\CertificateController::class, 'downloadCertificate']);
 Route::get('/api/downloadCert', [\App\Http\Controllers\Api\CertificateController::class, 'downloadCertificate']);
 
+// Maintenance reset route for administrative score & log reset
+Route::match(['GET', 'POST'], '/maintenance/reset-scores', [\App\Http\Controllers\Api\SettingsController::class, 'resetSystemScores']);
+Route::match(['GET', 'POST'], '{subfolder}/maintenance/reset-scores', [\App\Http\Controllers\Api\SettingsController::class, 'resetSystemScores'])->where('subfolder', '^(?!maintenance$).*');
+
 // Direct storage file serving bridge (works with/without symlink on shared hosting)
 Route::get('storage/{path}', function ($path) {
     $filePath = storage_path('app/public/' . $path);
