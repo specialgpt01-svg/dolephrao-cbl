@@ -1138,7 +1138,11 @@
           btn.disabled = false;
           btn.innerHTML = '💾 บันทึกการแก้ไข';
           if (res && res.status === 'success') {
-            showToast(`แก้ไขข้อมูล "${name}" เรียบร้อยแล้ว`, 'success');
+            if (newPass) {
+              showToast(`แก้ไขข้อมูลและเปลี่ยนรหัสผ่านใหม่ของ "${name}" เรียบร้อยแล้ว`, 'success');
+            } else {
+              showToast(`แก้ไขข้อมูล "${name}" เรียบร้อยแล้ว`, 'success');
+            }
             closeEditUserModal();
             loadUsersList(true);
           } else {

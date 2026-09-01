@@ -78,16 +78,19 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $data     = $request->all();
-        $username = AuthService::normalizeUsername($data['username'] ?? $data['phone'] ?? '');
-        $password = $data['password'] ?? '';
+        $data        = $request->all();
+        $rawUsername = trim((string)($data['username'] ?? $data['phone'] ?? $request->input('username') ?? $request->input('phone') ?? ''));
+        $username    = AuthService::normalizeUsername($rawUsername);
+        $password    = (string)($data['password'] ?? $request->input('password') ?? '');
 
-        if (!$username || !$password) {
+        if (!$rawUsername || !$password) {
             return response()->json(['status' => 'error', 'message' => 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน']);
         }
 
         $user = User::where('username', $username)
             ->orWhere('phone', $username)
+            ->orWhere('username', $rawUsername)
+            ->orWhere('phone', $rawUsername)
             ->first();
 
         if (!$user || !AuthService::verifyPassword($password, $user->password)) {

@@ -535,51 +535,80 @@ class UserController extends Controller
             return response()->json(['status' => 'error', 'message' => 'ไม่มีสิทธิ์แก้ไขข้อมูลผู้อื่น']);
         }
 
-        $user = User::where('username', $targetUserId)->first();
+        $searchKey = $targetUserId;
+        $normSearch = AuthService::normalizeUsername($searchKey);
+
+        $user = User::where('username', $normSearch)
+            ->orWhere('phone', $normSearch)
+            ->orWhere('username', $searchKey)
+            ->orWhere('phone', $searchKey)
+            ->when(is_numeric($searchKey), fn($q) => $q->orWhere('id', (int)$searchKey))
+            ->first();
+
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'ไม่พบผู้ใช้']);
         }
 
-        if ($actor['role'] === 'teacher' && $actor['username'] !== $targetUserId) {
+        if ($actor['role'] === 'teacher' && $actor['username'] !== $user->username) {
             if (AuthService::normalizeTambon($user->tambon) !== AuthService::normalizeTambon($actor['tambon'])) {
                 return response()->json(['status' => 'error', 'message' => 'ไม่มีสิทธิ์แก้ไขผู้ใช้นอกพื้นที่']);
             }
         }
 
         $updates = [];
-        if ($fullName) $updates['full_name'] = $fullName;
-        if ($profileImage !== null) {
-            $savedImage = $this->saveBase64ImageFile($profileImage, 'profile_' . $targetUserId);
+        if ($fullName !== '') {
+            $updates['full_name'] = $fullName;
+        }
+        if ($profileImage !== null && $profileImage !== '') {
+            $savedImage = $this->saveBase64ImageFile($profileImage, 'profile_' . $user->username);
             $updates['profile_image'] = $savedImage;
             $updates['image_status']  = 'Approved';
         }
-        if ($request->has('tambon') && trim($request->input('tambon'))) {
+        if ($request->has('tambon') && trim((string)$request->input('tambon'))) {
             $updates['tambon'] = AuthService::normalizeTambon($request->input('tambon'));
         }
         if ($request->has('userCategory')) {
-            $updates['user_category'] = trim($request->input('userCategory') ?? 'ประชาชนทั่วไป');
+            $updates['user_category'] = trim((string)($request->input('userCategory') ?? 'ประชาชนทั่วไป'));
         }
         if ($request->has('ageGroup')) {
-            $updates['age_group'] = trim($request->input('ageGroup') ?? '');
+            $updates['age_group'] = trim((string)($request->input('ageGroup') ?? ''));
         }
         if ($request->has('occupation')) {
-            $updates['occupation'] = trim($request->input('occupation') ?? '');
+            $updates['occupation'] = trim((string)($request->input('occupation') ?? ''));
         }
-        if ($requestedRole !== null) {
+        if ($requestedRole !== null && $requestedRole !== '') {
             if (!in_array($requestedRole, ['admin', 'teacher', 'user'])) {
                 return response()->json(['status' => 'error', 'message' => 'สิทธิ์ผู้ใช้ไม่ถูกต้อง']);
             }
             if ($actor['role'] !== 'admin') {
                 return response()->json(['status' => 'error', 'message' => 'เฉพาะผู้ดูแลระบบเท่านั้นที่เปลี่ยนสิทธิ์ได้']);
             }
-            if ($actor['username'] === $targetUserId && $requestedRole !== 'admin') {
+            if ($actor['username'] === $user->username && $requestedRole !== 'admin') {
                 return response()->json(['status' => 'error', 'message' => 'ไม่สามารถลดสิทธิ์ผู้ดูแลระบบของตัวเองได้']);
             }
             $updates['role'] = $requestedRole;
         }
 
-        $user->update($updates);
+        // จัดการรหัสผ่านใหม่ (หากแอดมินหรือครูระบุรหัสผ่านใหม่)
+        $newPassword = trim((string)(
+            $request->input('newPassword') ?? $request->input('new_password') ??
+            $request->input('password') ?? $request->input('newPass') ?? ''
+        ));
+        if ($newPassword !== '') {
+            if (strlen($newPassword) < 4) {
+                return response()->json(['status' => 'error', 'message' => 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร']);
+            }
+            $updates['password'] = AuthService::hashPassword($newPassword);
+            $updates['must_change_password'] = false;
+            $updates['password_reset_required'] = false;
+        }
 
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        CacheService::forgetUserProfile($user->username);
+        CacheService::forgetUserProfile($user->phone);
         CacheService::forgetUserProfile($targetUserId);
         CacheService::invalidateLeaderboard();
 
@@ -778,17 +807,24 @@ class UserController extends Controller
             return response()->json(['status' => 'error', 'message' => 'ไม่มีสิทธิ์']);
         }
 
-        $targetUserId  = AuthService::normalizeUsername($request->input('targetUserId') ?? $request->input('username') ?? '');
-        $newPassword   = trim($request->input('newPassword') ?? $request->input('password') ?? '123456');
+        $targetUserId  = AuthService::normalizeUsername($request->input('targetUserId') ?? $request->input('username') ?? $request->input('phone') ?? '');
+        $newPassword   = trim((string)($request->input('newPassword') ?? $request->input('password') ?? '123456'));
 
         if (!$targetUserId) {
             return response()->json(['status' => 'error', 'message' => 'กรุณาระบุสมาชิกที่ต้องการรีเซ็ตรหัสผ่าน']);
         }
-        if (!$newPassword || strlen($newPassword) < 6) {
-            return response()->json(['status' => 'error', 'message' => 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร']);
+        if (!$newPassword || strlen($newPassword) < 4) {
+            return response()->json(['status' => 'error', 'message' => 'รหัสผ่านใหม่ต้องมีอย่างน้อย 4 ตัวอักษร']);
         }
 
-        $user = User::where('username', $targetUserId)->first();
+        $normSearch = AuthService::normalizeUsername($targetUserId);
+        $user = User::where('username', $normSearch)
+            ->orWhere('phone', $normSearch)
+            ->orWhere('username', $targetUserId)
+            ->orWhere('phone', $targetUserId)
+            ->when(is_numeric($targetUserId), fn($q) => $q->orWhere('id', (int)$targetUserId))
+            ->first();
+
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'ไม่พบข้อมูลสมาชิกในระบบ']);
         }
@@ -809,6 +845,10 @@ class UserController extends Controller
             'must_change_password'    => true,
             'password_reset_required' => true,
         ]);
+
+        CacheService::forgetUserProfile($user->username);
+        CacheService::forgetUserProfile($user->phone);
+        CacheService::forgetUserProfile($targetUserId);
 
         return response()->json([
             'status'      => 'success',
