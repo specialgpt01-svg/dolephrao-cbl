@@ -34,11 +34,22 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         // API ต้องตอบ JSON 401 เสมอ แม้ client ไม่ได้ส่ง Accept: application/json
         $exceptions->render(function (AuthenticationException $exception, Request $request) {
-            if ($request->is('api/*') || $request->is('api')) {
+            if ($request->is('api/*') || $request->is('api') || $request->has('action')) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'กรุณาเข้าสู่ระบบ',
                 ], 401);
+            }
+        });
+
+        // API 500 error ตอบเป็น JSON เสมอเพื่อให้อ่านข้อความ error ได้ตรงจุด
+        $exceptions->render(function (\Throwable $exception, Request $request) {
+            if ($request->is('api/*') || $request->is('api') || $request->has('action') || $request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $exception->getMessage(),
+                    'file' => config('app.debug') ? $exception->getFile().':'.$exception->getLine() : null,
+                ], 500);
             }
         });
     })->create();

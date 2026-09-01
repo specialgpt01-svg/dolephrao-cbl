@@ -1,8 +1,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    # ป้องกันการแสดง Directory Listing
     Options -Indexes
-    # ส่งต่อ Request ทั้งหมดเข้าโฟลเดอร์ public
-    RewriteCond %{ENV:REDIRECT_STATUS} ^$
-    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Forward all requests into public folder cleanly for subfolder & root setups
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
 </IfModule>
