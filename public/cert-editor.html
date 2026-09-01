@@ -834,9 +834,10 @@
 
       // 2. Background Image
       if (currentBgUrl) {
-        el.pvBgImg.src = currentBgUrl;
+        const validBg = typeof getValidImageUrl === 'function' ? getValidImageUrl(currentBgUrl) : currentBgUrl;
+        el.pvBgImg.src = validBg;
         el.pvBgImg.style.display = 'block';
-        el.bgThumbImg.src = currentBgUrl;
+        el.bgThumbImg.src = validBg;
         el.bgThumbImg.classList.remove('hidden');
         el.bgThumbPlaceholder.classList.add('hidden');
         el.btnRemoveBg.classList.remove('hidden');
@@ -908,7 +909,8 @@
       const sigSvg = document.getElementById('pvSigSvg');
       if (sigImg && sigSvg) {
         if (currentSigUrl) {
-          sigImg.src = currentSigUrl;
+          const validSig = typeof getValidImageUrl === 'function' ? getValidImageUrl(currentSigUrl) : currentSigUrl;
+          sigImg.src = validSig;
           sigImg.style.display = 'block';
           sigSvg.style.display = 'none';
         } else {

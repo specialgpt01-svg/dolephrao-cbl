@@ -1354,7 +1354,8 @@
         const eventDate = formatEventDate(eventDateRaw);
         const contact = act.contactName || '';
         const phone = act.contactPhone || '';
-        const img = act.coverImage || act.imageUrl || '';
+        const rawImg = act.coverImage || act.imageUrl || '';
+        const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : rawImg;
         const points = act.checkInPoints || 20;
         const passScore = act.quizPassScore || 80;
         const checkInsCount = act.checkInsCount || 0;

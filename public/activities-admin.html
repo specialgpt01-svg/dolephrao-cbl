@@ -1010,7 +1010,8 @@
         const capacity = act.capacity || '';
         const contact = act.contactName || '';
         const phone = act.contactPhone || '';
-        const img = act.imageUrl || '';
+        const rawImg = act.imageUrl || '';
+        const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : rawImg;
         const order = act.displayOrder || 0;
         const checkInPoints = act.checkInPoints || 20;
         const checkInsCount = act.checkInsCount || 0;

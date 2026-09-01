@@ -562,7 +562,8 @@
         const name = base.baseName || base.name || '(ไม่มีชื่อฐาน)';
         const desc = base.description || '';
         const isActive = (base.isActive !== false && base.isActive !== 0 && base.isActive !== '0');
-        const imgUrl = base.coverImage || '';
+        const rawImg = base.coverImage || '';
+        const imgUrl = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : rawImg;
         const orderNum = base.displayOrder != null ? base.displayOrder : (idx + 1);
         const hasGps = !!base.gps;
         const hasVideo = !!base.videoUrl;

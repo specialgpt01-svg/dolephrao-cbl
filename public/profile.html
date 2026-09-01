@@ -2041,7 +2041,8 @@
       const directorTitleEl = document.getElementById('cert-live-director-title');
 
       if (bgImg) {
-        const bgSrc = settings.backgroundUrl || settings.certificateTemplate || settings.globalCertTemplate || '';
+        const rawBg = settings.backgroundUrl || settings.certificateTemplate || settings.globalCertTemplate || '';
+        const bgSrc = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawBg) : rawBg;
         if (bgSrc) {
           bgImg.src = bgSrc;
           bgImg.crossOrigin = 'anonymous';
@@ -2148,7 +2149,8 @@
       }
 
       if (sigImg) {
-        const sigSrc = settings.signatureUrl || (cachedGlobalSettings && cachedGlobalSettings.signatureUrl) || '';
+        const rawSig = settings.signatureUrl || (cachedGlobalSettings && cachedGlobalSettings.signatureUrl) || '';
+        const sigSrc = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawSig) : rawSig;
         if (sigSrc) {
           sigImg.src = sigSrc;
           sigImg.crossOrigin = 'anonymous';
