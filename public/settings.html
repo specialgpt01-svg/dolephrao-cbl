@@ -342,7 +342,8 @@
       const urlInput = document.getElementById('signature-url');
       showToast('กำลังอัปโหลดไฟล์ลายเซ็นต์...', 'info');
 
-      fetch('/api/uploadImage', {
+      const uploadEndpoint = (typeof API_URL !== 'undefined' ? API_URL : '/api') + '/uploadImage';
+      fetch(uploadEndpoint, {
         method: 'POST',
         headers: {
           'X-Requested-With': 'XMLHttpRequest'

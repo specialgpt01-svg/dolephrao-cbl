@@ -1,7 +1,14 @@
 const LEGACY_APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycby5vSJSJZiL9qu6GPJgwVXNOIJvuHRc0JIqhf2TLp8j3kXcniD9HqShiIDt3-PUKjLA/exec';
-const API_URL = window.LOFT_API_URL || (location.protocol === 'file:' ? LEGACY_APPS_SCRIPT_API_URL : '/api');
+const LOFT_BASE_PATH = (function() {
+  if (typeof window === 'undefined' || location.protocol === 'file:') return '';
+  const path = window.location.pathname || '';
+  const lastSlash = path.lastIndexOf('/');
+  const dir = lastSlash >= 0 ? path.substring(0, lastSlash) : '';
+  return (dir && dir !== '/' ? dir : '');
+})();
+const API_URL = window.LOFT_API_URL || (location.protocol === 'file:' ? LEGACY_APPS_SCRIPT_API_URL : LOFT_BASE_PATH + '/api');
 const LOFT_FIREBASE_FREE_MODE = window.LOFT_FIREBASE_FREE_MODE === true;
-const LOFT_PLACEHOLDER_IMAGE = '/assets/placeholder-image.svg';
+const LOFT_PLACEHOLDER_IMAGE = LOFT_BASE_PATH + '/assets/placeholder-image.svg';
 const LOFT_AUTH_STORAGE_KEYS = [
   'authToken', 'nfe_auth_token', 'nfe_user', 'userPhone', 'userName', 'userRole', 'userTambon',
   'userScore', 'userNFEHours'
@@ -628,7 +635,7 @@ function getValidImageUrl(url) {
   if (str.indexOf('/storage/') > -1) {
     const sub = str.split('/storage/')[1] || '';
     const cleanSub = sub.replace(/[\]"'`\s]+$/g, '');
-    return '/storage/' + cleanSub;
+    return LOFT_BASE_PATH + '/storage/' + cleanSub;
   }
 
   if (str.indexOf('drive.google.com/file/d/') > -1) {

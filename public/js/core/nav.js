@@ -495,7 +495,13 @@
     }
     if (errEl) errEl.classList.add('hidden');
 
-    fetch('/api', {
+    const loginEndpoint = typeof API_URL !== 'undefined' ? API_URL : ((function(){
+      const path = window.location.pathname || '';
+      const dir = path.substring(0, path.lastIndexOf('/'));
+      return (dir && dir !== '/' ? dir : '') + '/api';
+    })());
+
+    fetch(loginEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'login', username: u, phone: u, password: p })
