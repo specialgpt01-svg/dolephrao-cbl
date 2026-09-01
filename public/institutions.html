@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏛️ จัดการสถานศึกษา และสถานศึกษาในสังกัด — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .inst-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .inst-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .sub-unit-tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .sub-unit-tag:hover {
+      background: rgba(37, 99, 235, 0.18);
+      border-color: rgba(37, 99, 235, 0.4);
+      color: #93c5fd;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Page Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md shadow-blue-500/20 shrink-0">
+          <i class="fas fa-building-columns"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการสถานศึกษา และสถานศึกษาในสังกัด
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Multi-Tenant System
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            บริหารจัดการสถานศึกษาหลัก (สกร.อำเภอ) และรายชื่อสถานศึกษาในสังกัด (ศกร.ระดับตำบล / ศศช.)
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="openInstitutionModal()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-md shadow-blue-600/30 transition-all active:scale-95">
+          <i class="fas fa-plus"></i> เพิ่มสถานศึกษาใหม่
+        </button>
+        <button type="button" onclick="openImportModal()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-md shadow-emerald-600/30 transition-all active:scale-95">
+          <i class="fas fa-file-csv"></i> นำเข้า CSV
+        </button>
+        <button type="button" onclick="loadInstitutions(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI Summary Cards -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md">
+        <div class="flex items-center justify-between text-blue-200 text-xs font-bold mb-1">
+          <span><i class="fas fa-building-columns mr-1"></i> สถานศึกษาหลัก</span>
+          <i class="fas fa-shield-alt text-white/40"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-white" id="stat-total-inst">0</div>
+        <span class="text-[10px] text-blue-200/80">สกร.ระดับอำเภอในระบบ</span>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md">
+        <div class="flex items-center justify-between text-emerald-200 text-xs font-bold mb-1">
+          <span><i class="fas fa-school mr-1"></i> สถานศึกษาในสังกัดรวม</span>
+          <i class="fas fa-sitemap text-white/40"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-white" id="stat-total-subunits">0</div>
+        <span class="text-[10px] text-emerald-200/80">ศกร.ตำบล และ ศศช. ทั้งหมด</span>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-800/70 border border-slate-700/80 shadow-md">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold mb-1">
+          <span><i class="fas fa-users text-blue-400 mr-1"></i> ผู้เรียนทั้งระบบ</span>
+          <i class="fas fa-user-graduate text-slate-600"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-slate-100" id="stat-total-users">0</div>
+        <span class="text-[10px] text-slate-400">สมาชิกผู้เรียนทั้งหมด</span>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-800/70 border border-slate-700/80 shadow-md">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold mb-1">
+          <span><i class="fas fa-map-location-dot text-emerald-400 mr-1"></i> แหล่งเรียนรู้รวม</span>
+          <i class="fas fa-book-open text-slate-600"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-slate-100" id="stat-total-sources">0</div>
+        <span class="text-[10px] text-slate-400">ฐานเรียนรู้และปราชญ์ชุมชน</span>
+      </div>
+    </section>
+
+    <!-- Search & Filter Bar -->
+    <section class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 flex flex-col md:flex-row items-center justify-between gap-3 shadow-md">
+      <div class="relative w-full md:w-96">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="inst-search-input" onkeyup="filterInstitutions()" placeholder="ค้นหาชื่อสถานศึกษา, อำเภอ, จังหวัด หรือ ศกร.ตำบล..." class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition">
+      </div>
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end text-xs text-slate-400">
+        <span id="inst-count-badge" class="px-3 py-1.5 rounded-xl bg-slate-700/50 border border-slate-600 text-slate-300 font-bold">
+          แสดง 0 สถานศึกษา
+        </span>
+      </div>
+    </section>
+
+    <!-- Institutions Cards Grid -->
+    <main id="institutions-container" class="space-y-4">
+      <div class="text-center py-16 text-slate-400">
+        <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-blue-500"></i>
+        <p class="text-sm font-semibold">กำลังโหลดข้อมูลสถานศึกษา...</p>
+      </div>
+    </main>
+
+  </div> <!-- End .max-w-7xl -->
+
+  <!-- ═══════════════════ Modal: Add / Edit Institution ═══════════════════ -->
+  <div id="modal-inst-form" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-base">
+            <i class="fas fa-building-columns"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="form-modal-title">เพิ่มสถานศึกษาใหม่</h3>
+            <p class="text-[11px] text-slate-400 m-0">กำหนดข้อมูลสถานศึกษาและรายชื่อสถานศึกษาในสังกัด</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeInstitutionModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="inst-form" onsubmit="submitInstitutionForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="form-id">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อสถานศึกษาหลัก <span class="text-rose-400">*</span></label>
+          <input type="text" id="form-name" required placeholder="เช่น ศกร.ระดับอำเภอแม่ริม (สกร.แม่ริม)" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">อำเภอ <span class="text-rose-400">*</span></label>
+            <input type="text" id="form-district" required placeholder="เช่น แม่ริม" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">จังหวัด <span class="text-rose-400">*</span></label>
+            <input type="text" id="form-province" required value="เชียงใหม่" placeholder="เช่น เชียงใหม่" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">รหัสย่อ (Code) <span class="text-slate-500 font-normal">(ภาษาอังกฤษ)</span></label>
+            <input type="text" id="form-code" placeholder="เช่น MAERIM" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white uppercase placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สีประจำสถานศึกษา</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="form-color" value="#2563eb" class="w-10 h-10 rounded-xl border border-slate-700 bg-transparent cursor-pointer p-0.5">
+              <input type="text" id="form-color-text" value="#2563eb" oninput="document.getElementById('form-color').value=this.value" class="flex-1 px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white uppercase font-mono placeholder-slate-500 focus:outline-none focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-bold text-slate-300">รายชื่อสถานศึกษาในสังกัด (ศกร.ระดับตำบล / ศศช.)</label>
+            <span class="text-[10px] text-slate-400" id="form-subunits-count">0 แห่ง</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mb-1.5"><i class="fas fa-info-circle mr-1"></i>พิมพ์รายชื่อ <b>1 แห่ง ต่อ 1 บรรทัด</b> (ระบบจะจัดเก็บเป็นตัวเลือกตำบล/สังกัดอัตโนมัติ)</p>
+          <textarea id="form-subunits" rows="6" oninput="updateSubUnitsLineCount(this.value)" placeholder="ศกร.ระดับตำบลริมใต้&#10;ศกร.ระดับตำบลริมเหนือ&#10;ศกร.ระดับตำบลสันโป่ง&#10;ศศช.บ้านปางกว้าง" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 leading-relaxed font-sans"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeInstitutionModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold shadow-md shadow-blue-600/30 transition">
+            💾 บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Quick Manage Sub-Units ═══════════════════ -->
+  <div id="modal-subunits-quick" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+            <i class="fas fa-sitemap"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="quick-subunits-title">จัดการสถานศึกษาในสังกัด</h3>
+            <p class="text-[11px] text-slate-400 m-0" id="quick-subunits-subtitle">เพิ่ม ลบ หรือแก้ไข ศกร.ตำบล / ศศช.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeQuickSubUnitsModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="quick-inst-id">
+
+      <!-- Add Sub-Unit Input Bar -->
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="quick-add-subunit-input" placeholder="พิมพ์ชื่อ ศกร.ตำบล หรือ ศศช. ใหม่..." onkeydown="if(event.key==='Enter'){event.preventDefault();addQuickSubUnit();}" class="flex-1 px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+        <button type="button" onclick="addQuickSubUnit()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition">
+          <i class="fas fa-plus mr-1"></i> เพิ่ม
+        </button>
+      </div>
+
+      <!-- Tag List -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span>รายชื่อปัจจุบัน (<span id="quick-tags-count">0</span> แห่ง):</span>
+          <button type="button" onclick="sortQuickSubUnits()" class="text-blue-400 hover:underline text-[11px]">
+            <i class="fas fa-sort-alpha-down mr-1"></i> เรียงตาม ก-ฮ
+          </button>
+        </div>
+        <div id="quick-subunits-tags-container" class="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-3 rounded-xl bg-slate-800/40 border border-slate-800 custom-scrollbar">
+          <!-- Tags injected here -->
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <button type="button" onclick="closeQuickSubUnitsModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button type="button" onclick="saveQuickSubUnitsAction()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition">
+          💾 บันทึกรายชื่อในสังกัด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: CSV Import ═══════════════════ -->
+  <div id="modal-csv-import" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+            <i class="fas fa-file-csv"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">นำเข้าสถานศึกษาด้วย CSV</h3>
+            <p class="text-[11px] text-slate-400 m-0">อัปโหลดไฟล์ CSV เพื่อเพิ่มสถานศึกษาและรายชื่อสังกัดเป็นชุด</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeImportModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-4 border-2 border-dashed border-slate-700 hover:border-emerald-500/60 rounded-2xl text-center bg-slate-800/30 transition cursor-pointer" onclick="document.getElementById('csv-file-input').click()">
+          <i class="fas fa-cloud-upload-alt text-3xl text-emerald-400 mb-2"></i>
+          <p class="text-slate-300 font-bold mb-1">คลิกเพื่อเลือกไฟล์ CSV หรือลากไฟล์มาวางที่นี่</p>
+          <p class="text-[10px] text-slate-500">รองรับ UTF-8 CSV</p>
+          <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="handleCsvFileSelected(this)">
+        </div>
+
+        <div id="csv-selected-info" style="display:none;" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center justify-between">
+          <span id="csv-filename" class="font-bold">filename.csv</span>
+          <button type="button" onclick="clearCsvSelection()" class="text-slate-400 hover:text-white"><i class="fas fa-trash"></i></button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700 text-[11px] text-slate-400 leading-relaxed">
+          <b class="text-slate-200">รูปแบบคอลัมน์ CSV ที่แนะนำ:</b><br>
+          <code class="text-emerald-400 font-mono">id, name, district, province, code, sub_units</code><br>
+          *(คอลัมน์ sub_units คั่นรายชื่อด้วยเครื่องหมายจุลภาค <code>,</code> หรือ <code>;</code>)*
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeImportModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="button" id="btn-do-import" onclick="processCsvImport()" disabled class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold opacity-50 cursor-not-allowed transition">
+            🚀 เริ่มนำเข้าข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Alert ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-inst-v2"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-inst-v2"></script>
+
+  <script>
+    let allInstitutions = [];
+    let currentEditingSubUnits = [];
+
+    // Helper: Toast Notifications
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-blue-600 text-white border-blue-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Data Loading ───────────────────────────────────────────
+    function loadInstitutions(forceRefresh = false) {
+      const container = document.getElementById('institutions-container');
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      if (!allInstitutions.length || forceRefresh) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400">
+            <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-blue-500"></i>
+            <p class="text-sm font-semibold">กำลังโหลดข้อมูลสถานศึกษา...</p>
+          </div>
+        `;
+      }
+
+      apiGet('getInstitutions', withAuthParams({}))
+        .then(function(res) {
+          if (icon) icon.classList.remove('fa-spin');
+          if (!res || res.status !== 'success' || !Array.isArray(res.institutions)) {
+            container.innerHTML = `
+              <div class="text-center py-16 text-slate-400 bg-slate-800/40 rounded-3xl border border-slate-700">
+                <i class="fas fa-building-circle-exclamation text-4xl mb-3 text-slate-500"></i>
+                <h4 class="text-base font-bold text-slate-300">ไม่พบข้อมูลสถานศึกษา</h4>
+                <p class="text-xs text-slate-500 mt-1">คลิกปุ่ม "+ เพิ่มสถานศึกษาใหม่" ด้านบนเพื่อเริ่มสร้างสถานศึกษาแรก</p>
+              </div>
+            `;
+            return;
+          }
+
+          allInstitutions = res.institutions;
+          
+          // Update KPI Stats
+          const totalInst = allInstitutions.length;
+          let totalSubUnits = 0;
+          allInstitutions.forEach(inst => {
+            const subs = inst.subUnits || inst.sub_units || [];
+            totalSubUnits += subs.length;
+          });
+
+          document.getElementById('stat-total-inst').innerText = res.stats?.totalInstitutions || totalInst;
+          document.getElementById('stat-total-subunits').innerText = res.stats?.totalSubUnits || totalSubUnits;
+          document.getElementById('stat-total-users').innerText = res.stats?.totalUsers || '-';
+          document.getElementById('stat-total-sources').innerText = res.stats?.totalSources || '-';
+
+          renderInstitutionsList(allInstitutions);
+        })
+        .catch(function(err) {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Error loading institutions:', err);
+          container.innerHTML = `
+            <div class="text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดข้อมูล</h4>
+              <p class="text-xs text-rose-400/80 mt-1">กรุณาลองกดปุ่มโหลดใหม่ หรือตรวจสอบการเชื่อมต่อเซิร์ฟเวอร์</p>
+              <button onclick="loadInstitutions(true)" class="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition">
+                <i class="fas fa-sync-alt mr-1"></i> ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          `;
+          showToast("ไม่สามารถโหลดข้อมูลสถานศึกษาได้", "error");
+        });
+    }
+
+    // ─── Rendering ──────────────────────────────────────────────
+    function renderInstitutionsList(list) {
+      const container = document.getElementById('institutions-container');
+      const badge = document.getElementById('inst-count-badge');
+      if (badge) badge.innerText = `แสดง ${list.length} จาก ${allInstitutions.length} สถานศึกษา`;
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-search text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ไม่พบสถานศึกษาที่ตรงกับคำค้นหา</h4>
+            <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือกดล้างการค้นหา</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach(inst => {
+        const subs = inst.subUnits || inst.sub_units || [];
+        const isRoot = (inst.id === 'INS_PHRAO');
+        const themeColor = inst.themeColor || '#2563eb';
+        const codeDisplay = inst.code || inst.id.replace('INS_', '');
+        
+        let subTagsHtml = '';
+        if (subs.length > 0) {
+          subs.forEach((sub, idx) => {
+            subTagsHtml += `
+              <span class="sub-unit-tag">
+                <i class="fas fa-school text-[10px] text-blue-400"></i> ${escapeHtml(sub)}
+              </span>
+            `;
+          });
+        } else {
+          subTagsHtml = '<span class="text-xs text-slate-500 italic">ยังไม่มีสถานศึกษาในสังกัด (คลิก "จัดการสังกัด" เพื่อเพิ่ม)</span>';
+        }
+
+        const deleteBtnHtml = isRoot
+          ? ''
+          : `
+            <button type="button" onclick="deleteInstitutionAction('${escapeJS(inst.id)}', '${escapeJS(inst.name)}')" class="px-3 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition active:scale-95" title="ลบสถานศึกษานี้">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+
+        html += `
+          <div class="inst-card p-5 sm:p-6" data-inst-id="${escapeHtml(inst.id)}">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+              
+              <!-- Left: Header info -->
+              <div class="flex items-start sm:items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-md shrink-0" style="background: linear-gradient(135deg, ${themeColor}, #1e293b);">
+                  ${escapeHtml(codeDisplay)}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-base sm:text-lg font-black text-white m-0">${escapeHtml(inst.name || inst.id)}</h3>
+                    ${isRoot ? '<span class="px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30"><i class="fas fa-crown text-[9px] mr-1"></i>สถานศึกษาหลัก</span>' : ''}
+                  </div>
+                  <div class="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+                    <span><i class="fas fa-map-marker-alt text-blue-400 mr-1"></i>อ.${escapeHtml(inst.district || '-')}, จ.${escapeHtml(inst.province || 'เชียงใหม่')}</span>
+                    <span>•</span>
+                    <span><i class="fas fa-sitemap text-emerald-400 mr-1"></i><b class="text-slate-200">${subs.length}</b> สถานศึกษาในสังกัด</span>
+                    ${inst.usersCount !== undefined ? `<span>•</span><span><i class="fas fa-users text-indigo-400 mr-1"></i>${inst.usersCount} ผู้เรียน</span>` : ''}
+                    ${inst.sourcesCount !== undefined ? `<span>•</span><span><i class="fas fa-book-open text-amber-400 mr-1"></i>${inst.sourcesCount} แหล่งเรียนรู้</span>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Actions -->
+              <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <button type="button" onclick="openQuickSubUnitsModal('${escapeJS(inst.id)}')" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 transition active:scale-95">
+                  <i class="fas fa-sitemap"></i> จัดการสังกัด (${subs.length})
+                </button>
+                <button type="button" onclick="openInstitutionModal('${escapeJS(inst.id)}')" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 transition active:scale-95">
+                  <i class="fas fa-edit"></i> แก้ไขข้อมูล
+                </button>
+                ${deleteBtnHtml}
+              </div>
+            </div>
+
+            <!-- Sub-units Tag Cloud -->
+            <div class="mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  รายชื่อสถานศึกษาในสังกัด (ศกร.ระดับตำบล / ศศช.)
+                </span>
+                <button type="button" onclick="openQuickSubUnitsModal('${escapeJS(inst.id)}')" class="text-[11px] text-blue-400 hover:text-blue-300 font-bold transition">
+                  <i class="fas fa-plus text-[10px] mr-1"></i>เพิ่ม/แก้ไขรายชื่อ
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar p-1">
+                ${subTagsHtml}
+              </div>
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Search / Filter ─────────────────────────────────────────
+    function filterInstitutions() {
+      const q = (document.getElementById('inst-search-input')?.value || '').trim().toLowerCase();
+      if (!q) {
+        renderInstitutionsList(allInstitutions);
+        return;
+      }
+
+      const filtered = allInstitutions.filter(inst => {
+        const name = String(inst.name || '').toLowerCase();
+        const district = String(inst.district || '').toLowerCase();
+        const province = String(inst.province || '').toLowerCase();
+        const code = String(inst.code || '').toLowerCase();
+        const subs = (inst.subUnits || inst.sub_units || []).map(s => String(s).toLowerCase());
+
+        return name.includes(q) ||
+               district.includes(q) ||
+               province.includes(q) ||
+               code.includes(q) ||
+               subs.some(sub => sub.includes(q));
+      });
+
+      renderInstitutionsList(filtered);
+    }
+
+    // ─── Modal 1: Add / Edit Institution Form ────────────────────
+    function openInstitutionModal(instId = '') {
+      const modal = document.getElementById('modal-inst-form');
+      const form = document.getElementById('inst-form');
+      form.reset();
+
+      const titleEl = document.getElementById('form-modal-title');
+      const submitBtn = document.getElementById('form-submit-btn');
+      const idInput = document.getElementById('form-id');
+      const nameInput = document.getElementById('form-name');
+      const districtInput = document.getElementById('form-district');
+      const provinceInput = document.getElementById('form-province');
+      const codeInput = document.getElementById('form-code');
+      const colorInput = document.getElementById('form-color');
+      const colorTextInput = document.getElementById('form-color-text');
+      const subUnitsInput = document.getElementById('form-subunits');
+
+      if (instId) {
+        const inst = allInstitutions.find(i => String(i.id) === String(instId));
+        if (inst) {
+          titleEl.innerText = '✏️ แก้ไขข้อมูลสถานศึกษา';
+          submitBtn.innerText = '💾 บันทึกการแก้ไข';
+          idInput.value = inst.id || '';
+          nameInput.value = inst.name || '';
+          districtInput.value = inst.district || '';
+          provinceInput.value = inst.province || 'เชียงใหม่';
+          codeInput.value = inst.code || '';
+          const col = inst.themeColor || '#2563eb';
+          colorInput.value = col;
+          colorTextInput.value = col;
+          const subs = inst.subUnits || inst.sub_units || [];
+          subUnitsInput.value = subs.join('\n');
+          updateSubUnitsLineCount(subUnitsInput.value);
+        }
+      } else {
+        titleEl.innerText = '🏫 เพิ่มสถานศึกษาใหม่ (Multi-Tenant)';
+        submitBtn.innerText = '💾 สร้างสถานศึกษาใหม่';
+        idInput.value = '';
+        provinceInput.value = 'เชียงใหม่';
+        colorInput.value = '#2563eb';
+        colorTextInput.value = '#2563eb';
+        subUnitsInput.value = '';
+        updateSubUnitsLineCount('');
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeInstitutionModal() {
+      document.getElementById('modal-inst-form').style.display = 'none';
+    }
+
+    function updateSubUnitsLineCount(val) {
+      const lines = val.split('\n').map(s => s.trim()).filter(Boolean);
+      const countEl = document.getElementById('form-subunits-count');
+      if (countEl) countEl.innerText = `${lines.length} แห่ง`;
+    }
+
+    function submitInstitutionForm(event) {
+      event.preventDefault();
+      const id = document.getElementById('form-id').value.trim();
+      const name = document.getElementById('form-name').value.trim();
+      const district = document.getElementById('form-district').value.trim();
+      const province = document.getElementById('form-province').value.trim() || 'เชียงใหม่';
+      const code = document.getElementById('form-code').value.trim();
+      const themeColor = document.getElementById('form-color').value.trim();
+      const subUnits = document.getElementById('form-subunits').value.trim();
+
+      if (!name) {
+        showToast('กรุณากรอกชื่อสถานศึกษา', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('createOrUpdateInstitution', withAuthParams({
+        id: id,
+        name: name,
+        district: district,
+        province: province,
+        code: code,
+        themeColor: themeColor,
+        subUnits: subUnits
+      }))
+        .then(function(res) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกข้อมูล';
+          if (res && res.status === 'success') {
+            showToast(id ? 'แก้ไขข้อมูลสถานศึกษาเรียบร้อยแล้ว' : 'สร้างสถานศึกษาใหม่สำเร็จเรียบร้อยแล้ว', 'success');
+            closeInstitutionModal();
+            loadInstitutions(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(function(err) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกข้อมูล';
+          console.error('Save institution error:', err);
+          showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+        });
+    }
+
+    // ─── Modal 2: Quick Sub-Units Manager ────────────────────────
+    function openQuickSubUnitsModal(instId) {
+      const inst = allInstitutions.find(i => String(i.id) === String(instId));
+      if (!inst) return;
+
+      document.getElementById('quick-inst-id').value = inst.id;
+      document.getElementById('quick-subunits-title').innerText = `🌿 จัดการสังกัด: ${inst.name}`;
+      document.getElementById('quick-subunits-subtitle').innerText = `อ.${inst.district || '-'}, จ.${inst.province || 'เชียงใหม่'}`;
+      
+      const subs = inst.subUnits || inst.sub_units || [];
+      currentEditingSubUnits = [...subs];
+
+      renderQuickSubUnitsTags();
+      document.getElementById('modal-subunits-quick').style.display = 'flex';
+      document.getElementById('quick-add-subunit-input').focus();
+    }
+
+    function closeQuickSubUnitsModal() {
+      document.getElementById('modal-subunits-quick').style.display = 'none';
+    }
+
+    function renderQuickSubUnitsTags() {
+      const container = document.getElementById('quick-subunits-tags-container');
+      const countEl = document.getElementById('quick-tags-count');
+      if (countEl) countEl.innerText = currentEditingSubUnits.length;
+
+      if (!currentEditingSubUnits.length) {
+        container.innerHTML = '<span class="text-xs text-slate-500 italic py-2">ยังไม่มีรายชื่อในสังกัด กดเพิ่มด้านบน</span>';
+        return;
+      }
+
+      let html = '';
+      currentEditingSubUnits.forEach((sub, idx) => {
+        html += `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-700/80 border border-slate-600 text-slate-200 text-xs font-semibold hover:border-blue-500 transition">
+            <span>${escapeHtml(sub)}</span>
+            <button type="button" onclick="removeQuickSubUnit(${idx})" class="w-4 h-4 rounded-full bg-slate-600 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[9px] transition">
+              <i class="fas fa-times"></i>
+            </button>
+          </span>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function addQuickSubUnit() {
+      const input = document.getElementById('quick-add-subunit-input');
+      const val = (input.value || '').trim();
+      if (!val) return;
+
+      if (currentEditingSubUnits.includes(val)) {
+        showToast(`มี "${val}" อยู่ในรายการแล้ว`, 'warning');
+        return;
+      }
+
+      currentEditingSubUnits.push(val);
+      renderQuickSubUnitsTags();
+      input.value = '';
+      input.focus();
+    }
+
+    function removeQuickSubUnit(index) {
+      currentEditingSubUnits.splice(index, 1);
+      renderQuickSubUnitsTags();
+    }
+
+    function sortQuickSubUnits() {
+      currentEditingSubUnits.sort((a, b) => a.localeCompare(b, 'th'));
+      renderQuickSubUnitsTags();
+      showToast('เรียงลำดับตามตัวอักษรเรียบร้อยแล้ว', 'info');
+    }
+
+    function saveQuickSubUnitsAction() {
+      const instId = document.getElementById('quick-inst-id').value;
+      if (!instId) return;
+
+      apiPost('updateSubUnits', withAuthParams({
+        id: instId,
+        subUnits: currentEditingSubUnits
+      }))
+        .then(function(res) {
+          if (res && res.status === 'success') {
+            showToast('บันทึกรายชื่อสถานศึกษาในสังกัดเรียบร้อยแล้ว', 'success');
+            closeQuickSubUnitsModal();
+            loadInstitutions(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(function(err) {
+          console.error('Update sub units error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+        });
+    }
+
+    // ─── Delete Institution ─────────────────────────────────────
+    function deleteInstitutionAction(instId, instName) {
+      if (instId === 'INS_PHRAO') {
+        showToast('ไม่สามารถลบสถานศึกษาหลักของระบบ (สกร.อำเภอพร้าว) ได้ครับ', 'warning');
+        return;
+      }
+
+      showCustomConfirm({
+        title: 'ยืนยันการลบสถานศึกษา',
+        message: `ต้องการลบสถานศึกษา "${instName}" ใช่หรือไม่?\n⚠️ ข้อมูลสถานศึกษาและสถานศึกษาในสังกัดจะถูกลบออกจากระบบอย่างถาวร`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        apiPost('deleteInstitution', withAuthParams({ id: instId }))
+          .then(function(res) {
+            if (res && res.status === 'success') {
+              showToast(`ลบสถานศึกษา "${instName}" เรียบร้อยแล้ว`, 'success');
+              loadInstitutions(true);
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(function(err) {
+            console.error('Delete institution error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบสถานศึกษา', 'error');
+          });
+      });
+    }
+
+    // ─── Modal 3: CSV Import ─────────────────────────────────────
+    let selectedCsvContent = '';
+
+    function openImportModal() {
+      clearCsvSelection();
+      document.getElementById('modal-csv-import').style.display = 'flex';
+    }
+
+    function closeImportModal() {
+      document.getElementById('modal-csv-import').style.display = 'none';
+      clearCsvSelection();
+    }
+
+    function handleCsvFileSelected(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        document.getElementById('csv-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        document.getElementById('csv-selected-info').style.display = 'flex';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          selectedCsvContent = e.target.result;
+          const btn = document.getElementById('btn-do-import');
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.classList.add('hover:bg-emerald-500');
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    function clearCsvSelection() {
+      selectedCsvContent = '';
+      const input = document.getElementById('csv-file-input');
+      if (input) input.value = '';
+      const info = document.getElementById('csv-selected-info');
+      if (info) info.style.display = 'none';
+      const btn = document.getElementById('btn-do-import');
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.classList.remove('hover:bg-emerald-500');
+      }
+    }
+
+    function processCsvImport() {
+      if (!selectedCsvContent) {
+        showToast('กรุณาเลือกไฟล์ CSV ก่อนครับ', 'warning');
+        return;
+      }
+
+      const lines = selectedCsvContent.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length <= 1) {
+        showToast('ไฟล์ CSV ว่างเปล่า หรือมีแค่ Header', 'warning');
+        return;
+      }
+
+      showToast(`กำลังประมวลผล ${lines.length - 1} แถว...`, 'info');
+      
+      // Auto parse CSV headers
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+      let importedCount = 0;
+
+      // Sequential async creation
+      let promise = Promise.resolve();
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
+        if (!cols.length || !cols[0]) continue;
+
+        const row = {};
+        headers.forEach((h, idx) => { row[h] = cols[idx] || ''; });
+
+        const name = row['name'] || row['ชื่อสถานศึกษา'] || cols[1] || cols[0];
+        const district = row['district'] || row['อำเภอ'] || cols[2] || '';
+        const province = row['province'] || row['จังหวัด'] || cols[3] || 'เชียงใหม่';
+        const code = row['code'] || row['รหัส'] || cols[4] || '';
+        const subUnits = row['sub_units'] || row['subunits'] || row['สังกัด'] || cols[5] || '';
+
+        promise = promise.then(() => {
+          return apiPost('createOrUpdateInstitution', withAuthParams({
+            name: name,
+            district: district,
+            province: province,
+            code: code,
+            subUnits: subUnits.replace(/;/g, '\n')
+          })).then(res => {
+            if (res && res.status === 'success') importedCount++;
+          }).catch(() => {});
+        });
+      }
+
+      promise.then(() => {
+        showToast(`นำเข้าสำเร็จ ${importedCount} สถานศึกษา`, 'success');
+        closeImportModal();
+        loadInstitutions(true);
+      });
+    }
+
+    // ─── Initialize on Page Load ────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      loadInstitutions(true);
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# AI Rules & Instructions
+
+- **Do Not Open DOM / Browser Subagent:** Do not use `browser_subagent` or open the browser/DOM to verify UI. The user will test and verify the UI manually.
+- **Do Not Deploy:** Do not run deploy commands (such as `firebase deploy`). The user will handle deployment manually.
+- **Local Dev Server:** The local development server runs on `http://127.0.0.1:5000/`.
+- **Code Edits Only:** Focus solely on modifying and repairing the codebase.

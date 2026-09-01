@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌿 จัดการฐานการเรียนรู้ — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .base-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .base-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+      border-color: rgba(13, 148, 136, 0.4);
+    }
+    .base-card.dragging {
+      opacity: 0.4;
+      border-style: dashed;
+      border-color: #14b8a6;
+    }
+    .drag-handle {
+      cursor: grab;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 flex items-center justify-center text-white text-xl shadow-md shadow-teal-500/20 shrink-0">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการฐานการเรียนรู้ (Learning Bases)
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30">
+              Curriculum & Bases
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            กำหนดฐานย่อย พิกัด GPS จุดประสงค์ เนื้อหาบทเรียน วิดีโอ และจัดเรียงลำดับการเรียนรู้
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="openBaseEditorModal()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white shadow-md shadow-teal-600/30 transition-all active:scale-95">
+          <i class="fas fa-plus"></i> เพิ่มฐานการเรียนรู้
+        </button>
+        <button type="button" onclick="saveBasesOrder()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-slate-700/80 hover:bg-slate-700 text-teal-300 border border-teal-500/30 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-sort-numeric-down"></i> บันทึกลำดับ
+        </button>
+        <button type="button" onclick="loadBasesForSelectedSource(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Unified Center Banner -->
+    <div class="p-3.5 px-4 mb-5 rounded-2xl bg-gradient-to-r from-sky-950/80 via-teal-950/60 to-slate-900/80 border border-sky-500/30 flex items-center justify-between gap-3 shadow-md flex-wrap">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm shrink-0">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white m-0">✨ ใหม่! จัดการแหล่งเรียนรู้ ฐานย่อย และแบบทดสอบรวมในหน้าเดียว (Unified Center)</h4>
+          <p class="text-[11px] text-slate-400 m-0">จัดการครบวงจรในหน้าเดียว ไม่ต้องสลับหน้าไปมา</p>
+        </div>
+      </div>
+      <a href="sources.html" id="btn-jump-unified" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
+        <span>เปิด Unified Center</span> <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Filters & Selectors Bar -->
+    <section class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        
+        <!-- Institution Selector -->
+        <div class="relative">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-university mr-1 text-blue-400"></i>สถานศึกษาหลัก</label>
+          <select id="filter-institution" onchange="onInstitutionChange()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 font-medium">
+            <option value="ALL">🌍 กำลังโหลดสถานศึกษา...</option>
+          </select>
+        </div>
+
+        <!-- Source Selector -->
+        <div class="relative">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-bookmark mr-1 text-teal-400"></i>แหล่งเรียนรู้หลัก (บังคับเลือก) <span class="text-rose-400">*</span></label>
+          <select id="filter-source" onchange="loadBasesForSelectedSource()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-teal-500 font-bold">
+            <option value="">— กำลังโหลดรายชื่อแหล่งเรียนรู้... —</option>
+          </select>
+        </div>
+
+        <!-- Live Search in Bases -->
+        <div class="relative md:col-span-2 lg:col-span-1">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-search mr-1 text-amber-400"></i>ค้นหาฐานการเรียนรู้</label>
+          <div class="relative">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="filter-search" onkeyup="filterBasesList()" placeholder="พิมพ์ชื่อฐาน, จุดประสงค์ หรือเนื้อหา..." class="w-full pl-9 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Status Badges -->
+      <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/50 flex-wrap gap-2">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span id="source-name-badge" class="font-bold text-teal-300">
+            <i class="fas fa-location-dot mr-1"></i>ยังไม่ได้เลือกแหล่งเรียนรู้
+          </span>
+          <span>•</span>
+          <span><i class="fas fa-layer-group text-slate-500 mr-1"></i><b class="text-white" id="count-bases">0</b> ฐานในแหล่งนี้</span>
+          <span>•</span>
+          <span><i class="fas fa-check-circle text-emerald-400 mr-1"></i><b class="text-white" id="count-active">0</b> เปิดใช้งาน</span>
+        </div>
+        <div id="drag-hint" class="text-[11px] text-slate-500 italic hidden sm:block">
+          <i class="fas fa-info-circle mr-1"></i>ลากที่ไอคอน ⋮⋮ หรือกดปุ่ม ⬆️/⬇️ เพื่อสลับลำดับ แล้วกด "บันทึกลำดับ"
+        </div>
+      </div>
+    </section>
+
+    <!-- Bases List Container -->
+    <main id="bases-container" class="space-y-3.5">
+      <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+        <i class="fas fa-arrow-up-right-from-square text-3xl mb-3 text-teal-500"></i>
+        <h4 class="text-sm font-bold text-slate-300">กรุณาเลือกแหล่งเรียนรู้จากตัวเลือกด้านบน</h4>
+        <p class="text-xs text-slate-500 mt-1">เพื่อเรียกดู เพิ่ม แก้ไข หรือจัดเรียงฐานการเรียนรู้</p>
+      </div>
+    </main>
+
+  </div> <!-- End Main Container -->
+
+  <!-- ═══════════════════ Modal: Add / Edit Base ═══════════════════ -->
+  <div id="modal-base-editor" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-base">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="base-modal-title">เพิ่มฐานการเรียนรู้</h3>
+            <p class="text-[11px] text-slate-400 m-0" id="base-modal-subtitle">กำหนดเนื้อหา บทเรียน รูปภาพ และพิกัด GPS</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBaseEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="base-form" onsubmit="submitBaseForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="base-form-id">
+
+        <!-- Base Name & Source -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-300 mb-1">ชื่อฐานการเรียนรู้ <span class="text-rose-400">*</span></label>
+            <input type="text" id="base-form-name" required placeholder="เช่น ฐานที่ 1: การเพาะเห็ดโคนและเห็ดนางฟ้า" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ลำดับการแสดงผล</label>
+            <input type="number" id="base-form-order" placeholder="เช่น 1, 2, 3" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+        <!-- Short Description -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">คำอธิบายสั้นของฐาน</label>
+          <textarea id="base-form-desc" rows="2" placeholder="สรุปภาพรวมของฐานการเรียนรู้นี้สั้นๆ..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"></textarea>
+        </div>
+
+        <!-- Cover Image & Active -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-300 mb-1">URL รูปภาพปกฐาน</label>
+            <div class="flex gap-2">
+              <input type="text" id="base-form-cover" placeholder="https://... หรืออัปโหลดไฟล์" class="flex-1 px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500" oninput="updateCoverPreview(this.value)">
+              <input type="file" id="base-form-cover-file" accept="image/*" class="hidden" onchange="handleCoverFileSelected(this)">
+              <button type="button" onclick="document.getElementById('base-form-cover-file').click()" class="px-3.5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-bold transition flex items-center gap-1 shrink-0">
+                <i class="fas fa-upload"></i> อัปโหลด
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-2.5 bg-slate-800/60 border border-slate-700 rounded-xl h-[42px]">
+            <label for="base-form-active" class="font-bold text-slate-300 cursor-pointer select-none">เปิดใช้งานฐานนี้</label>
+            <input type="checkbox" id="base-form-active" checked class="w-4 h-4 text-teal-600 rounded bg-slate-700 border-slate-600 focus:ring-teal-500 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Cover Image Preview Thumbnail -->
+        <div id="base-cover-preview-box" class="p-2 rounded-xl bg-slate-800/40 border border-slate-700/60 flex items-center gap-3" style="display:none;">
+          <div id="base-cover-preview-img" class="w-16 h-12 rounded-lg bg-cover bg-center border border-slate-600 shrink-0"></div>
+          <div class="text-[11px] text-slate-400 truncate">
+            <span class="text-slate-200 font-bold">รูปภาพตัวอย่าง</span><br>
+            <span id="base-cover-preview-url" class="truncate font-mono"></span>
+          </div>
+          <button type="button" onclick="clearCoverImage()" class="ml-auto text-slate-400 hover:text-rose-400 p-1"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Learning Purpose / History -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1"><i class="fas fa-bullseye text-amber-400 mr-1"></i>จุดประสงค์การเรียนรู้ (ฐาน)</label>
+          <textarea id="base-form-history" rows="3" placeholder="ระบุสิ่งที่ผู้เรียนจะได้รับจากฐานนี้..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"></textarea>
+        </div>
+
+        <!-- Content / Lesson -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1"><i class="fas fa-book text-teal-400 mr-1"></i>เนื้อหา / บทเรียนความรู้</label>
+          <textarea id="base-form-result" rows="4" placeholder="ระบุเนื้อหา ขั้นตอน หรือองค์ความรู้ประจำฐาน..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 leading-relaxed"></textarea>
+        </div>
+
+        <!-- Multimedia & Links -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1"><i class="fab fa-youtube text-rose-400 mr-1"></i>ลิงก์วิดีโอ (YouTube)</label>
+            <input type="text" id="base-form-video" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1"><i class="fas fa-map-location-dot text-emerald-400 mr-1"></i>พิกัด / แผนที่ GPS</label>
+            <input type="text" id="base-form-gps" placeholder="เช่น 19.35824, 99.20145" class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1"><i class="fas fa-images text-indigo-400 mr-1"></i>ลิงก์แกลอรีรูปภาพ</label>
+            <input type="text" id="base-form-gallery" placeholder="ลิงก์อัลบั้มรูปภาพ Google Drive / OneDrive" class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1"><i class="fas fa-link text-blue-400 mr-1"></i>ลิงก์สื่อภายนอก / เว็บไซต์</label>
+            <input type="text" id="base-form-external" placeholder="https://..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeBaseEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="base-form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold shadow-md shadow-teal-600/30 transition">
+            💾 บันทึกฐานการเรียนรู้
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-bases-v1"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-bases-v1"></script>
+
+  <script>
+    let allInstitutions = [];
+    let allSources = [];
+    let currentBases = [];
+    let draggedBaseId = null;
+
+    // Toast Notification Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-teal-600 text-white border-teal-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Initialize Data ─────────────────────────────────────────
+    function initData() {
+      const instSelect = document.getElementById('filter-institution');
+      const sourceSelect = document.getElementById('filter-source');
+
+      instSelect.innerHTML = '<option value="ALL">⏳ กำลังโหลดสถานศึกษา...</option>';
+      sourceSelect.innerHTML = '<option value="">⏳ กำลังโหลดรายชื่อแหล่งเรียนรู้...</option>';
+
+      Promise.all([
+        apiGet('getInstitutions', withAuthParams({})).catch(err => {
+          console.error('Load institutions error:', err);
+          return { status: 'error', institutions: [] };
+        }),
+        apiGet('getSources', withAuthParams({})).catch(err => {
+          console.error('Load sources error:', err);
+          return [];
+        })
+      ]).then(([instRes, sourcesRes]) => {
+        // 1. Process Institutions
+        if (instRes && instRes.status === 'success' && Array.isArray(instRes.institutions) && instRes.institutions.length > 0) {
+          allInstitutions = instRes.institutions;
+        } else {
+          allInstitutions = [
+            { id: 'INS_PHRAO', name: 'ศกร.ระดับอำเภอพร้าว' },
+            { id: 'INS_MAERIM', name: 'ศกร.ระดับอำเภอแม่ริม' }
+          ];
+        }
+
+        let instHtml = '<option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>';
+        allInstitutions.forEach(inst => {
+          instHtml += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name || inst.id)}</option>`;
+        });
+        instSelect.innerHTML = instHtml;
+
+        const userInst = (localStorage.getItem('userInstitution') || '').trim();
+        if (userInst && userInst !== 'ALL' && userInst !== 'ทั้งหมด' && allInstitutions.find(i => i.id === userInst)) {
+          instSelect.value = userInst;
+        } else if (allInstitutions.length > 0) {
+          instSelect.value = allInstitutions[0].id;
+        } else {
+          instSelect.value = 'ALL';
+        }
+
+        // 2. Process Sources
+        if (Array.isArray(sourcesRes)) {
+          allSources = sourcesRes;
+        } else if (sourcesRes && Array.isArray(sourcesRes.sources)) {
+          allSources = sourcesRes.sources;
+        } else if (sourcesRes && Array.isArray(sourcesRes.data)) {
+          allSources = sourcesRes.data;
+        } else {
+          allSources = [];
+        }
+
+        populateSourcesDropdown();
+      });
+    }
+
+    function onInstitutionChange() {
+      populateSourcesDropdown();
+    }
+
+    function populateSourcesDropdown() {
+      const instFilter = (document.getElementById('filter-institution')?.value || 'ALL').trim();
+      const sourceSelect = document.getElementById('filter-source');
+
+      let filtered = allSources;
+      if (instFilter && instFilter !== 'ALL' && instFilter !== 'ทั้งหมด') {
+        filtered = allSources.filter(s => {
+          const sInst = (s.institutionId || s.institution_id || '').trim();
+          return !sInst || sInst === instFilter || sInst === 'ALL';
+        });
+      }
+
+      if (!filtered.length) {
+        sourceSelect.innerHTML = `<option value="">— ไม่พบแหล่งเรียนรู้ในสถานศึกษานี้ (${allSources.length} แหล่งทั้งหมด) —</option>`;
+        renderBasesList([]);
+        return;
+      }
+
+      let html = `<option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการฐาน (${filtered.length} แหล่ง) —</option>`;
+      filtered.forEach(s => {
+        const id = s.SourceID || s.sourceId || s.id || '';
+        const name = s.SourceName || s.sourceName || s.name || id;
+        const tambonRaw = s.TambonName || s.tambon || '';
+        const tambon = tambonRaw ? ` (${typeof formatTambon === 'function' ? formatTambon(tambonRaw) : tambonRaw})` : '';
+        html += `<option value="${escapeHtml(id)}">${escapeHtml(name)}${escapeHtml(tambon)}</option>`;
+      });
+      sourceSelect.innerHTML = html;
+
+      // Auto-select first source
+      if (filtered.length > 0) {
+        const firstId = filtered[0].SourceID || filtered[0].sourceId || filtered[0].id || '';
+        sourceSelect.value = firstId;
+        loadBasesForSelectedSource();
+      }
+    }
+
+    // ─── Load Bases ──────────────────────────────────────────────
+    function loadBasesForSelectedSource(forceRefresh = false) {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      const container = document.getElementById('bases-container');
+      const badge = document.getElementById('source-name-badge');
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      if (!sourceId) {
+        if (icon) icon.classList.remove('fa-spin');
+        badge.innerHTML = '<i class="fas fa-location-dot mr-1"></i>ยังไม่ได้เลือกแหล่งเรียนรู้';
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-arrow-up-right-from-square text-3xl mb-3 text-teal-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">กรุณาเลือกแหล่งเรียนรู้จากตัวเลือกด้านบน</h4>
+            <p class="text-xs text-slate-500 mt-1">เพื่อเรียกดู เพิ่ม แก้ไข หรือจัดเรียงฐานการเรียนรู้</p>
+          </div>
+        `;
+        document.getElementById('count-bases').innerText = '0';
+        document.getElementById('count-active').innerText = '0';
+        return;
+      }
+
+      const selectedSourceObj = allSources.find(s => String(s.SourceID || s.sourceId || s.id) === String(sourceId));
+      if (selectedSourceObj) {
+        const sName = selectedSourceObj.SourceName || selectedSourceObj.sourceName || selectedSourceObj.name || sourceId;
+        badge.innerHTML = `<i class="fas fa-location-dot mr-1 text-teal-400"></i>${escapeHtml(sName)}`;
+      }
+
+      container.innerHTML = `
+        <div class="text-center py-16 text-slate-400">
+          <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-teal-500"></i>
+          <p class="text-sm font-semibold">กำลังโหลดฐานการเรียนรู้...</p>
+        </div>
+      `;
+
+      apiGet('getAdminBasesBySource', withAuthParams({ sourceId: sourceId }))
+        .then(res => {
+          if (icon) icon.classList.remove('fa-spin');
+          let list = [];
+          if (Array.isArray(res)) list = res;
+          else if (res && Array.isArray(res.data)) list = res.data;
+          else if (res && Array.isArray(res.bases)) list = res.bases;
+
+          currentBases = list;
+          renderBasesList(currentBases);
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Load bases error:', err);
+          container.innerHTML = `
+            <div class="text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดฐานการเรียนรู้</h4>
+              <p class="text-xs text-rose-400/80 mt-1">กรุณาลองกดปุ่มโหลดใหม่อีกครั้ง</p>
+            </div>
+          `;
+          showToast('ไม่สามารถโหลดข้อมูลฐานการเรียนรู้ได้', 'error');
+        });
+    }
+
+    // ─── Rendering ──────────────────────────────────────────────
+    function renderBasesList(list) {
+      const container = document.getElementById('bases-container');
+      const totalCount = list.length;
+      const activeCount = list.filter(b => b.isActive !== false && b.isActive !== 0 && b.isActive !== '0').length;
+      
+      document.getElementById('count-bases').innerText = totalCount;
+      document.getElementById('count-active').innerText = activeCount;
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-layer-group text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ยังไม่มีฐานการเรียนรู้ในแหล่งนี้</h4>
+            <p class="text-xs text-slate-500 mt-1">คลิกปุ่ม "+ เพิ่มฐานการเรียนรู้" ด้านบนเพื่อเริ่มสร้างฐานแรก</p>
+            <button onclick="openBaseEditorModal()" class="mt-4 px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-xl transition">
+              <i class="fas fa-plus mr-1"></i> เพิ่มฐานแรกเลย
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach((base, idx) => {
+        const id = base.baseId || base.id || '';
+        const name = base.baseName || base.name || '(ไม่มีชื่อฐาน)';
+        const desc = base.description || '';
+        const isActive = (base.isActive !== false && base.isActive !== 0 && base.isActive !== '0');
+        const imgUrl = base.coverImage || '';
+        const orderNum = base.displayOrder != null ? base.displayOrder : (idx + 1);
+        const hasGps = !!base.gps;
+        const hasVideo = !!base.videoUrl;
+
+        html += `
+          <div class="base-card p-4 sm:p-5" draggable="true" 
+               ondragstart="onDragStart(event, '${escapeJS(id)}')" 
+               ondragover="onDragOver(event)" 
+               ondrop="onDrop(event, '${escapeJS(id)}')" 
+               ondragend="onDragEnd()"
+               data-base-id="${escapeHtml(id)}">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              
+              <!-- Left: Order Handle & Cover & Title -->
+              <div class="flex items-start gap-3.5 flex-1 min-w-0">
+                
+                <!-- Drag Handle & Order Badge -->
+                <div class="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                  <div class="drag-handle text-slate-500 hover:text-teal-400 text-base p-1" title="ลากเพื่อสลับลำดับ">
+                    <i class="fas fa-grip-vertical"></i>
+                  </div>
+                  <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 text-teal-400 flex items-center justify-center font-black text-xs shadow-inner">
+                    ${idx + 1}
+                  </div>
+                </div>
+
+                <!-- Cover Image Thumbnail -->
+                ${imgUrl 
+                  ? `<div class="w-14 h-14 rounded-xl bg-cover bg-center border border-slate-700 shrink-0 shadow-sm" style="background-image:url('${escapeHtml(imgUrl)}');"></div>`
+                  : `<div class="w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 text-slate-600 flex items-center justify-center text-xl shrink-0"><i class="fas fa-image"></i></div>`
+                }
+
+                <!-- Info Block -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-sm sm:text-base font-bold text-white m-0 truncate">${escapeHtml(name)}</h3>
+                    ${isActive 
+                      ? '<span class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">เปิดใช้งาน</span>' 
+                      : '<span class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-slate-700 text-slate-400 border border-slate-600">ปิดใช้งาน</span>'
+                    }
+                  </div>
+                  
+                  ${desc ? `<p class="text-xs text-slate-400 mt-1 line-clamp-1">${escapeHtml(desc)}</p>` : ''}
+                  
+                  <!-- Tag Badges -->
+                  <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-400 flex-wrap">
+                    ${hasGps ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-emerald-400 font-mono"><i class="fas fa-location-dot mr-1"></i>${escapeHtml(base.gps)}</span>` : ''}
+                    ${hasVideo ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-rose-400"><i class="fab fa-youtube mr-1"></i>วิดีโอ</span>` : ''}
+                    ${base.history ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-amber-400"><i class="fas fa-bullseye mr-1"></i>มีจุดประสงค์</span>` : ''}
+                    ${base.result ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-teal-400"><i class="fas fa-book-open mr-1"></i>มีบทเรียน</span>` : ''}
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right: Quick Sort Arrows & Actions -->
+              <div class="flex items-center gap-1.5 shrink-0 justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-700/50">
+                <button type="button" onclick="moveBase(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-slate-800 text-slate-300 flex items-center justify-center text-xs transition" title="เลื่อนขึ้น">
+                  <i class="fas fa-chevron-up"></i>
+                </button>
+                <button type="button" onclick="moveBase(${idx}, 1)" ${idx === list.length - 1 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-slate-800 text-slate-300 flex items-center justify-center text-xs transition" title="เลื่อนลง">
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <button type="button" onclick="openBaseEditorModal('${escapeJS(id)}')" class="px-3 py-2 text-xs font-bold rounded-xl bg-teal-600/20 hover:bg-teal-600/30 text-teal-400 border border-teal-500/30 transition active:scale-95 flex items-center gap-1">
+                  <i class="fas fa-edit"></i> แก้ไข
+                </button>
+                <button type="button" onclick="deleteBaseAction('${escapeJS(id)}', '${escapeJS(name)}')" class="px-3 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition active:scale-95" title="ลบฐานนี้">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Filter ──────────────────────────────────────────────────
+    function filterBasesList() {
+      const q = (document.getElementById('filter-search')?.value || '').trim().toLowerCase();
+      if (!q) {
+        renderBasesList(currentBases);
+        return;
+      }
+
+      const filtered = currentBases.filter(b => {
+        const name = String(b.baseName || b.name || '').toLowerCase();
+        const desc = String(b.description || '').toLowerCase();
+        const history = String(b.history || '').toLowerCase();
+        const result = String(b.result || '').toLowerCase();
+        return name.includes(q) || desc.includes(q) || history.includes(q) || result.includes(q);
+      });
+
+      renderBasesList(filtered);
+    }
+
+    // ─── Drag & Drop Reordering ──────────────────────────────────
+    function onDragStart(e, baseId) {
+      draggedBaseId = baseId;
+      e.currentTarget.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function onDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function onDrop(e, targetBaseId) {
+      e.preventDefault();
+      if (!draggedBaseId || draggedBaseId === targetBaseId) return;
+
+      const fromIdx = currentBases.findIndex(b => String(b.baseId || b.id) === String(draggedBaseId));
+      const toIdx = currentBases.findIndex(b => String(b.baseId || b.id) === String(targetBaseId));
+
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const item = currentBases.splice(fromIdx, 1)[0];
+        currentBases.splice(toIdx, 0, item);
+        renderBasesList(currentBases);
+        showToast('สลับตำแหน่งแล้ว กด "บันทึกลำดับ" เพื่อบันทึกลงระบบ', 'info');
+      }
+    }
+
+    function onDragEnd() {
+      document.querySelectorAll('.base-card').forEach(el => el.classList.remove('dragging'));
+      draggedBaseId = null;
+    }
+
+    function moveBase(index, direction) {
+      const targetIdx = index + direction;
+      if (targetIdx < 0 || targetIdx >= currentBases.length) return;
+
+      const item = currentBases.splice(index, 1)[0];
+      currentBases.splice(targetIdx, 0, item);
+      renderBasesList(currentBases);
+      showToast('สลับตำแหน่งแล้ว กด "บันทึกลำดับ" เพื่อบันทึกลงระบบ', 'info');
+    }
+
+    function saveBasesOrder() {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      if (!sourceId) return showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนครับ', 'warning');
+      if (!currentBases.length) return showToast('ไม่มีรายการฐานสำหรับจัดลำดับ', 'warning');
+
+      const baseIds = currentBases.map(b => b.baseId || b.id).filter(Boolean);
+
+      apiPost('saveAdminBaseOrder', withAuthParams({
+        sourceId: sourceId,
+        baseIds: baseIds
+      }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast('บันทึกลำดับฐานการเรียนรู้เรียบร้อยแล้ว', 'success');
+            loadBasesForSelectedSource();
+          } else {
+            showToast(res.message || 'บันทึกลำดับไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Save order error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกลำดับ', 'error');
+        });
+    }
+
+    // ─── Add / Edit Modal ────────────────────────────────────────
+    function openBaseEditorModal(baseId = '') {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      if (!sourceId) {
+        showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนเพิ่มฐานครับ', 'warning');
+        return;
+      }
+
+      const form = document.getElementById('base-form');
+      form.reset();
+      clearCoverImage();
+
+      const titleEl = document.getElementById('base-modal-title');
+      const submitBtn = document.getElementById('base-form-submit-btn');
+      const idInput = document.getElementById('base-form-id');
+      const nameInput = document.getElementById('base-form-name');
+      const orderInput = document.getElementById('base-form-order');
+      const descInput = document.getElementById('base-form-desc');
+      const coverInput = document.getElementById('base-form-cover');
+      const activeInput = document.getElementById('base-form-active');
+      const historyInput = document.getElementById('base-form-history');
+      const resultInput = document.getElementById('base-form-result');
+      const videoInput = document.getElementById('base-form-video');
+      const gpsInput = document.getElementById('base-form-gps');
+      const galleryInput = document.getElementById('base-form-gallery');
+      const externalInput = document.getElementById('base-form-external');
+
+      if (baseId) {
+        const item = currentBases.find(b => String(b.baseId || b.id) === String(baseId));
+        if (item) {
+          titleEl.innerText = `✏️ แก้ไขฐาน: ${item.baseName || item.name || ''}`;
+          submitBtn.innerText = '💾 บันทึกการแก้ไข';
+          idInput.value = item.baseId || item.id || '';
+          nameInput.value = item.baseName || item.name || '';
+          orderInput.value = item.displayOrder != null ? item.displayOrder : '';
+          descInput.value = item.description || '';
+          coverInput.value = item.coverImage || '';
+          activeInput.checked = (item.isActive !== false && item.isActive !== 0 && item.isActive !== '0');
+          historyInput.value = item.history || '';
+          resultInput.value = item.result || '';
+          videoInput.value = item.videoUrl || '';
+          gpsInput.value = item.gps || '';
+          galleryInput.value = item.gallery || '';
+          externalInput.value = item.external || '';
+          updateCoverPreview(item.coverImage || '');
+        }
+      } else {
+        titleEl.innerText = '🌿 เพิ่มฐานการเรียนรู้ใหม่';
+        submitBtn.innerText = '💾 สร้างฐานการเรียนรู้';
+        idInput.value = '';
+        orderInput.value = currentBases.length + 1;
+        activeInput.checked = true;
+      }
+
+      document.getElementById('modal-base-editor').style.display = 'flex';
+      nameInput.focus();
+    }
+
+    function closeBaseEditorModal() {
+      document.getElementById('modal-base-editor').style.display = 'none';
+    }
+
+    function updateCoverPreview(url) {
+      const box = document.getElementById('base-cover-preview-box');
+      const img = document.getElementById('base-cover-preview-img');
+      const text = document.getElementById('base-cover-preview-url');
+      if (url && url.trim()) {
+        img.style.backgroundImage = `url('${url.trim()}')`;
+        text.innerText = url.trim();
+        box.style.display = 'flex';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function clearCoverImage() {
+      document.getElementById('base-form-cover').value = '';
+      document.getElementById('base-cover-preview-box').style.display = 'none';
+      document.getElementById('base-form-cover-file').value = '';
+    }
+
+    function handleCoverFileSelected(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result;
+          document.getElementById('base-form-cover').value = base64;
+          updateCoverPreview(base64);
+          showToast(`เลือกรูปภาพ ${file.name} เรียบร้อยแล้ว`, 'info');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function submitBaseForm(e) {
+      e.preventDefault();
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      if (!sourceId) return showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนครับ', 'warning');
+
+      const rawId = document.getElementById('base-form-id').value.trim();
+      const name = document.getElementById('base-form-name').value.trim();
+      const order = document.getElementById('base-form-order').value.trim();
+      const desc = document.getElementById('base-form-desc').value.trim();
+      const cover = document.getElementById('base-form-cover').value.trim();
+      const isActive = document.getElementById('base-form-active').checked;
+      const history = document.getElementById('base-form-history').value.trim();
+      const result = document.getElementById('base-form-result').value.trim();
+      const video = document.getElementById('base-form-video').value.trim();
+      const gps = document.getElementById('base-form-gps').value.trim();
+      const gallery = document.getElementById('base-form-gallery').value.trim();
+      const external = document.getElementById('base-form-external').value.trim();
+
+      if (!name) return showToast('กรุณาระบุชื่อฐานการเรียนรู้', 'warning');
+
+      const submitBtn = document.getElementById('base-form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        mode: rawId ? 'edit' : 'create',
+        sourceId: sourceId,
+        baseId: rawId,
+        baseName: name,
+        description: desc,
+        coverImage: cover,
+        displayOrder: order,
+        isActive: isActive,
+        history: history,
+        result: result,
+        videoUrl: video,
+        gps: gps,
+        gallery: gallery,
+        external: external
+      };
+
+      apiPost('saveAdminBase', withAuthParams(payload))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกฐานการเรียนรู้';
+          if (res && res.status === 'success') {
+            showToast(rawId ? 'แก้ไขฐานการเรียนรู้เรียบร้อย' : 'สร้างฐานการเรียนรู้ใหม่สำเร็จ', 'success');
+            closeBaseEditorModal();
+            loadBasesForSelectedSource();
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกฐานการเรียนรู้';
+          console.error('Save base error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+        });
+    }
+
+    // ─── Delete Base ─────────────────────────────────────────────
+    function deleteBaseAction(baseId, baseName) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบฐานการเรียนรู้',
+        message: `ต้องการลบฐานการเรียนรู้ "${baseName}" ใช่หรือไม่?\n⚠️ ข้อมูลเนื้อหาและแบบทดสอบของฐานนี้จะถูกลบออกจากระบบ`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        apiPost('deleteAdminBase', withAuthParams({ baseId: baseId }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`ลบฐานการเรียนรู้ "${baseName}" เรียบร้อยแล้ว`, 'success');
+              loadBasesForSelectedSource();
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Delete base error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบฐานการเรียนรู้', 'error');
+          });
+      });
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="assets/loft-logo.svg">
+  <title>PHRAO LEARNING DISTRICT | ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      font-family: 'Prompt', sans-serif;
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+      overflow-x: hidden;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .hero-glow {
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 10px;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ─── Leaderboard Podium V2 Styles ─── */
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 12px;
+      padding: 60px 10px 20px;
+      margin-bottom: 20px;
+      background: radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.15), transparent 70%),
+                  radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.08), transparent 60%);
+      position: relative;
+    }
+    .podium-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 31%;
+      max-width: 140px;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .podium-item:hover {
+      transform: scale(1.06) translateY(-4px);
+    }
+    .podium-item.rank-1 { order: 2; z-index: 10; width: 36%; max-width: 160px; }
+    .podium-item.rank-2 { order: 1; z-index: 5; }
+    .podium-item.rank-3 { order: 3; z-index: 5; }
+
+    .podium-avatar-wrapper {
+      position: relative;
+      margin-bottom: -16px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .crown-icon {
+      position: absolute;
+      top: -38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.6rem;
+      z-index: 10;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+    }
+    .rank-1 .crown-icon {
+      top: -46px;
+      font-size: 3.8rem;
+      color: #fbbf24;
+      filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+      animation: crown-float 2.5s ease-in-out infinite;
+    }
+    .rank-2 .crown-icon {
+      color: #e2e8f0;
+      font-size: 2.4rem;
+    }
+    .rank-3 .crown-icon {
+      color: #d97706;
+      font-size: 2.4rem;
+    }
+    @keyframes crown-float {
+      0%, 100% { transform: translateX(-50%) translateY(0) rotate(-4deg); }
+      50% { transform: translateX(-50%) translateY(-6px) rotate(4deg); }
+    }
+
+    .podium-img-wrapper {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      padding: 3px;
+      background: #0f172a;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rank-1 .podium-img-wrapper {
+      width: 92px;
+      height: 92px;
+      border: 3px solid #fbbf24;
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
+    }
+    .rank-2 .podium-img-wrapper {
+      border: 3px solid #cbd5e1;
+    }
+    .rank-3 .podium-img-wrapper {
+      border: 3px solid #d97706;
+    }
+    .podium-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .podium-base {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 14px;
+      border-radius: 16px 16px 8px 8px;
+      font-weight: 900;
+      font-size: 2.2rem;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 2px 6px rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .rank-1 .podium-base {
+      height: 130px;
+      background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
+      border-top: 3px solid #fde68a;
+    }
+    .rank-2 .podium-base {
+      height: 95px;
+      background: linear-gradient(135deg, #94a3b8, #64748b, #475569);
+      border-top: 3px solid #f1f5f9;
+    }
+    .rank-3 .podium-base {
+      height: 75px;
+      background: linear-gradient(135deg, #b45309, #78350f, #451a03);
+      border-top: 3px solid #fed7aa;
+    }
+
+    .podium-info {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      text-align: center;
+    }
+    .podium-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .rank-1 .podium-name {
+      font-size: 0.95rem;
+      color: #fbbf24;
+    }
+    .podium-score-badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: #0f172a;
+      background: linear-gradient(to right, #fbbf24, #f59e0b);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .rank-2 .podium-score-badge {
+      background: #e2e8f0;
+    }
+    .rank-3 .podium-score-badge {
+      background: #fdba74;
+    }
+
+    /* Rank List Cards (Rank 4-10) */
+    .rank-list-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .rank-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .rank-card:hover {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(245, 158, 11, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .rank-number {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #64748b;
+      width: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-950 pb-24 md:pb-10">
+
+  <!-- ═══════════════════ Top Navigation Bar ═══════════════════ -->
+  <header class="w-full sticky top-0 z-40 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-3 group shrink-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-emerald-500 p-0.5 shadow-lg shadow-orange-500/20 group-hover:scale-105 transition">
+          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center overflow-hidden">
+            <img src="assets/loft-logo.svg" alt="Logo" class="w-7 h-7 object-contain">
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-sm sm:text-base font-black tracking-tight text-white m-0">PHRAO LEARNING</h1>
+            <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">สกร.</span>
+          </div>
+          <p class="text-[10px] text-slate-400 m-0 font-medium">อำเภอแห่งการเรียนรู้ตลอดชีวิต</p>
+        </div>
+      </a>
+
+      <!-- Top Nav Links (แสดงเฉพาะ Tablet / หน้าจอกลาง ส่วนจอคอมใช้เมนูด้านซ้าย) -->
+      <nav class="hidden md:flex lg:hidden items-center gap-1 bg-slate-800/60 p-1 rounded-full border border-slate-700/60 text-xs font-bold">
+        <a href="index.html" class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black shadow-sm">หน้าแรก</a>
+        <a href="map.html" class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-700/50 transition">🗺️ แผนที่</a>
+        <a href="scan.html" class="px-3 py-1.5 rounded-full text-amber-400 hover:text-white hover:bg-slate-700/50 transition"><i class="fas fa-qrcode mr-1"></i> สแกน</a>
+        <a href="learning.html" class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-700/50 transition">📚 แหล่งเรียนรู้</a>
+        <a href="market.html" class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-700/50 transition">🛍️ ตลาดชุมชน</a>
+        <a href="upskill.html" class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-700/50 transition">🎬 อัพสกิล</a>
+      </nav>
+
+      <!-- User Auth & Institution Selector -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <!-- Institution Selector -->
+        <select id="user-institution-select" onchange="onUserInstitutionChange(this.value)" class="text-xs bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-slate-200 font-bold focus:outline-none focus:border-amber-500 cursor-pointer max-w-[110px] sm:max-w-none">
+          <option value="INS_PHRAO" selected>🏫 สกร.พร้าว</option>
+          <option value="INS_MAERIM">🏫 สกร.แม่ริม</option>
+        </select>
+
+        <!-- Guest / Logged in Container -->
+        <div id="nav-auth-container" class="flex items-center gap-1.5">
+          <button type="button" onclick="openLoginModal()" class="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition active:scale-95 flex items-center gap-1">
+            <i class="fas fa-sign-in-alt text-amber-400"></i> <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ═══════════════════ Hero Banner Section ═══════════════════ -->
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 pb-36 md:pb-16 space-y-6">
+
+    <!-- Hero Card Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 p-6 sm:p-10 shadow-2xl">
+      <div class="hero-glow bg-amber-500/20 -top-20 -left-20"></div>
+      <div class="hero-glow bg-emerald-500/15 -bottom-20 -right-20"></div>
+
+      <div class="relative z-10 max-w-2xl space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <i class="fas fa-sparkles"></i> PHRAO LEARNING DISTRICT 2026
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-black text-white leading-tight m-0">
+          ระบบขับเคลื่อนการเรียนรู้<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-emerald-400">
+            ตลอดชีวิตและยกระดับชุมชน
+          </span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed m-0 font-normal">
+          ค้นหาแหล่งเรียนรู้ชุมชนตามมาตรฐาน ม.6 ศึกษาดูงานผ่านคลิปวิดีโอ ทำแบบทดสอบรับเกียรติบัตร และสะสมแต้มแลกรับคูปองสินค้า OTOP
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <a href="learning.html" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-orange-500/25 transition active:scale-95 flex items-center gap-2">
+            <i class="fas fa-book-open"></i> เริ่มต้นเรียนรู้ทันที
+          </a>
+          <a href="scan.html" class="hero-scan-btn px-5 py-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs sm:text-sm transition active:scale-95 flex items-center gap-2">
+            <i class="fas fa-qrcode"></i> สแกนเช็กอิน
+          </a>
+          <a href="map.html" class="px-5 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition active:scale-95 flex items-center gap-2">
+            <i class="fas fa-map-marked-alt text-amber-400"></i> แผนที่
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Quick Category Grid (8 Hubs) ═══════════════════ -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3">
+      <a href="learning.html" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-sky-500/10">
+          <i class="fas fa-book-bookmark"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">แหล่งเรียนรู้</span>
+        <span class="text-[10px] text-slate-400 mt-0.5" id="stat-count-sources">0 แห่ง</span>
+      </a>
+
+      <a href="map.html" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-teal-500/10">
+          <i class="fas fa-map-location-dot"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">แผนที่ GPS</span>
+        <span class="text-[10px] text-slate-400 mt-0.5">พิกัดดาวเทียม</span>
+      </a>
+
+      <a href="scan.html" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-amber-500/40 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-amber-500/10">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <span class="text-xs font-bold text-amber-300 group-hover:text-white">สแกนเช็กอิน</span>
+        <span class="text-[10px] text-amber-400 mt-0.5">+20 แต้ม</span>
+      </a>
+
+      <a href="market.html" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-amber-500/10">
+          <i class="fas fa-store"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">ตลาดชุมชน</span>
+        <span class="text-[10px] text-slate-400 mt-0.5" id="stat-count-products">0 รายการ</span>
+      </a>
+
+      <a href="upskill.html" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-rose-500/10">
+          <i class="fas fa-play-circle"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">วิดีโออัพสกิล</span>
+        <span class="text-[10px] text-slate-400 mt-0.5" id="stat-count-videos">0 บทเรียน</span>
+      </a>
+
+      <a href="profile.html?tab=certs" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition shadow-md shadow-indigo-500/10">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">เกียรติบัตร</span>
+        <span class="text-[10px] text-slate-400 mt-0.5">กระเป๋าประกาศ</span>
+      </a>
+
+      <a href="profile.html?tab=idplan" class="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 flex flex-col items-center justify-center text-center group transition active:scale-95">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition shadow-md shadow-emerald-500/10">
+          <i class="fas fa-id-card-clip"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-200 group-hover:text-white">ID Plan</span>
+        <span class="text-[10px] text-slate-400 mt-0.5">แฟ้มสะสมงาน</span>
+      </a>
+    </div>
+
+    <!-- ═══════════════════ Featured Learning Sources ═══════════════════ -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-black text-white m-0 flex items-center gap-2">
+            <i class="fas fa-award text-amber-400"></i> แหล่งเรียนรู้เด่นรับรองมาตรฐาน สกร.
+          </h3>
+          <p class="text-[11px] text-slate-400 m-0">แหล่งเรียนรู้คุณภาพตาม พ.ร.บ. ส่งเสริมการเรียนรู้ พ.ศ. 2566</p>
+        </div>
+        <a href="learning.html" class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1">
+          ดูทั้งหมด <i class="fas fa-arrow-right text-[10px]"></i>
+        </a>
+      </div>
+
+      <div id="home-featured-sources-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════ Top Upskill Videos & Community Market ═══════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Top Upskill Videos -->
+      <section class="p-4 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-700/80 space-y-3.5 shadow-lg">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-white m-0 flex items-center gap-2">
+            <i class="fas fa-fire text-rose-500"></i> สื่อการเรียนรู้ออนไลน์แนะนำ
+          </h3>
+          <a href="upskill.html" class="text-xs font-bold text-sky-400 hover:text-sky-300">
+            ดูทั้งหมด <i class="fas fa-arrow-right text-[10px]"></i>
+          </a>
+        </div>
+        <div id="home-top-videos-list" class="space-y-2.5">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- Featured Community Market -->
+      <section class="p-4 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-700/80 space-y-3.5 shadow-lg">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-white m-0 flex items-center gap-2">
+            <i class="fas fa-gift text-amber-400"></i> สินค้าภูมิปัญญา & แลกคูปอง
+          </h3>
+          <a href="market.html" class="text-xs font-bold text-amber-400 hover:text-amber-300">
+            ดูทั้งหมด <i class="fas fa-arrow-right text-[10px]"></i>
+          </a>
+        </div>
+        <div id="home-featured-products-grid" class="grid grid-cols-2 gap-3">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══════════════════ Full Top 10 Podium Leaderboard ═══════════════════ -->
+    <section class="p-4 sm:p-6 rounded-3xl bg-gradient-to-b from-slate-900/90 via-slate-950/95 to-slate-900/90 border border-amber-500/30 space-y-6 shadow-2xl relative overflow-hidden">
+      <!-- Ambient Glow Behind -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-amber-500/10 blur-3xl pointer-events-none rounded-full"></div>
+
+      <div class="flex items-center justify-between flex-wrap gap-3 relative z-10 border-b border-slate-800/80 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-slate-950 text-xl shadow-lg shadow-amber-500/20 shrink-0 font-black">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-1.5">
+                กระดาน Top 10 ผู้เรียนยอดเยี่ยม
+              </h2>
+              <span class="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wide">
+                TOP 10 LEADERBOARD
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5 m-0">ผู้เรียนที่สะสมแต้มการเรียนรู้ สแกนเช็กอิน และทำแบบทดสอบสูงสุด</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <a href="profile.html" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-id-card text-emerald-400"></i> โปรไฟล์ของฉัน
+          </a>
+          <a href="profile.html?tab=cosmetics" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+            <i class="fas fa-palette"></i> ตกแต่งโปรไฟล์
+          </a>
+        </div>
+      </div>
+
+      <!-- Container for Podium & Top 4-10 -->
+      <div id="home-leaderboard-container" class="relative z-10">
+        <div class="flex flex-col items-center justify-center py-16 text-slate-400 gap-3">
+          <i class="fas fa-circle-notch fa-spin text-3xl text-amber-500"></i>
+          <p class="text-xs font-bold">กำลังโหลดกระดานจัดอันดับ Top 10...</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════ Shared Mobile Bottom Navigation Bar ═══════════════════ -->
+  <div class="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 md:hidden flex items-center justify-around py-2 px-1 text-[10px] font-bold text-slate-400 shadow-2xl">
+    <a href="index.html" class="flex flex-col items-center gap-1 text-amber-400">
+      <i class="fas fa-home text-base"></i>
+      <span>หน้าแรก</span>
+    </a>
+    <a href="map.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-map-marked-alt text-base"></i>
+      <span>แผนที่</span>
+    </a>
+    <a href="scan.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-qrcode text-base"></i>
+      <span>สแกน</span>
+    </a>
+    <a href="learning.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-book-open text-base"></i>
+      <span>แหล่งเรียนรู้</span>
+    </a>
+    <a href="market.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-store text-base"></i>
+      <span>ตลาด</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center gap-1 hover:text-slate-200" id="bottom-nav-profile">
+      <i class="fas fa-user text-base"></i>
+      <span>โปรไฟล์</span>
+    </a>
+  </div>
+
+  <!-- ═══════════════════ AI Assistant Floating Button ═══════════════════ -->
+  <div class="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40">
+    <button type="button" onclick="toggleAIChatModal()" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 flex items-center justify-center text-xl font-black shadow-xl shadow-orange-500/30 hover:scale-110 active:scale-95 transition-all">
+      <i class="fas fa-robot"></i>
+    </button>
+  </div>
+
+  <!-- ═══════════════════ AI Chat Modal ═══════════════════ -->
+  <div id="ai-chat-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm" style="display:none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl flex flex-col h-[80vh] overflow-hidden animate-pop">
+      <div class="p-3.5 border-b border-slate-800 bg-slate-800/80 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-black text-white m-0">ผู้ช่วยอัจฉริยะ (AI Learning Assistant)</h4>
+            <p class="text-[10px] text-slate-400 m-0">สอบถามข้อมูลแหล่งเรียนรู้ สรุปเนื้อหา หรือแนะนำการเรียน</p>
+          </div>
+        </div>
+        <button type="button" onclick="toggleAIChatModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs custom-scrollbar">
+        <div class="flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-xs">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3 text-slate-200 max-w-[85%] leading-relaxed">
+            สวัสดีครับ! ผมคือผู้ช่วยอัจฉริยะของ สกร.อำเภอพร้าว คุณสามารถสอบถามข้อมูลแหล่งเรียนรู้ สินค้าชุมชน หรือสอบถามแนวทางการพัฒนาทักษะได้เลยครับ 😊
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-800 bg-slate-800/40 flex items-center gap-2 shrink-0">
+        <input type="text" id="ai-chat-input" placeholder="พิมพ์คำถามของคุณที่นี่..." class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-amber-500" onkeydown="if(event.key==='Enter') sendAIChatMessage()">
+        <button type="button" onclick="sendAIChatMessage()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold rounded-xl text-xs shadow-md transition active:scale-95">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Admin Hub Navigation Modal / Drawer ═══════════════════ -->
+  <div id="admin-nav-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700 sm:rounded-3xl rounded-t-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <i class="fas fa-toolbox"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white m-0">ศูนย์จัดการระบบ (Admin Hub)</h3>
+            <p class="text-[10px] text-slate-400 m-0">เลือกระบบงานที่ต้องการเข้าจัดการข้อมูล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminNavModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto custom-scrollbar p-1">
+        <a href="sources.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">แหล่งเรียนรู้ ม.6</span>
+          <span class="text-[10px] text-slate-400">จัดการข้อมูลและปราชญ์</span>
+        </a>
+
+        <a href="bases.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-sky-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-sky-400">ฐานเรียนรู้ย่อย</span>
+          <span class="text-[10px] text-slate-400">ฐานกิจกรรมในแหล่ง</span>
+        </a>
+
+        <a href="activities-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-indigo-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-indigo-400">กิจกรรม & ป้าย QR</span>
+          <span class="text-[10px] text-slate-400">QR เช็กอินแต้ม, ข้อสอบ & เกียรติบัตร</span>
+        </a>
+
+        <a href="quizzes.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-emerald-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-emerald-400">ข้อสอบ & เกณฑ์</span>
+          <span class="text-[10px] text-slate-400">คลังข้อสอบ Pre/Post และเกณฑ์ผ่าน</span>
+        </a>
+
+        <a href="cert-editor.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-award"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">ออกแบบเกียรติบัตร</span>
+          <span class="text-[10px] text-slate-400">Live Designer & ปรับแต่งเทมเพลต</span>
+        </a>
+
+        <a href="users.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-blue-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-blue-400">จัดการผู้เรียน</span>
+          <span class="text-[10px] text-slate-400">สมาชิก, รูปโปรไฟล์, สิทธิ์</span>
+        </a>
+
+        <a href="approvals.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-purple-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-stamp"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-purple-400">ตรวจอนุมัติ</span>
+          <span class="text-[10px] text-slate-400">ID Plan และผลงานผู้เรียน</span>
+        </a>
+
+        <a href="market-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-store"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">ตลาด & คูปอง</span>
+          <span class="text-[10px] text-slate-400">สินค้า OTOP และส่วนลด</span>
+        </a>
+
+        <a href="stats.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">สถิติภาพรวม</span>
+          <span class="text-[10px] text-slate-400">รายงานสรุปผู้บริหาร</span>
+        </a>
+
+        <a href="institutions.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-school"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">สถานศึกษา</span>
+          <span class="text-[10px] text-slate-400">เครือข่าย สกร.อำเภอ</span>
+        </a>
+
+        <a href="upskill-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-video"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">วิดีโออัพสกิล</span>
+          <span class="text-[10px] text-slate-400">จัดการสื่อและคลิปเรียนรู้</span>
+        </a>
+
+        <a href="settings.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-400/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-slate-700/60 text-slate-300 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-cog"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-slate-300">ตั้งค่าระบบ</span>
+          <span class="text-[10px] text-slate-400">Gemini AI Key & กลาง</span>
+        </a>
+
+        <a href="scan.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <span class="text-xs font-bold text-amber-300 group-hover:text-white">สแกน QR เช็กอิน</span>
+          <span class="text-[10px] text-amber-400">เช็กอินสถานที่จริง</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Login / Auth Modal ═══════════════════ -->
+  <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" style="display:none;">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <img src="assets/loft-logo.svg" alt="Logo" class="w-6 h-6">
+          <h4 class="text-sm font-black text-white m-0">เข้าสู่ระบบ / เข้าใช้งาน</h4>
+        </div>
+        <button type="button" onclick="closeLoginModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="login-form" onsubmit="handleUserLogin(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">เบอร์โทรศัพท์ หรือ ชื่อผู้ใช้</label>
+          <input type="text" id="login-username" placeholder="08xxxxxxxx หรือ username" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-slate-400 font-bold">รหัสผ่าน</label>
+            <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] text-amber-400 hover:underline">ลืมรหัสผ่าน?</button>
+          </div>
+          <input type="password" id="login-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+
+        <div id="login-inline-error" class="p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hidden flex items-center gap-1.5">
+          <i class="fas fa-circle-exclamation text-rose-400 shrink-0"></i> <span id="login-inline-error-text">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/20 transition active:scale-95 cursor-pointer">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 text-center space-y-2">
+        <div>ยังไม่มีบัญชีผู้ใช้งาน?</div>
+        <button type="button" onclick="switchToRegisterModal()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fas fa-user-plus"></i> สมัครสมาชิกใหม่ (ลงทะเบียน)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Register Modal ═══════════════════ -->
+  <div id="register-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-black text-white m-0">สมัครสมาชิกใหม่</h4>
+            <p class="text-[10px] text-slate-400 m-0">ลงทะเบียนเพื่อสะสมแต้มและรับใบประกาศนียบัตร</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeRegisterModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="index-register-form" onsubmit="handleUserRegister(event)" class="space-y-3 text-xs text-left">
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">ชื่อ - นามสกุล <span class="text-rose-400">*</span></label>
+          <input type="text" id="index-reg-fullname" placeholder="เช่น นายสมชาย ใจดี" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">เบอร์โทรศัพท์ (ใช้เข้าสู่ระบบ) <span class="text-rose-400">*</span></label>
+            <input type="tel" id="index-reg-phone" placeholder="เช่น 0812345678" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ประเภทผู้เรียน</label>
+            <select id="index-reg-user-category" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="ประชาชนทั่วไป" selected>ประชาชนทั่วไป</option>
+              <option value="นักศึกษา สกร.">นักศึกษา สกร.</option>
+              <option value="นักเรียน / นักศึกษา">นักเรียน / นักศึกษา</option>
+              <option value="ผู้สูงอายุ">ผู้สูงอายุ</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">สถานศึกษา <span class="text-rose-400">*</span></label>
+            <select id="index-reg-institution" onchange="onIndexRegInstChange(this.value)" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="INS_PHRAO" selected>สกร.ระดับอำเภอพร้าว</option>
+              <option value="INS_MAERIM">สกร.ระดับอำเภอแม่ริม</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ศกร.ระดับตำบล / ศศช. <span class="text-rose-400">*</span></label>
+            <select id="index-reg-tambon" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer" required>
+              <option value="">— เลือกตำบลในสังกัด —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">รหัสผ่าน (อย่างน้อย 6 ตัว) <span class="text-rose-400">*</span></label>
+            <input type="password" id="index-reg-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" minlength="6" required>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ยืนยันรหัสผ่าน <span class="text-rose-400">*</span></label>
+            <input type="password" id="index-reg-confirm-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" minlength="6" required>
+          </div>
+        </div>
+
+        <div id="register-inline-error" class="p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hidden flex items-center gap-1.5">
+          <i class="fas fa-circle-exclamation text-rose-400 shrink-0"></i> <span id="register-inline-error-text">ข้อมูลไม่ถูกต้อง</span>
+        </div>
+
+        <div class="pt-2 space-y-2.5">
+          <button type="submit" id="btn-index-register" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black text-xs shadow-xl shadow-emerald-500/25 transition active:scale-95 cursor-pointer">
+            <i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก
+          </button>
+          <div class="text-center text-[11px] text-slate-400">
+            <span>มีบัญชีอยู่แล้ว?</span>
+            <button type="button" onclick="switchToLoginModal()" class="text-amber-400 font-bold hover:underline ml-1">เข้าสู่ระบบที่นี่</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Forgot Password Modal ═══════════════════ -->
+  <div id="forgot-password-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl text-center space-y-4 animate-pop">
+      <div class="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mx-auto border border-amber-500/30">
+        <i class="fas fa-key"></i>
+      </div>
+      <div>
+        <h4 class="text-base font-black text-white m-0">ลืมรหัสผ่าน</h4>
+        <p class="text-xs text-slate-300 m-0 mt-2 leading-relaxed">
+          หากท่านลืมรหัสผ่านเข้าใช้งาน สามารถแจ้ง **ครูประจำตำบล** หรือ **ผู้ดูแลระบบ สกร.** เพื่อขอรับการรีเซ็ตรหัสผ่านชั่วคราวได้ทันที
+        </p>
+      </div>
+      <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700 text-left text-xs space-y-1.5 text-slate-300">
+        <div class="font-bold text-amber-400">💡 ขั้นตอนการรีเซ็ต:</div>
+        <div>1. ติดต่อครูผู้สอนประจำตำบลของคุณ</div>
+        <div>2. ครูจะตั้งรหัสผ่านใหม่ (เช่น 123456) ให้ในระบบ</div>
+        <div>3. เข้าสู่ระบบแล้วตั้งรหัสผ่านใหม่ของตนเอง</div>
+      </div>
+      <button type="button" onclick="closeForgotPasswordModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+        เข้าใจแล้ว / ปิดหน้าต่าง
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-20 md:bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260822-user-home-v2"></script>
+  <script src="js/core/auth.js?v=20260822-user-home-v2"></script>
+
+  <script>
+    let homeSources = [];
+    let homeProducts = [];
+    let homeVideos = [];
+    let currentInstitution = localStorage.getItem('nfe_selected_institution') || 'INS_PHRAO';
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-100 border border-slate-700');
+      t.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold pointer-events-auto transition duration-300 ${bg}`;
+      t.innerHTML = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function openAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function onUserInstitutionChange(instId) {
+      currentInstitution = instId;
+      localStorage.setItem('nfe_selected_institution', instId);
+      loadHomeData();
+    }
+
+    function updateGlobalUserScore(newScore) {
+      const num = parseInt(newScore, 10) || 0;
+      localStorage.setItem('userScore', String(num));
+      const scoreValEl = document.getElementById('nav-user-points-val');
+      if (scoreValEl) scoreValEl.innerText = num.toLocaleString();
+    }
+    window.updateGlobalUserScore = updateGlobalUserScore;
+
+    function initUserNav() {
+      const container = document.getElementById('nav-auth-container');
+      if (!container) return;
+
+      const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token');
+      const userPhone = localStorage.getItem('userPhone') || '';
+      let user = null;
+      try { user = JSON.parse(localStorage.getItem('nfe_user') || localStorage.getItem('userData') || 'null'); } catch(e) {}
+
+      const storedScore = localStorage.getItem('userScore');
+      const score = (storedScore !== null && storedScore !== '')
+        ? parseInt(storedScore, 10)
+        : (user ? (user.score != null ? user.score : (user.points != null ? user.points : 0)) : 0);
+
+      const fullName = (user && (user.fullName || user.fullname || user.full_name || user.name || user.displayName)) || localStorage.getItem('userName') || (user && user.username) || userPhone || 'ผู้เรียน';
+      const avatarUrl = (user && (user.profileImage || user.profile_image || user.image || user.avatar || user.photoURL)) || localStorage.getItem('userAvatar') || '';
+      const role = String((user && user.role) || localStorage.getItem('userRole') || 'user').toLowerCase();
+
+      if (token && role !== 'guest') {
+        let adminBtn = '';
+        if (role === 'admin' || role === 'teacher') {
+          adminBtn = `
+            <a href="sources.html" class="px-2.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-bold transition flex items-center gap-1" title="ศูนย์จัดการระบบ">
+              <i class="fas fa-toolbox"></i> <span class="hidden sm:inline">ศูนย์จัดการ</span>
+            </a>
+          `;
+        }
+
+        const initialLetter = (fullName && fullName.trim() ? fullName.trim().charAt(0).toUpperCase() : 'U');
+        const avatarHtml = avatarUrl && avatarUrl.trim()
+          ? `<img src="${avatarUrl.trim()}" class="w-full h-full object-cover rounded-full" alt="Avatar">`
+          : initialLetter;
+
+        container.innerHTML = `
+          ${adminBtn}
+          <div class="flex items-center gap-1.5">
+            <a href="profile.html" class="flex items-center gap-2 p-1 pl-2 pr-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition group shadow-sm" title="ดูโปรไฟล์และเกียรติบัตร">
+              <div class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xs overflow-hidden shrink-0">
+                ${avatarHtml}
+              </div>
+              <span class="text-xs font-bold text-slate-200 hidden sm:inline truncate max-w-[120px] sm:max-w-[160px]">${escapeHtml(fullName)}</span>
+              <span id="nav-user-score-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 flex items-center gap-1 shrink-0">
+                🪙 <span id="nav-user-points-val">${Number(score || 0).toLocaleString()}</span>
+              </span>
+            </a>
+            <button type="button" onclick="handleIndexLogout()" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-rose-950/80 text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 flex items-center justify-center text-xs transition active:scale-95 cursor-pointer shrink-0" title="ออกจากระบบ">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        `;
+
+        // Background sync to fetch latest score and user profile
+        if (typeof apiGet === 'function' && typeof withAuthParams === 'function') {
+          apiGet('getProfile', withAuthParams({}))
+            .then(res => {
+              if (res && res.status === 'success' && res.profile) {
+                const p = res.profile;
+                if (p.score !== undefined) {
+                  localStorage.setItem('userScore', String(p.score));
+                  const scoreValEl = document.getElementById('nav-user-points-val');
+                  if (scoreValEl) scoreValEl.innerText = Number(p.score).toLocaleString();
+                }
+                if (p.fullName || p.name) {
+                  localStorage.setItem('userName', p.fullName || p.name);
+                }
+                localStorage.setItem('nfe_user', JSON.stringify(p));
+              }
+            })
+            .catch(() => {});
+        }
+      } else {
+        container.innerHTML = `
+          <button type="button" onclick="openLoginModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-sign-in-alt text-amber-400"></i> <span>เข้าสู่ระบบ</span>
+          </button>
+        `;
+      }
+    }
+
+    function handleIndexLogout() {
+      if (typeof logout === 'function') {
+        logout();
+      } else if (typeof showCustomConfirm === 'function') {
+        showCustomConfirm({
+          title: 'ออกจากระบบ',
+          message: 'คุณต้องการออกจากระบบ ใช่หรือไม่?',
+          type: 'logout',
+          icon: 'fa-sign-out-alt',
+          confirmText: 'ออกจากระบบ',
+          cancelText: 'ยกเลิก'
+        }, () => {
+          if (typeof logoutNoConfirm === 'function') {
+            logoutNoConfirm();
+          } else {
+            if (typeof clearAllAuthData === 'function') clearAllAuthData();
+            window.location.href = 'profile.html';
+          }
+        });
+      } else if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        if (typeof logoutNoConfirm === 'function') {
+          logoutNoConfirm();
+        } else {
+          if (typeof clearAllAuthData === 'function') clearAllAuthData();
+          window.location.href = 'profile.html';
+        }
+      }
+    }
+
+    function openLoginModal() {
+      document.getElementById('login-modal').style.display = 'flex';
+    }
+    function closeLoginModal() {
+      document.getElementById('login-modal').style.display = 'none';
+    }
+
+    function handleUserLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+      const btn = document.getElementById('login-submit-btn');
+      const errBox = document.getElementById('login-inline-error');
+      const errText = document.getElementById('login-inline-error-text');
+
+      if (errBox) errBox.classList.add('hidden');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังเข้าสู่ระบบ...';
+
+      apiPost('login', { username: u, phone: u, password: p })
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = 'เข้าสู่ระบบ';
+          if (res && res.status === 'success' && res.token) {
+            const token = res.token || "";
+            const userObj = res.user || res.profile || { username: u };
+            const uPhone = userObj.phone || userObj.username || u;
+            const uName = userObj.fullName || userObj.name || userObj.full_name || "";
+            const uRole = String(userObj.role || "user").trim().toLowerCase();
+            const uTambon = userObj.tambon || "";
+            const userInstVal = userObj.institutionId || userObj.institution_id || "INS_PHRAO";
+            const uScore = String(userObj.score || "0");
+
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('nfe_auth_token', token);
+            localStorage.setItem('userPhone', uPhone);
+            localStorage.setItem('userName', uName);
+            localStorage.setItem('userRole', uRole);
+            localStorage.setItem('userTambon', uTambon);
+            localStorage.setItem('userInstitution', userInstVal);
+            localStorage.setItem('userInstitutionId', userInstVal);
+            localStorage.setItem('nfe_selected_institution', userInstVal);
+            localStorage.setItem('nfe_user', JSON.stringify(userObj));
+            localStorage.setItem('userData', JSON.stringify(userObj));
+            localStorage.setItem('userScore', uScore);
+
+            if (typeof initResponsiveNav === 'function') initResponsiveNav();
+            if (typeof applyRoleNavAdaptation === 'function') applyRoleNavAdaptation();
+            showToast('เข้าสู่ระบบสำเร็จ ยินดีต้อนรับครับ!', 'success');
+            closeLoginModal();
+            initUserNav();
+          } else {
+            const msg = (res && res.message) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+            showToast(msg, 'error');
+            if (errBox) {
+              if (errText) errText.innerText = msg;
+              errBox.classList.remove('hidden');
+            }
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = 'เข้าสู่ระบบ';
+          const msg = (err && err.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+          showToast(msg, 'error');
+          if (errBox) {
+            if (errText) errText.innerText = msg;
+            errBox.classList.remove('hidden');
+          }
+        });
+    }
+
+    function openRegisterModal() {
+      const m = document.getElementById('register-modal');
+      if (m) {
+        m.style.display = 'flex';
+        const errBox = document.getElementById('register-inline-error');
+        if (errBox) errBox.classList.add('hidden');
+        onIndexRegInstChange(document.getElementById('index-reg-institution')?.value || 'INS_PHRAO');
+      }
+    }
+
+    function closeRegisterModal() {
+      const m = document.getElementById('register-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function switchToRegisterModal() {
+      closeLoginModal();
+      openRegisterModal();
+    }
+
+    function switchToLoginModal() {
+      closeRegisterModal();
+      openLoginModal();
+    }
+
+    function openForgotPasswordModal() {
+      const m = document.getElementById('forgot-password-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeForgotPasswordModal() {
+      const m = document.getElementById('forgot-password-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function onIndexRegInstChange(instId) {
+      const tambonEl = document.getElementById('index-reg-tambon');
+      if (!tambonEl) return;
+
+      const subUnits = (window.INSTITUTION_SUB_UNITS_MAP && window.INSTITUTION_SUB_UNITS_MAP[instId]) || [
+        'ศกร.ระดับตำบลเวียง', 'ศกร.ระดับตำบลทุ่งหลวง', 'ศกร.ระดับตำบลป่าตุ้ม', 'ศกร.ระดับตำบลป่าไหน่',
+        'ศกร.ระดับตำบลสันทราย', 'ศกร.ระดับตำบลบ้านโป่ง', 'ศกร.ระดับตำบลน้ำแพร่', 'ศกร.ระดับตำบลเขื่อนผาก',
+        'ศกร.ระดับตำบลแม่แวน', 'ศกร.ระดับตำบลแม่ปั๋ง', 'ศกร.ระดับตำบลโหล่งขอด', 'ศศช.บ้านอาบอลาชา',
+        'ศศช.บ้านอาบอเน', 'ศศช.บ้านอาแย', 'ศศช.บ้านป่าหญ้าไทร', 'ศศช.บ้านขอนม่วง',
+        'ศศช.บ้านแม่งัดน้อย', 'ศศช.บ้านห้วยทรายขาว', 'ศศช.บ้านห้วยกันใจ', 'ศศช.บ้านปางตอย', 'ศศช.บ้านปางฟาน'
+      ];
+
+      let html = '<option value="">— เลือกตำบลในสังกัด —</option>';
+      subUnits.forEach(u => {
+        html += `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`;
+      });
+      tambonEl.innerHTML = html;
+    }
+
+    function handleUserRegister(e) {
+      e.preventDefault();
+      const fullName = (document.getElementById('index-reg-fullname').value || '').trim();
+      const phone = (document.getElementById('index-reg-phone').value || '').trim();
+      const tambon = (document.getElementById('index-reg-tambon').value || '').trim();
+      const userCategory = (document.getElementById('index-reg-user-category').value || 'ประชาชนทั่วไป').trim();
+      const instId = (document.getElementById('index-reg-institution').value || 'INS_PHRAO').trim();
+      const password = document.getElementById('index-reg-password').value || '';
+      const confirmPassword = document.getElementById('index-reg-confirm-password').value || '';
+      const errBox = document.getElementById('register-inline-error');
+      const errText = document.getElementById('register-inline-error-text');
+
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!fullName || !phone || !tambon || !password) {
+        const msg = 'กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+      if (password.length < 6) {
+        const msg = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+      if (password !== confirmPassword) {
+        const msg = 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+
+      const btn = document.getElementById('btn-index-register');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังลงทะเบียน...';
+
+      apiPost('register', {
+        fullName: fullName,
+        phone: phone,
+        username: phone,
+        tambon: tambon,
+        userCategory: userCategory,
+        institutionId: instId,
+        password: password
+      })
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก';
+          if (res && res.status === 'success') {
+            closeRegisterModal();
+
+            if (res.token) {
+              const token = res.token || "";
+              const userObj = res.user || res.profile || { username: phone, fullName: fullName };
+              const uPhone = userObj.phone || userObj.username || phone;
+              const uName = userObj.fullName || userObj.name || fullName;
+              const uRole = String(userObj.role || "user").trim().toLowerCase();
+              const uTambon = userObj.tambon || tambon;
+              const userInstVal = userObj.institutionId || instId;
+              const uScore = String(userObj.score || "0");
+
+              localStorage.setItem('authToken', token);
+              localStorage.setItem('nfe_auth_token', token);
+              localStorage.setItem('userPhone', uPhone);
+              localStorage.setItem('userName', uName);
+              localStorage.setItem('userRole', uRole);
+              localStorage.setItem('userTambon', uTambon);
+              localStorage.setItem('userInstitution', userInstVal);
+              localStorage.setItem('userInstitutionId', userInstVal);
+              localStorage.setItem('nfe_selected_institution', userInstVal);
+              localStorage.setItem('nfe_user', JSON.stringify(userObj));
+              localStorage.setItem('userData', JSON.stringify(userObj));
+              localStorage.setItem('userScore', uScore);
+
+              if (typeof initResponsiveNav === 'function') initResponsiveNav();
+              if (typeof applyRoleNavAdaptation === 'function') applyRoleNavAdaptation();
+              initUserNav();
+
+              showSuccessModal(
+                '🎉 สมัครสมาชิกสำเร็จ!',
+                `ยินดีต้อนรับคุณ ${uName} เข้าสู่ระบบ Phrao Learning District ระบบได้เข้าสู่ระบบให้ท่านเรียบร้อยแล้ว`,
+                () => { initUserNav(); }
+              );
+              showToast('🎉 สมัครสมาชิกสำเร็จ! ยินดีต้อนรับครับ', 'success');
+            } else {
+              document.getElementById('login-username').value = phone;
+              openLoginModal();
+              showToast('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ', 'success');
+            }
+          } else {
+            const msg = (res && res.message) || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+            showToast(msg, 'error');
+            if (errBox) {
+              if (errText) errText.innerText = msg;
+              errBox.classList.remove('hidden');
+            }
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก';
+          const msg = (err && err.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+          showToast(msg, 'error');
+          if (errBox) {
+            if (errText) errText.innerText = msg;
+            errBox.classList.remove('hidden');
+          }
+        });
+    }
+
+    function loadHomeData() {
+      // Load sources
+      apiGet('getSources', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.sources || res.data)) || []);
+          homeSources = list;
+          document.getElementById('stat-count-sources').innerText = `${homeSources.length} แห่ง`;
+          renderHomeFeaturedSources();
+        })
+        .catch(() => {});
+
+      // Load products
+      apiGet('getMarketProducts', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.products || res.data)) || []);
+          homeProducts = list;
+          document.getElementById('stat-count-products').innerText = `${homeProducts.length} รายการ`;
+          renderHomeProducts();
+        })
+        .catch(() => {});
+
+      // Load upskill videos
+      apiGet('getUpskillVideos', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.videos || res.data)) || []);
+          homeVideos = list;
+          document.getElementById('stat-count-videos').innerText = `${homeVideos.length} บทเรียน`;
+          renderHomeVideos();
+        })
+        .catch(() => {});
+
+      // Load leaderboard
+      apiGet('getLeaderboard', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.users || res.leaderboard || res.data)) || []);
+          homeLeaderboard = list;
+          renderHomeLeaderboard(homeLeaderboard);
+        })
+        .catch(() => {});
+    }
+
+    function renderHomeFeaturedSources() {
+      const grid = document.getElementById('home-featured-sources-grid');
+      if (!grid) return;
+
+      const featured = homeSources.slice(0, 3);
+      if (featured.length === 0) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-6 text-slate-500 text-xs">ยังไม่มีข้อมูลแหล่งเรียนรู้</div>';
+        return;
+      }
+
+      grid.innerHTML = featured.map(s => {
+        const cover = s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg';
+        const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
+        const tambon = s.TambonName || s.tambon || '';
+        const grade = (s.evaluation && s.evaluation.grade) || (s.info && s.info.evaluation && s.info.evaluation.grade) || 'มาตรฐาน สกร.';
+
+        return `
+          <a href="learning.html?source=${s.SourceID || s.id}" class="group rounded-3xl bg-slate-900/80 border border-slate-700/80 overflow-hidden hover:border-amber-500/50 transition flex flex-col shadow-lg">
+            <div class="h-36 w-full bg-slate-800 relative overflow-hidden">
+              <img src="${cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <div class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-950/80 text-amber-400 backdrop-blur-md border border-amber-500/30">
+                ⭐ ${grade}
+              </div>
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+              <div>
+                <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition line-clamp-1">${name}</h4>
+                <p class="text-[11px] text-slate-400 m-0">📍 ตำบล${tambon}</p>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+                <span>เข้าศึกษาดูงาน & ทำแบบทดสอบ</span>
+                <span class="text-amber-400 font-bold group-hover:translate-x-1 transition">เข้าชม →</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderHomeProducts() {
+      const grid = document.getElementById('home-featured-products-grid');
+      if (!grid) return;
+
+      const items = homeProducts.slice(0, 2);
+      if (items.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 text-center py-6 text-slate-500 text-xs">ยังไม่มีสินค้าในหมวดนี้</div>';
+        return;
+      }
+
+      grid.innerHTML = items.map(p => {
+        const img = p.image_url || p.image || 'assets/loft-logo.svg';
+        const name = p.name || 'สินค้าชุมชน';
+        const price = p.price || 0;
+        const pts = p.coupon_points || 50;
+
+        return `
+          <a href="market.html?product=${p.id}" class="group rounded-2xl bg-slate-800/60 border border-slate-700/60 p-2.5 flex flex-col space-y-2 hover:border-amber-500/50 transition">
+            <div class="h-24 w-full bg-slate-900 rounded-xl overflow-hidden">
+              <img src="${img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white line-clamp-1 group-hover:text-amber-400">${name}</h5>
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-xs font-black text-amber-400">฿${price}</span>
+                <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded-full">🪙 แลก ${pts} แต้ม</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderHomeVideos() {
+      const list = document.getElementById('home-top-videos-list');
+      if (!list) return;
+
+      const vids = homeVideos.slice(0, 3);
+      if (vids.length === 0) {
+        list.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">ยังไม่มีวิดีโออัพสกิล</div>';
+        return;
+      }
+
+      list.innerHTML = vids.map(v => {
+        const title = v.title || 'วิดีโอการเรียนรู้';
+        const cat = v.category || 'ทักษะอาชีพ';
+        const dur = v.duration || '5 นาที';
+
+        return `
+          <a href="upskill.html?video=${v.id}" class="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition group">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition">
+              <i class="fas fa-play"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h5 class="text-xs font-bold text-white truncate group-hover:text-amber-400">${title}</h5>
+              <p class="text-[10px] text-slate-400 m-0 flex items-center gap-2">
+                <span>🏷️ ${cat}</span>
+                <span>⏱️ ${dur}</span>
+              </p>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function openUserProfileModal(phone) {
+      if (typeof openStudentLearningDossier === 'function' && phone) {
+        openStudentLearningDossier(phone);
+      } else if (phone) {
+        window.location.href = `profile.html?user=${encodeURIComponent(phone)}`;
+      } else {
+        window.location.href = 'profile.html';
+      }
+    }
+
+    function renderHomeLeaderboard(leaders) {
+      const container = document.getElementById('home-leaderboard-container');
+      if (!container) return;
+
+      if (!leaders || leaders.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-slate-500 text-xs font-bold">ยังไม่มีข้อมูลอันดับคะแนนในขณะนี้</div>';
+        return;
+      }
+
+      const top10 = leaders.slice(0, 10);
+      const podiumData = top10.slice(0, 3);
+      const listData = top10.slice(3);
+
+      let html = '';
+
+      // --- Part 1: Top 1-3 Podium ---
+      html += '<div class="podium-container">';
+      podiumData.forEach((u, index) => {
+        const rankNum = index + 1;
+        const name = u.fullName || u.fullname || u.name || u.username || 'ผู้เรียน';
+        const rawTambon = u.tambon || '';
+        const tambon = rawTambon ? (rawTambon.startsWith('ต.') || rawTambon.startsWith('ตำบล') || rawTambon.startsWith('ศกร.') ? rawTambon : 'ต.' + rawTambon) : '';
+        const score = Number(u.score || u.points || 0);
+        const avatar = u.profileImage || u.profile_image || u.avatar || u.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true`;
+        const phone = u.phone || u.username || '';
+
+        html += `
+          <div class="podium-item rank-${rankNum}" onclick="openUserProfileModal('${escapeJS(phone)}')" title="คลิกเพื่อดูโปรไฟล์ของ ${escapeHtml(name)}">
+            <div class="podium-avatar-wrapper">
+              <i class="fas fa-crown crown-icon"></i>
+              <div class="podium-img-wrapper">
+                <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="podium-img" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true';">
+              </div>
+            </div>
+            <div class="podium-base">${rankNum}</div>
+            <div class="podium-info">
+              <div class="podium-name">${escapeHtml(name)}</div>
+              ${tambon ? `<div class="text-[10px] text-slate-400 font-medium">${escapeHtml(tambon)}</div>` : ''}
+              <div class="podium-score-badge countup-score" data-target="${score}">${score.toLocaleString()} แต้ม</div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      // --- Part 2: Rank 4 - 10 Cards ---
+      if (listData.length > 0) {
+        html += '<div class="rank-list-container">';
+        listData.forEach((u, index) => {
+          const rankNum = index + 4;
+          const name = u.fullName || u.fullname || u.name || u.username || 'ผู้เรียน';
+          const rawTambon = u.tambon || '';
+          const tambon = rawTambon ? (rawTambon.startsWith('ต.') || rawTambon.startsWith('ตำบล') || rawTambon.startsWith('ศกร.') ? rawTambon : 'ต.' + rawTambon) : '';
+          const score = Number(u.score || u.points || 0);
+          const avatar = u.profileImage || u.profile_image || u.avatar || u.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=38bdf8&bold=true`;
+          const phone = u.phone || u.username || '';
+
+          html += `
+            <div class="rank-card" onclick="openUserProfileModal('${escapeJS(phone)}')" title="คลิกเพื่อดูโปรไฟล์ของ ${escapeHtml(name)}">
+              <div class="rank-number">${rankNum}</div>
+              <div class="w-10 h-10 rounded-full bg-slate-800 p-0.5 border border-slate-700 overflow-hidden shrink-0">
+                <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="w-full h-full rounded-full object-cover" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=38bdf8&bold=true';">
+              </div>
+              <div class="flex-1 min-w-0">
+                <h5 class="text-xs font-bold text-white truncate m-0 group-hover:text-amber-400">${escapeHtml(name)}</h5>
+                ${tambon ? `<p class="text-[10px] text-slate-400 m-0">${escapeHtml(tambon)}</p>` : ''}
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-xs font-black text-amber-400 block">${score.toLocaleString()} แต้ม</span>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ผู้เรียน</span>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+
+      // Countup animation
+      const countupElements = container.querySelectorAll('.countup-score');
+      countupElements.forEach(el => {
+        const target = Number(el.getAttribute('data-target') || 0);
+        if (isNaN(target)) return;
+        const duration = 800;
+        let startTime = null;
+
+        function animateStep(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const progress = timestamp - startTime;
+          const curVal = Math.min(Math.round((progress / duration) * target), target);
+          el.innerText = curVal.toLocaleString() + ' แต้ม';
+
+          if (progress < duration) {
+            window.requestAnimationFrame(animateStep);
+          } else {
+            el.innerText = target.toLocaleString() + ' แต้ม';
+          }
+        }
+        window.requestAnimationFrame(animateStep);
+      });
+    }
+
+    function toggleAIChatModal() {
+      const modal = document.getElementById('ai-chat-modal');
+      modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+      if (modal.style.display === 'flex') {
+        document.getElementById('ai-chat-input').focus();
+      }
+    }
+
+    function sendAIChatMessage() {
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatContainer = document.getElementById('ai-chat-messages');
+
+      chatContainer.innerHTML += `
+        <div class="flex items-start justify-end gap-2.5">
+          <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-bold rounded-2xl rounded-tr-none p-3 max-w-[85%] leading-relaxed shadow-sm">
+            ${escapeHtml(text)}
+          </div>
+        </div>
+      `;
+
+      input.value = '';
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      apiPost('askAIIntent', withAuthParams({ query: text }))
+        .then(res => {
+          let reply = 'ขออภัยครับ ไม่สามารถค้นหาข้อมูลที่ตรงกับคำถามได้';
+          if (res && res.status === 'success' && res.reply) {
+            reply = res.reply;
+          }
+          chatContainer.innerHTML += `
+            <div class="flex items-start gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-xs">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3 text-slate-200 max-w-[85%] leading-relaxed">
+                ${reply}
+              </div>
+            </div>
+          `;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        })
+        .catch(err => {
+          chatContainer.innerHTML += `
+            <div class="flex items-start gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 text-xs">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3 text-rose-300 max-w-[85%] leading-relaxed">
+                เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI Assistant
+              </div>
+            </div>
+          `;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initUserNav();
+      const sel = document.getElementById('user-institution-select');
+      if (sel) sel.value = currentInstitution;
+      loadHomeData();
+    });
+  </script>
+  <script src="js/core/dossier.js?v=20260830-dossier"></script>
+  <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "loft-laravel-frontend",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -c tailwind.config.cjs -i resources/css/tailwind.css -o public/assets/tailwind.css --watch",
+    "build": "tailwindcss -c tailwind.config.cjs -i resources/css/tailwind.css -o public/assets/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  },
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  }
+}

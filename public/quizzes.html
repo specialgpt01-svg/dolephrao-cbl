@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>❓ จัดการชุดแบบทดสอบ (All-in-One Quiz Editor) — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .quiz-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .quiz-card:hover {
+      border-color: rgba(168, 85, 247, 0.4);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .choice-box {
+      transition: all 0.18s ease-in-out;
+      cursor: pointer;
+    }
+    .choice-box:hover {
+      border-color: rgba(168, 85, 247, 0.5);
+    }
+    .choice-box.active-correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: #10b981 !important;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar pb-28">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-white text-xl shadow-md shadow-purple-500/20 shrink-0">
+          <i class="fas fa-list-check"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการแบบทดสอบ (All-in-One Editor)
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+              Batch Mode
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            แก้ไขและเฉลยข้อสอบทุกข้อได้ในหน้าเดียว คลิกเฉลยขึ้นสีเขียวทันที และกดบันทึกครั้งเดียว
+          </p>
+        </div>
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="addNewQuestionCard()" class="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-plus"></i> เพิ่มข้อสอบ
+        </button>
+        <button type="button" onclick="openQuizCsvModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-file-csv text-emerald-400"></i> นำเข้า CSV
+        </button>
+        <button type="button" onclick="exportQuizzesCsv()" class="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95" title="ส่งออกข้อมูลเป็น CSV">
+          <i class="fas fa-file-export text-sky-400"></i> ส่งออก CSV
+        </button>
+        <button type="button" id="btn-save-all-top" onclick="saveAllQuizzesBatch()" class="flex items-center gap-1.5 px-5 py-2.5 text-xs font-black rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-600/30 transition-all active:scale-95">
+          <i class="fas fa-save"></i> 💾 บันทึกทั้งหมด
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Unified Center Banner -->
+    <div class="p-3.5 px-4 mb-5 rounded-2xl bg-gradient-to-r from-sky-950/80 via-purple-950/60 to-slate-900/80 border border-purple-500/30 flex items-center justify-between gap-3 shadow-md flex-wrap">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm shrink-0">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white m-0">✨ ใหม่! จัดการแหล่งเรียนรู้ ฐานย่อย และแบบทดสอบรวมในหน้าเดียว (Unified Center)</h4>
+          <p class="text-[11px] text-slate-400 m-0">จัดการครบวงจรในหน้าเดียว ไม่ต้องสลับหน้าไปมา</p>
+        </div>
+      </div>
+      <a href="sources.html" id="btn-jump-unified" class="px-3.5 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+        <span>เปิด Unified Center</span> <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Filters Bar -->
+    <section class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md space-y-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        <!-- 1. Institution Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-university mr-1 text-blue-400"></i>สถานศึกษาหลัก</label>
+          <select id="filter-institution" onchange="onInstitutionChange()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500 font-medium">
+            <option value="ALL">⏳ กำลังโหลดสถานศึกษา...</option>
+          </select>
+        </div>
+
+        <!-- 2. Source Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-bookmark mr-1 text-sky-400"></i>แหล่งเรียนรู้หลัก (บังคับเลือก) <span class="text-rose-400">*</span></label>
+          <select id="filter-source" onchange="onSourceChange()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500 font-bold">
+            <option value="">⏳ กำลังโหลดรายชื่อแหล่งเรียนรู้...</option>
+          </select>
+        </div>
+
+        <!-- 3. Base Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-layer-group mr-1 text-teal-400"></i>ฐานการเรียนรู้ย่อย</label>
+          <select id="filter-base" onchange="loadQuizzesForSelection()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="">— ทุกฐาน / ข้อสอบประจำแหล่ง —</option>
+          </select>
+        </div>
+
+        <!-- 4. Quiz Type Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-clipboard-check mr-1 text-purple-400"></i>ประเภทข้อสอบ</label>
+          <select id="filter-type" onchange="loadQuizzesForSelection()" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500 font-medium">
+            <option value="posttest" selected>📝 แบบทดสอบหลังเรียน (Post-test)</option>
+            <option value="pretest">📋 แบบทดสอบก่อนเรียน (Pre-test)</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Quick Status & Action Toolbar -->
+      <div class="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-700/50 flex-wrap gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span id="quiz-source-title-badge" class="font-bold text-purple-300">
+            <i class="fas fa-bookmark mr-1"></i>ยังไม่ได้เลือกแหล่งเรียนรู้
+          </span>
+          <span>•</span>
+          <span><i class="fas fa-list-ol text-slate-500 mr-1"></i>รวม <b class="text-white text-sm" id="count-quizzes">0</b> ข้อ</span>
+          <span>•</span>
+          <span class="text-emerald-400 font-medium"><i class="fas fa-award mr-1"></i>เกณฑ์ผ่าน 80% (รับเกียรติบัตร)</span>
+        </div>
+
+        <!-- Quick batch helpers -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="generateQuickTemplates(5)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 border border-slate-600 transition">
+            <i class="fas fa-plus mr-1 text-purple-400"></i> เพิ่ม 5 ข้อด่วน
+          </button>
+          <button type="button" onclick="generateQuickTemplates(10)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 border border-slate-600 transition">
+            <i class="fas fa-plus mr-1 text-purple-400"></i> เพิ่ม 10 ข้อด่วน
+          </button>
+          <button type="button" onclick="clearAllDraftQuizzes()" class="px-2.5 py-1 text-[11px] rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition">
+            <i class="fas fa-trash-can mr-1"></i> ล้างทั้งหมด
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quizzes Interactive Batch Container -->
+    <main id="quizzes-container" class="space-y-4">
+      <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+        <i class="fas fa-arrow-up-right-from-square text-3xl mb-3 text-purple-500"></i>
+        <h4 class="text-sm font-bold text-slate-300">กรุณาเลือกแหล่งเรียนรู้จากตัวเลือกด้านบน</h4>
+        <p class="text-xs text-slate-500 mt-1">เพื่อจัดการชุดข้อสอบทั้งหมดในหน้าเดียว</p>
+      </div>
+    </main>
+
+  </div> <!-- End Main Container -->
+
+  <!-- ═══════════════════ Sticky Floating Bottom Action Bar ═══════════════════ -->
+  <div id="sticky-save-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-4xl bg-slate-900/90 border border-purple-500/40 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 flex-wrap">
+    <div class="flex items-center gap-2.5 text-xs text-slate-300">
+      <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+        <i class="fas fa-pen-to-square"></i>
+      </div>
+      <div>
+        <div class="font-bold text-white"><span id="sticky-count">0</span> ข้อสอบในชุดนี้</div>
+        <div class="text-[11px] text-slate-400">คลิกเลือก ก/ข/ค/ง เป็นเฉลยสีเขียว แล้วกดบันทึก</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="addNewQuestionCard()" class="px-3.5 py-2 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 shadow-sm transition active:scale-95">
+        <i class="fas fa-plus mr-1"></i> เพิ่มข้อใหม่
+      </button>
+      <button type="button" id="btn-save-all-bottom" onclick="saveAllQuizzesBatch()" class="px-5 py-2 text-xs font-black rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-600/30 transition active:scale-95 flex items-center gap-1.5">
+        <i class="fas fa-save"></i> 💾 บันทึกทั้งหมด
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: CSV Import ═══════════════════ -->
+  <div id="modal-quiz-csv" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+            <i class="fas fa-file-csv"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">นำเข้าข้อสอบด้วย CSV</h3>
+            <p class="text-[11px] text-slate-400 m-0">เพิ่มข้อสอบหลายข้อพร้อมกันจากไฟล์ CSV</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeQuizCsvModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700 text-[11px] text-slate-300 leading-relaxed">
+          <b class="text-emerald-400">รูปแบบไฟล์ CSV (6 คอลัมน์):</b><br>
+          <code class="font-mono text-slate-400">คำถาม,ตัวเลือก ก,ตัวเลือก ข,ตัวเลือก ค,ตัวเลือก ง,เฉลย (A/B/C/D)</code>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">วางเนื้อหา CSV หรืออัปโหลดไฟล์</label>
+          <textarea id="quiz-csv-content" rows="7" placeholder="คำถาม,ตัวเลือก ก,ตัวเลือก ข,ตัวเลือก ค,ตัวเลือก ง,A&#10;ข้อใดคือ...,คำตอบ1,คำตอบ2,คำตอบ3,คำตอบ4,B" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white font-mono text-[11px] placeholder-slate-500 focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeQuizCsvModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="submitQuizCsvImport()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold shadow-md shadow-emerald-600/30 transition">
+            🚀 นำเข้าข้อสอบเข้าชุดนี้
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260822-batch-quizzes-v2"></script>
+  <script src="js/core/auth.js?v=20260822-batch-quizzes-v2"></script>
+
+  <script>
+    let allInstitutions = [];
+    let allSources = [];
+    let currentBases = [];
+    let quizDrafts = []; // Main editable in-memory array of quizzes
+
+    // Toast Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-purple-600 text-white border-purple-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Initialize Data ─────────────────────────────────────────
+    function initData() {
+      const instSelect = document.getElementById('filter-institution');
+      const sourceSelect = document.getElementById('filter-source');
+
+      instSelect.innerHTML = '<option value="ALL">⏳ กำลังโหลดสถานศึกษา...</option>';
+      sourceSelect.innerHTML = '<option value="">⏳ กำลังโหลดรายชื่อแหล่งเรียนรู้...</option>';
+
+      Promise.all([
+        apiGet('getInstitutions', withAuthParams({})).catch(err => {
+          console.error('Load institutions error:', err);
+          return { status: 'error', institutions: [] };
+        }),
+        apiGet('getSources', withAuthParams({})).catch(err => {
+          console.error('Load sources error:', err);
+          return [];
+        })
+      ]).then(([instRes, sourcesRes]) => {
+        // 1. Process Institutions
+        if (instRes && instRes.status === 'success' && Array.isArray(instRes.institutions) && instRes.institutions.length > 0) {
+          allInstitutions = instRes.institutions;
+        } else {
+          allInstitutions = [
+            { id: 'INS_PHRAO', name: 'ศกร.ระดับอำเภอพร้าว' },
+            { id: 'INS_MAERIM', name: 'ศกร.ระดับอำเภอแม่ริม' }
+          ];
+        }
+
+        let instHtml = '<option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>';
+        allInstitutions.forEach(inst => {
+          instHtml += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name || inst.id)}</option>`;
+        });
+        instSelect.innerHTML = instHtml;
+
+        const userInst = (localStorage.getItem('userInstitution') || '').trim();
+        if (userInst && userInst !== 'ALL' && userInst !== 'ทั้งหมด' && allInstitutions.find(i => i.id === userInst)) {
+          instSelect.value = userInst;
+        } else if (allInstitutions.length > 0) {
+          instSelect.value = allInstitutions[0].id;
+        } else {
+          instSelect.value = 'ALL';
+        }
+
+        // 2. Process Sources
+        if (Array.isArray(sourcesRes)) {
+          allSources = sourcesRes;
+        } else if (sourcesRes && Array.isArray(sourcesRes.sources)) {
+          allSources = sourcesRes.sources;
+        } else if (sourcesRes && Array.isArray(sourcesRes.data)) {
+          allSources = sourcesRes.data;
+        } else {
+          allSources = [];
+        }
+
+        populateSourcesDropdown();
+      });
+    }
+
+    function onInstitutionChange() {
+      populateSourcesDropdown();
+    }
+
+    function populateSourcesDropdown() {
+      const instFilter = (document.getElementById('filter-institution')?.value || 'ALL').trim();
+      const sourceSelect = document.getElementById('filter-source');
+
+      let filtered = allSources;
+      if (instFilter && instFilter !== 'ALL' && instFilter !== 'ทั้งหมด') {
+        filtered = allSources.filter(s => {
+          const sInst = (s.institutionId || s.institution_id || '').trim();
+          return !sInst || sInst === instFilter || sInst === 'ALL';
+        });
+      }
+
+      if (!filtered.length) {
+        sourceSelect.innerHTML = `<option value="">— ไม่พบแหล่งเรียนรู้ในสถานศึกษานี้ (${allSources.length} แหล่งทั้งหมด) —</option>`;
+        renderBatchQuizCards([]);
+        return;
+      }
+
+      let html = `<option value="">— เลือกแหล่งเรียนรู้สำหรับจัดการข้อสอบ (${filtered.length} แหล่ง) —</option>`;
+      filtered.forEach(s => {
+        const id = s.SourceID || s.sourceId || s.id || '';
+        const name = s.SourceName || s.sourceName || s.name || id;
+        const tambonRaw = s.TambonName || s.tambon || '';
+        const tambon = tambonRaw ? ` (${typeof formatTambon === 'function' ? formatTambon(tambonRaw) : tambonRaw})` : '';
+        html += `<option value="${escapeHtml(id)}">${escapeHtml(name)}${escapeHtml(tambon)}</option>`;
+      });
+      sourceSelect.innerHTML = html;
+
+      if (filtered.length > 0) {
+        const firstId = filtered[0].SourceID || filtered[0].sourceId || filtered[0].id || '';
+        sourceSelect.value = firstId;
+        onSourceChange();
+      }
+    }
+
+    function onSourceChange() {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      const baseSelect = document.getElementById('filter-base');
+
+      if (!sourceId) {
+        baseSelect.innerHTML = '<option value="">— ทุกฐาน / ข้อสอบประจำแหล่ง —</option>';
+        loadQuizzesForSelection();
+        return;
+      }
+
+      // Load bases for this source
+      apiGet('getAdminBasesBySource', withAuthParams({ sourceId: sourceId }))
+        .then(res => {
+          let list = [];
+          if (Array.isArray(res)) list = res;
+          else if (res && Array.isArray(res.data)) list = res.data;
+          else if (res && Array.isArray(res.bases)) list = res.bases;
+
+          currentBases = list;
+          let html = '<option value="">— ทุกฐาน / ข้อสอบประจำแหล่ง —</option>';
+          currentBases.forEach((b, idx) => {
+            const bId = b.baseId || b.id || '';
+            const bName = b.baseName || b.name || `ฐานที่ ${idx + 1}`;
+            html += `<option value="${escapeHtml(bId)}">ฐานที่ ${idx + 1}: ${escapeHtml(bName)}</option>`;
+          });
+          baseSelect.innerHTML = html;
+
+          loadQuizzesForSelection();
+        })
+        .catch(err => {
+          console.error('Load bases error:', err);
+          loadQuizzesForSelection();
+        });
+    }
+
+    // ─── Load Quizzes ────────────────────────────────────────────
+    function loadQuizzesForSelection(forceRefresh = false) {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      const baseId = (document.getElementById('filter-base')?.value || '').trim();
+      const quizType = (document.getElementById('filter-type')?.value || 'posttest').trim();
+      const container = document.getElementById('quizzes-container');
+      const badge = document.getElementById('quiz-source-title-badge');
+
+      if (!sourceId) {
+        badge.innerHTML = '<i class="fas fa-bookmark mr-1 text-slate-500"></i>ยังไม่ได้เลือกแหล่งเรียนรู้';
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-arrow-up-right-from-square text-3xl mb-3 text-purple-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">กรุณาเลือกแหล่งเรียนรู้จากตัวเลือกด้านบน</h4>
+            <p class="text-xs text-slate-500 mt-1">เพื่อจัดการชุดข้อสอบทั้งหมดในหน้าเดียว</p>
+          </div>
+        `;
+        updateCountBadge(0);
+        return;
+      }
+
+      const selectedSource = allSources.find(s => String(s.SourceID || s.sourceId || s.id) === String(sourceId));
+      if (selectedSource) {
+        const sName = selectedSource.SourceName || selectedSource.sourceName || selectedSource.name || sourceId;
+        badge.innerHTML = `<i class="fas fa-bookmark mr-1 text-purple-400"></i>${escapeHtml(sName)}`;
+      }
+
+      container.innerHTML = `
+        <div class="text-center py-16 text-slate-400">
+          <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-purple-500"></i>
+          <p class="text-sm font-semibold">กำลังโหลดข้อสอบทั้งหมดในชุดนี้...</p>
+        </div>
+      `;
+
+      apiGet('getAdminQuizBySource', withAuthParams({
+        sourceId: sourceId,
+        baseId: baseId,
+        quizType: quizType
+      }))
+        .then(res => {
+          let list = [];
+          if (res && res.status === 'success' && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res && Array.isArray(res.quizzes)) {
+            list = res.quizzes;
+          } else if (Array.isArray(res)) {
+            list = res;
+          }
+
+          // Convert into structured editable objects
+          quizDrafts = list.map((item, idx) => {
+            let choices = Array.isArray(item.choices) ? item.choices : [];
+            if (!choices.length && typeof item.choices === 'string') {
+              try { choices = JSON.parse(item.choices); } catch(e) {}
+            }
+            if (!choices.length && (item.choiceA || item.choice_a)) {
+              choices = [
+                item.choiceA || item.choice_a || '',
+                item.choiceB || item.choice_b || '',
+                item.choiceC || item.choice_c || '',
+                item.choiceD || item.choice_d || ''
+              ];
+            }
+            while (choices.length < 4) choices.push('');
+
+            let answer = String(item.answer || 'A').toUpperCase().trim();
+            if (!['A', 'B', 'C', 'D'].includes(answer)) answer = 'A';
+
+            return {
+              id: item.id || item.quizId || '',
+              question: item.question || '',
+              choices: [choices[0] || '', choices[1] || '', choices[2] || '', choices[3] || ''],
+              answer: answer,
+              displayOrder: item.displayOrder || (idx + 1)
+            };
+          });
+
+          renderBatchQuizCards();
+        })
+        .catch(err => {
+          console.error('Load quizzes error:', err);
+          container.innerHTML = `
+            <div class="text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดข้อสอบ</h4>
+              <p class="text-xs text-rose-400/80 mt-1">กรุณาลองกดปุ่มโหลดใหม่อีกครั้ง</p>
+            </div>
+          `;
+          showToast('ไม่สามารถโหลดข้อสอบได้', 'error');
+        });
+    }
+
+    function updateCountBadge(cnt) {
+      const c = cnt != null ? cnt : quizDrafts.length;
+      document.getElementById('count-quizzes').innerText = c;
+      document.getElementById('sticky-count').innerText = c;
+    }
+
+    // ─── Render Batch Quiz Cards ─────────────────────────────────
+    function renderBatchQuizCards() {
+      const container = document.getElementById('quizzes-container');
+      updateCountBadge();
+
+      if (!quizDrafts.length) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-list-check text-4xl mb-3 text-purple-400/60"></i>
+            <h4 class="text-base font-bold text-slate-200">ยังไม่มีข้อสอบในชุดนี้</h4>
+            <p class="text-xs text-slate-500 mt-1 mb-4">คลิกปุ่มด้านล่างเพื่อเริ่มสร้างข้อสอบหรือเพิ่มชุดตัวอย่าง</p>
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+              <button type="button" onclick="addNewQuestionCard()" class="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-md shadow-purple-600/30 transition">
+                <i class="fas fa-plus mr-1"></i> เพิ่มข้อสอบแรก
+              </button>
+              <button type="button" onclick="generateQuickTemplates(5)" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-purple-300 text-xs font-bold rounded-xl transition">
+                <i class="fas fa-wand-magic-sparkles mr-1"></i> สร้างชุดตัวอย่าง 5 ข้อ
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const choiceKeys = ['A', 'B', 'C', 'D'];
+      const choiceLabels = ['ก', 'ข', 'ค', 'ง'];
+
+      let html = '';
+      quizDrafts.forEach((quiz, qIdx) => {
+        const currentAns = String(quiz.answer || 'A').toUpperCase();
+
+        // Generate 4 choice boxes
+        let choicesHtml = '';
+        for (let i = 0; i < 4; i++) {
+          const key = choiceKeys[i];
+          const label = choiceLabels[i];
+          const val = quiz.choices[i] || '';
+          const isCorrect = (currentAns === key);
+
+          choicesHtml += `
+            <div class="choice-box p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${isCorrect ? 'bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-950/50' : 'bg-slate-900/70 border-slate-700/80 hover:border-slate-500'}" onclick="setQuestionAnswer(${qIdx}, '${key}')">
+              
+              <!-- Choice Header / Quick Answer Toggle Button -->
+              <div class="flex items-center justify-between mb-2 select-none">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-xl ${isCorrect ? 'bg-emerald-500 text-slate-950 font-black shadow-sm' : 'bg-slate-800 border border-slate-700 text-slate-300 font-bold'} flex items-center justify-center text-xs">
+                    ${label}
+                  </span>
+                  <span class="text-xs font-bold ${isCorrect ? 'text-emerald-300' : 'text-slate-300'}">
+                    ตัวเลือก ${label} (${key})
+                  </span>
+                </div>
+
+                <!-- Direct Answer Button -->
+                <div>
+                  ${isCorrect 
+                    ? `<button type="button" onclick="setQuestionAnswer(${qIdx}, '${key}'); event.stopPropagation();" class="px-2.5 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[11px] shadow-md shadow-emerald-500/25 flex items-center gap-1.5 transition">
+                         <i class="fas fa-check-circle text-xs"></i> <span>✓ ข้อนี้เป็นเฉลย</span>
+                       </button>`
+                    : `<button type="button" onclick="setQuestionAnswer(${qIdx}, '${key}'); event.stopPropagation();" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-emerald-950/50 hover:border-emerald-500 border border-slate-700 text-slate-400 hover:text-emerald-300 font-bold text-[11px] flex items-center gap-1.5 transition">
+                         <i class="far fa-circle text-xs"></i> <span>คลิกเฉลยข้อนี้</span>
+                       </button>`
+                  }
+                </div>
+              </div>
+
+              <!-- Choice Text Input -->
+              <input type="text" 
+                     value="${escapeHtml(val)}" 
+                     placeholder="พิมพ์คำตอบสำหรับตัวเลือก ${label}..." 
+                     oninput="updateChoiceText(${qIdx}, ${i}, this.value)"
+                     onclick="event.stopPropagation()"
+                     class="w-full px-3.5 py-2.5 bg-slate-800/90 border ${isCorrect ? 'border-emerald-500/60 text-emerald-100' : 'border-slate-700 text-white'} rounded-xl text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500 transition">
+            </div>
+          `;
+        }
+
+        html += `
+          <div class="quiz-card p-4 sm:p-5 relative" id="card-q-${qIdx}">
+            
+            <!-- Card Header: Number & Action Tools -->
+            <div class="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-700/60 flex-wrap">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-purple-600/30 text-purple-300 border border-purple-500/40 flex items-center justify-center font-black text-xs shadow-inner">
+                  ${qIdx + 1}
+                </div>
+                <h3 class="text-sm font-bold text-white m-0">ข้อที่ ${qIdx + 1}</h3>
+                <span class="text-[11px] text-slate-400">
+                  (เฉลยปัจจุบัน: <b class="text-emerald-400 font-extrabold">${choiceLabels[choiceKeys.indexOf(currentAns)] || 'ก'} (${currentAns})</b>)
+                </span>
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="moveQuizItem(${qIdx}, -1)" ${qIdx === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-slate-800 text-slate-300 flex items-center justify-center text-[11px] transition" title="เลื่อนขึ้น">
+                  <i class="fas fa-chevron-up"></i>
+                </button>
+                <button type="button" onclick="moveQuizItem(${qIdx}, 1)" ${qIdx === quizDrafts.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-slate-800 text-slate-300 flex items-center justify-center text-[11px] transition" title="เลื่อนลง">
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <button type="button" onclick="duplicateQuizItem(${qIdx})" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="ทำสำเนาข้อนี้">
+                  <i class="fas fa-copy mr-1 text-sky-400"></i> สำเนา
+                </button>
+                <button type="button" onclick="removeQuizItem(${qIdx})" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition" title="ลบข้อนี้">
+                  <i class="fas fa-trash-can mr-1"></i> ลบ
+                </button>
+              </div>
+            </div>
+
+            <!-- Question Input -->
+            <div class="mb-3">
+              <label class="block text-[11px] font-bold text-slate-300 mb-1">
+                <i class="fas fa-question-circle text-purple-400 mr-1"></i>โจทย์คำถาม <span class="text-rose-400">*</span>
+              </label>
+              <textarea rows="2" 
+                        placeholder="พิมพ์โจทย์คำถามข้อที่ ${qIdx + 1}..." 
+                        oninput="updateQuestionText(${qIdx}, this.value)"
+                        class="w-full px-3.5 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500 leading-relaxed font-medium transition">${escapeHtml(quiz.question || '')}</textarea>
+            </div>
+
+            <!-- Choices Grid 2x2 -->
+            <div>
+              <label class="block text-[11px] font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span><i class="fas fa-check-double text-emerald-400 mr-1"></i>ตัวเลือกคำตอบ 4 ข้อ (คลิกที่ช่องเพื่อกำหนดเป็นเฉลยสีเขียว) <span class="text-rose-400">*</span></span>
+              </label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                ${choicesHtml}
+              </div>
+            </div>
+
+          </div>
+        `;
+      });
+
+      // Bottom Add button
+      html += `
+        <div class="flex items-center justify-center pt-2">
+          <button type="button" onclick="addNewQuestionCard()" class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 hover:border-purple-500/50 font-bold text-xs shadow-md transition-all active:scale-95">
+            <i class="fas fa-plus-circle text-base text-purple-400"></i> เพิ่มข้อสอบข้อถัดไป (ข้อที่ ${quizDrafts.length + 1})
+          </button>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // ─── Inline Updates ──────────────────────────────────────────
+    function updateQuestionText(qIdx, text) {
+      if (quizDrafts[qIdx]) {
+        quizDrafts[qIdx].question = text;
+      }
+    }
+
+    function updateChoiceText(qIdx, choiceIdx, text) {
+      if (quizDrafts[qIdx] && quizDrafts[qIdx].choices) {
+        quizDrafts[qIdx].choices[choiceIdx] = text;
+      }
+    }
+
+    function setQuestionAnswer(qIdx, answerKey) {
+      if (quizDrafts[qIdx]) {
+        quizDrafts[qIdx].answer = answerKey;
+        renderBatchQuizCards();
+        // Keep focus context or show quick toast
+      }
+    }
+
+    function addNewQuestionCard() {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      if (!sourceId) {
+        showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนเพิ่มข้อสอบครับ', 'warning');
+        return;
+      }
+
+      quizDrafts.push({
+        id: '',
+        question: '',
+        choices: ['', '', '', ''],
+        answer: 'A',
+        displayOrder: quizDrafts.length + 1
+      });
+
+      renderBatchQuizCards();
+      
+      // Scroll to new question card
+      setTimeout(() => {
+        const lastCard = document.getElementById(`card-q-${quizDrafts.length - 1}`);
+        if (lastCard) {
+          lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const ta = lastCard.querySelector('textarea');
+          if (ta) ta.focus();
+        }
+      }, 50);
+
+      showToast(`เพิ่มข้อที่ ${quizDrafts.length} เรียบร้อยแล้ว`, 'info');
+    }
+
+    function duplicateQuizItem(qIdx) {
+      if (!quizDrafts[qIdx]) return;
+      const original = quizDrafts[qIdx];
+      const clone = {
+        id: '',
+        question: (original.question ? original.question + ' (สำเนา)' : ''),
+        choices: [...(original.choices || ['', '', '', ''])],
+        answer: original.answer || 'A',
+        displayOrder: quizDrafts.length + 1
+      };
+      quizDrafts.splice(qIdx + 1, 0, clone);
+      renderBatchQuizCards();
+      showToast(`ทำสำเนาข้อที่ ${qIdx + 1} สำเร็จ`, 'info');
+    }
+
+    function removeQuizItem(qIdx) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบข้อสอบ',
+        message: `ต้องการลบข้อที่ ${qIdx + 1} ใช่หรือไม่?`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        quizDrafts.splice(qIdx, 1);
+        renderBatchQuizCards();
+        showToast('ลบข้อคำถามออกแล้ว', 'info');
+      });
+    }
+
+    function moveQuizItem(qIdx, direction) {
+      const targetIdx = qIdx + direction;
+      if (targetIdx < 0 || targetIdx >= quizDrafts.length) return;
+      const item = quizDrafts.splice(qIdx, 1)[0];
+      quizDrafts.splice(targetIdx, 0, item);
+      renderBatchQuizCards();
+    }
+
+    function generateQuickTemplates(count = 5) {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      if (!sourceId) {
+        showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนครับ', 'warning');
+        return;
+      }
+
+      for (let i = 0; i < count; i++) {
+        const num = quizDrafts.length + 1;
+        quizDrafts.push({
+          id: '',
+          question: `คำถามข้อที่ ${num}: `,
+          choices: [`ตัวเลือก ก`, `ตัวเลือก ข`, `ตัวเลือก ค`, `ตัวเลือก ง`],
+          answer: 'A',
+          displayOrder: num
+        });
+      }
+      renderBatchQuizCards();
+      showToast(`เพิ่มตัวอย่าง ${count} ข้อเรียบร้อยแล้ว`, 'success');
+    }
+
+    function clearAllDraftQuizzes() {
+      if (!quizDrafts.length) return;
+      showCustomConfirm({
+        title: 'ยืนยันการล้างข้อสอบทั้งหมด',
+        message: `ต้องการล้างข้อสอบทั้งหมด (${quizDrafts.length} ข้อ) ในชุดนี้ใช่หรือไม่?\n⚠️ หมายเหตุ: การล้างจะมีผลจริงเมื่อกด "บันทึกทั้งหมด"`,
+        type: 'danger',
+        confirmText: 'ยืนยันล้างทั้งหมด'
+      }, () => {
+        quizDrafts = [];
+        renderBatchQuizCards();
+        showToast('ล้างข้อสอบทั้งหมดแล้ว', 'info');
+      });
+    }
+
+    // ─── Save All Quizzes Batch ──────────────────────────────────
+    function saveAllQuizzesBatch() {
+      const sourceId = (document.getElementById('filter-source')?.value || '').trim();
+      const baseId = (document.getElementById('filter-base')?.value || '').trim();
+      const quizType = (document.getElementById('filter-type')?.value || 'posttest').trim();
+
+      if (!sourceId) {
+        showToast('กรุณาเลือกแหล่งเรียนรู้ก่อนบันทึกครับ', 'warning');
+        return;
+      }
+
+      // Validate inputs before saving
+      let emptyQuestionIndex = -1;
+      let emptyChoiceIndex = -1;
+
+      for (let i = 0; i < quizDrafts.length; i++) {
+        const q = quizDrafts[i];
+        if (!q.question || !q.question.trim()) {
+          emptyQuestionIndex = i;
+          break;
+        }
+        const filledChoices = (q.choices || []).filter(c => c && c.trim());
+        if (filledChoices.length < 2) {
+          emptyChoiceIndex = i;
+          break;
+        }
+      }
+
+      if (emptyQuestionIndex !== -1) {
+        showToast(`ข้อที่ ${emptyQuestionIndex + 1}: กรุณากรอกโจทย์คำถาม`, 'warning');
+        const card = document.getElementById(`card-q-${emptyQuestionIndex}`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      if (emptyChoiceIndex !== -1) {
+        showToast(`ข้อที่ ${emptyChoiceIndex + 1}: กรุณากรอกตัวเลือกอย่างน้อย 2 ข้อขึ้นไป`, 'warning');
+        const card = document.getElementById(`card-q-${emptyChoiceIndex}`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const btnTop = document.getElementById('btn-save-all-top');
+      const btnBottom = document.getElementById('btn-save-all-bottom');
+      const originalTopHtml = btnTop.innerHTML;
+      const originalBottomHtml = btnBottom.innerHTML;
+
+      btnTop.disabled = true;
+      btnBottom.disabled = true;
+      btnTop.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+      btnBottom.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        sourceId: sourceId,
+        baseId: baseId,
+        quizType: quizType,
+        quizzes: quizDrafts.map((q, idx) => ({
+          question: q.question.trim(),
+          choices: [
+            (q.choices[0] || '').trim(),
+            (q.choices[1] || '').trim(),
+            (q.choices[2] || '').trim(),
+            (q.choices[3] || '').trim()
+          ],
+          answer: (q.answer || 'A').toUpperCase().trim(),
+          displayOrder: idx + 1
+        }))
+      };
+
+      apiPost('saveAdminQuizBatch', withAuthParams(payload))
+        .then(res => {
+          btnTop.disabled = false;
+          btnBottom.disabled = false;
+          btnTop.innerHTML = originalTopHtml;
+          btnBottom.innerHTML = originalBottomHtml;
+
+          if (res && res.status === 'success') {
+            showToast(`🎉 บันทึกข้อสอบทั้งหมด ${res.saved != null ? res.saved : quizDrafts.length} ข้อเรียบร้อยแล้ว!`, 'success');
+            loadQuizzesForSelection();
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btnTop.disabled = false;
+          btnBottom.disabled = false;
+          btnTop.innerHTML = originalTopHtml;
+          btnBottom.innerHTML = originalBottomHtml;
+          console.error('Save all quizzes error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกข้อสอบ', 'error');
+        });
+    }
+
+    // ─── CSV Import & Export ─────────────────────────────────────
+    function openQuizCsvModal() {
+      document.getElementById('quiz-csv-content').value = '';
+      document.getElementById('modal-quiz-csv').style.display = 'flex';
+    }
+
+    function closeQuizCsvModal() {
+      document.getElementById('modal-quiz-csv').style.display = 'none';
+    }
+
+    function submitQuizCsvImport() {
+      const csv = document.getElementById('quiz-csv-content').value.trim();
+      if (!csv) return showToast('กรุณากรอกหรือวางข้อมูล CSV', 'warning');
+
+      const lines = csv.split('\n').map(l => l.trim()).filter(Boolean);
+      let countAdded = 0;
+
+      lines.forEach((line, idx) => {
+        // Skip header if it starts with คำถาม or Question
+        if (idx === 0 && (line.includes('คำถาม') || line.toLowerCase().includes('question'))) return;
+
+        // Parse CSV columns
+        const cols = line.split(',').map(c => c.trim());
+        if (cols.length >= 6) {
+          const question = cols[0];
+          const a = cols[1];
+          const b = cols[2];
+          const c = cols[3];
+          const d = cols[4];
+          let ans = (cols[5] || 'A').toUpperCase().trim();
+          if (!['A', 'B', 'C', 'D'].includes(ans)) ans = 'A';
+
+          quizDrafts.push({
+            id: '',
+            question: question,
+            choices: [a, b, c, d],
+            answer: ans,
+            displayOrder: quizDrafts.length + 1
+          });
+          countAdded++;
+        }
+      });
+
+      closeQuizCsvModal();
+      renderBatchQuizCards();
+      showToast(`นำเข้าข้อสอบ ${countAdded} ข้อเรียบร้อยแล้ว กด "บันทึกทั้งหมด" เพื่อบันทึกลงระบบ`, 'success');
+    }
+
+    function exportQuizzesCsv() {
+      if (!quizDrafts.length) return showToast('ไม่มีข้อสอบสำหรับส่งออก', 'warning');
+
+      let csvContent = 'คำถาม,ตัวเลือก ก,ตัวเลือก ข,ตัวเลือก ค,ตัวเลือก ง,เฉลย\n';
+      quizDrafts.forEach(q => {
+        const row = [
+          `"${(q.question || '').replace(/"/g, '""')}"`,
+          `"${(q.choices[0] || '').replace(/"/g, '""')}"`,
+          `"${(q.choices[1] || '').replace(/"/g, '""')}"`,
+          `"${(q.choices[2] || '').replace(/"/g, '""')}"`,
+          `"${(q.choices[3] || '').replace(/"/g, '""')}"`,
+          `"${q.answer || 'A'}"`
+        ];
+        csvContent += row.join(',') + '\n';
+      });
+
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `quizzes_export_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('ส่งออกไฟล์ CSV สำเร็จ', 'success');
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

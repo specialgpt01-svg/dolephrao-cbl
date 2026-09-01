@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทะเบียนคุมเกียรติบัตรและรายงานเสนอผู้บริหาร - Phrao Learning District</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Prompt & Sarabun -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #030712;
+      color: #f3f4f6;
+      min-height: 100vh;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.96); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .print-only { display: block !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
+
+  <!-- Desktop App Container -->
+  <div class="min-h-screen flex flex-col">
+    
+    <!-- Top Header -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-30 px-4 sm:px-6 py-3.5 no-print">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 p-0.5 shadow-lg shadow-purple-500/20 flex items-center justify-center text-white text-lg font-black">
+            <i class="fas fa-file-signature"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black text-white m-0 tracking-tight">
+                ทะเบียนคุมเลขที่เกียรติบัตร (Certificate Registry)
+              </h1>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                ระบบรายงานผู้บริหาร
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 m-0">
+              ทะเบียนคุมเลขที่อ้างอิง หลักฐานการออกใบเกียรติบัตร และส่งออกรายงาน Microsoft Word เสนอผู้บริหาร
+            </p>
+          </div>
+        </div>
+
+        <!-- Top Action Buttons -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="exportWordReport()" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/30 transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <i class="fas fa-file-word text-sm"></i>
+            <span>ดาวน์โหลดรายงาน Word (.doc)</span>
+          </button>
+          <button type="button" onclick="exportCsvData()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <i class="fas fa-file-excel text-emerald-400"></i>
+            <span>ส่งออก Excel</span>
+          </button>
+          <button type="button" onclick="window.print()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <i class="fas fa-print text-amber-400"></i>
+            <span>พิมพ์</span>
+          </button>
+          <a href="cert-editor.html" class="px-3 py-2 bg-purple-950/60 hover:bg-purple-900/60 text-purple-300 border border-purple-700/60 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95">
+            <i class="fas fa-palette"></i>
+            <span>ออกแบบแม่แบบ</span>
+          </a>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      
+      <!-- KPI Stats Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 no-print">
+        
+        <!-- Total Certs -->
+        <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">เกียรติบัตรทั้งหมด</div>
+            <div class="text-xl sm:text-2xl font-black text-purple-400 pt-0.5" id="stat-total-certs">0</div>
+            <div class="text-[10px] text-slate-500">บันทึกในทะเบียนคุม</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center text-lg">
+            <i class="fas fa-certificate"></i>
+          </div>
+        </div>
+
+        <!-- Total Students -->
+        <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">ผู้เรียนที่ได้รับ</div>
+            <div class="text-xl sm:text-2xl font-black text-sky-400 pt-0.5" id="stat-total-students">0</div>
+            <div class="text-[10px] text-slate-500">คน (ไม่ซ้ำบุคคล)</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center text-lg">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+        </div>
+
+        <!-- Total Sources -->
+        <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">หลักสูตร / แหล่งเรียนรู้</div>
+            <div class="text-xl sm:text-2xl font-black text-amber-400 pt-0.5" id="stat-total-sources">0</div>
+            <div class="text-[10px] text-slate-500">แห่งที่มีการออกใบประกาศ</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-lg">
+            <i class="fas fa-landmark"></i>
+          </div>
+        </div>
+
+        <!-- Pass Rate / Status -->
+        <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">สถานะทะเบียนคุม</div>
+            <div class="text-xl sm:text-2xl font-black text-emerald-400 pt-0.5">100%</div>
+            <div class="text-[10px] text-emerald-400/80">ตรวจสอบหลักฐานสมบูรณ์</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg">
+            <i class="fas fa-check-double"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filter Bar Panel -->
+      <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg space-y-3.5 no-print">
+        
+        <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-800">
+          <div class="text-xs font-bold text-slate-200 flex items-center gap-2">
+            <i class="fas fa-filter text-purple-400"></i>
+            <span>ตัวกรองและเงื่อนไขการออกรายงาน</span>
+          </div>
+          <button type="button" onclick="resetFilters()" class="text-[11px] text-slate-400 hover:text-rose-400 transition flex items-center gap-1">
+            <i class="fas fa-rotate-left"></i> ล้างตัวกรองทั้งหมด
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+          
+          <!-- Amphoe -->
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold">สถานศึกษา / อำเภอ:</label>
+            <select id="filter-amphoe" onchange="onFilterChanged()" class="w-full px-2.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-purple-500">
+              <option value="ALL">🏢 ทุกสถานศึกษา (ทั้งหมด)</option>
+              <option value="INS_PHRAO" selected>สกร.ระดับอำเภอพร้าว</option>
+              <option value="INS_MAERIM">สกร.ระดับอำเภอแม่ริม</option>
+            </select>
+          </div>
+
+          <!-- Tambon -->
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold">ศกร.ตำบล / ศศช.:</label>
+            <select id="filter-tambon" onchange="onFilterChanged()" class="w-full px-2.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-purple-500">
+              <option value="ALL">📍 ทุกตำบล (ทั้งหมด)</option>
+            </select>
+          </div>
+
+          <!-- Date From -->
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold">ตั้งแต่วันที่:</label>
+            <input type="date" id="filter-date-from" onchange="onFilterChanged()" class="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-purple-500">
+          </div>
+
+          <!-- Date To -->
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold">ถึงวันที่:</label>
+            <input type="date" id="filter-date-to" onchange="onFilterChanged()" class="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-purple-500">
+          </div>
+
+          <!-- Search Box -->
+          <div>
+            <label class="block text-slate-400 mb-1 font-semibold">ค้นหาด่วน:</label>
+            <div class="relative">
+              <input type="text" id="filter-search" oninput="debounceSearch()" placeholder="🔍 ค้นหาเลขที่/ชื่อ/เบอร์..." class="w-full pl-7 pr-3 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium focus:outline-none focus:border-purple-500">
+              <i class="fas fa-search absolute left-2.5 top-2 text-slate-500 text-[10px]"></i>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Master Register Data Table Section -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+        
+        <!-- Table Header & Controls -->
+        <div class="p-4 sm:p-5 flex items-center justify-between gap-3 border-b border-slate-800 flex-wrap no-print">
+          <div class="flex items-center gap-2.5">
+            <h2 class="text-sm font-bold text-white m-0 flex items-center gap-2">
+              <i class="fas fa-list-ol text-purple-400"></i>
+              <span>ตารางทะเบียนคุมหลักฐานการออกใบเกียรติบัตร</span>
+            </h2>
+            <span id="table-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-purple-300 border border-purple-500/30">
+              0 รายการ
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs">
+            <button type="button" onclick="loadRegistryData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition flex items-center gap-1">
+              <i class="fas fa-sync-alt" id="refresh-icon"></i> รีเฟรช
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-3.5 text-center w-12">ลำดับ</th>
+                <th class="py-3 px-3.5 text-center w-48">เลขที่อ้างอิงเกียรติบัตร</th>
+                <th class="py-3 px-4 min-w-[160px]">ชื่อ - นามสกุล ผู้รับ</th>
+                <th class="py-3 px-4 min-w-[200px]">หลักสูตร / แหล่งเรียนรู้ / กิจกรรม</th>
+                <th class="py-3 px-3.5 text-center min-w-[120px]">ตำบล / สังกัด</th>
+                <th class="py-3 px-3.5 text-center w-28">วันที่ออก</th>
+                <th class="py-3 px-3.5 text-center w-24">ผลคะแนน</th>
+                <th class="py-3 px-3.5 text-center w-24">สถานะ</th>
+                <th class="py-3 px-3.5 text-right w-28 no-print">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="registry-table-body" class="divide-y divide-slate-800/60">
+              <!-- Loading row -->
+              <tr>
+                <td colspan="9" class="text-center py-16 text-slate-500">
+                  <div class="inline-flex flex-col items-center gap-2">
+                    <i class="fas fa-circle-notch fa-spin text-2xl text-purple-400"></i>
+                    <span class="text-xs">กำลังโหลดข้อมูลทะเบียนคุมเกียรติบัตร...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer / Pagination -->
+        <div class="p-3.5 border-t border-slate-800/80 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2 no-print">
+          <div id="registry-showing-text">
+            แสดง 0 - 0 จากทั้งหมด 0 รายการ
+          </div>
+          <div id="registry-pagination" class="flex items-center gap-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Alert -->
+  <div id="toastAlert" class="fixed bottom-6 right-6 z-50 p-4 rounded-2xl text-xs font-bold transition transform duration-300 translate-y-4 opacity-0 pointer-events-none shadow-2xl flex items-center gap-2"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js"></script>
+  <script src="js/core/auth.js"></script>
+  <script src="js/core/nav.js"></script>
+
+  <script>
+    let allRegistryItems = [];
+    let filteredRegistryItems = [];
+    let currentPage = 1;
+    const pageSize = 25;
+    let searchDebounceTimer = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadInstitutionsAndTambons();
+      await loadRegistryData();
+    });
+
+    async function loadInstitutionsAndTambons() {
+      try {
+        const res = await apiGet('getCertEditorSources', withAuthParams({}));
+        if (res && res.status === 'success') {
+          const tambonSelect = document.getElementById('filter-tambon');
+          const sources = res.sources || [];
+          const tambonSet = new Set();
+
+          sources.forEach(s => {
+            if (s.tambon && s.tambon.trim()) tambonSet.add(s.tambon.trim());
+          });
+
+          tambonSelect.innerHTML = '<option value="ALL">📍 ทุกตำบล (ทั้งหมด)</option>';
+          Array.from(tambonSet).sort().forEach(tb => {
+            const opt = document.createElement('option');
+            opt.value = tb;
+            opt.textContent = tb;
+            tambonSelect.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Error loading tambons:', err);
+      }
+    }
+
+    async function loadRegistryData() {
+      const refreshIcon = document.getElementById('refresh-icon');
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+      const amphoe = document.getElementById('filter-amphoe').value;
+      const tambon = document.getElementById('filter-tambon').value;
+      const dateFrom = document.getElementById('filter-date-from').value;
+      const dateTo = document.getElementById('filter-date-to').value;
+      const search = document.getElementById('filter-search').value.trim();
+
+      try {
+        const res = await apiGet('getCertificateRegistry', withAuthParams({
+          institutionId: amphoe,
+          tambon: tambon,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+          search: search
+        }));
+
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+        if (res && res.status === 'success') {
+          allRegistryItems = res.items || [];
+          const summary = res.summary || {};
+
+          // Update KPI Stats
+          document.getElementById('stat-total-certs').innerText = (summary.totalCerts || allRegistryItems.length).toLocaleString();
+          document.getElementById('stat-total-students').innerText = (summary.totalStudents || 0).toLocaleString();
+          document.getElementById('stat-total-sources').innerText = (summary.totalSources || 0).toLocaleString();
+
+          applyClientFilterAndRender();
+        } else {
+          showToast(res.message || 'ไม่สามารถโหลดข้อมูลทะเบียนคุมได้', 'error');
+          renderEmptyState('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+        }
+      } catch (err) {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+        console.error('Error loading registry:', err);
+        showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+        renderEmptyState('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+      }
+    }
+
+    function debounceSearch() {
+      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        applyClientFilterAndRender();
+      }, 250);
+    }
+
+    function onFilterChanged() {
+      loadRegistryData();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-amphoe').value = 'ALL';
+      document.getElementById('filter-tambon').value = 'ALL';
+      document.getElementById('filter-date-from').value = '';
+      document.getElementById('filter-date-to').value = '';
+      document.getElementById('filter-search').value = '';
+      loadRegistryData();
+    }
+
+    function applyClientFilterAndRender() {
+      const keyword = (document.getElementById('filter-search').value || '').trim().toLowerCase();
+
+      if (!keyword) {
+        filteredRegistryItems = [...allRegistryItems];
+      } else {
+        filteredRegistryItems = allRegistryItems.filter(item => {
+          return (item.refNo && item.refNo.toLowerCase().includes(keyword)) ||
+                 (item.fullName && item.fullName.toLowerCase().includes(keyword)) ||
+                 (item.sourceName && item.sourceName.toLowerCase().includes(keyword)) ||
+                 (item.tambon && item.tambon.toLowerCase().includes(keyword)) ||
+                 (item.phone && item.phone.toLowerCase().includes(keyword));
+        });
+      }
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('registry-table-body');
+      const countBadge = document.getElementById('table-count-badge');
+      const showingText = document.getElementById('registry-showing-text');
+      const paginationEl = document.getElementById('registry-pagination');
+
+      countBadge.innerText = `${filteredRegistryItems.length.toLocaleString()} รายการ`;
+
+      if (!filteredRegistryItems.length) {
+        renderEmptyState('ไม่พบข้อมูลตามเงื่อนไขที่ค้นหา');
+        showingText.innerText = 'แสดง 0 - 0 จากทั้งหมด 0 รายการ';
+        paginationEl.innerHTML = '';
+        return;
+      }
+
+      const totalItems = filteredRegistryItems.length;
+      const totalPages = Math.ceil(totalItems / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, totalItems);
+      const pageItems = filteredRegistryItems.slice(startIndex, endIndex);
+
+      showingText.innerText = `แสดง ${startIndex + 1} - ${endIndex} จากทั้งหมด ${totalItems.toLocaleString()} รายการ`;
+
+      let html = '';
+      pageItems.forEach((item, idx) => {
+        const itemNumber = startIndex + idx + 1;
+        const refNo = item.refNo || `CERT-${item.id}`;
+        const name = item.fullName || item.username || 'ผู้เรียน';
+        const sourceName = item.sourceName || 'หลักสูตรตามอัธยาศัย';
+        const tambon = item.tambon || 'สกร.อำเภอพร้าว';
+        const issuedDate = item.issuedAt || '-';
+        const score = item.score || 'ผ่านเกณฑ์';
+        const certUrl = item.certUrl || '';
+
+        html += `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-3.5 text-center font-mono text-slate-400">${itemNumber}</td>
+            <td class="py-3 px-3.5 text-center font-mono font-black text-purple-300">
+              <span class="px-2.5 py-1 rounded-lg bg-purple-950/70 border border-purple-500/30">
+                ${escapeHtml(refNo)}
+              </span>
+            </td>
+            <td class="py-3 px-4 font-bold text-white leading-snug">
+              ${escapeHtml(name)}
+              <div class="text-[10px] text-slate-400 font-mono font-normal">${escapeHtml(item.phone || '')}</div>
+            </td>
+            <td class="py-3 px-4 text-slate-200 font-semibold leading-relaxed">
+              ${escapeHtml(sourceName)}
+            </td>
+            <td class="py-3 px-3.5 text-center text-slate-300 font-medium">
+              ${escapeHtml(tambon)}
+            </td>
+            <td class="py-3 px-3.5 text-center text-slate-400 font-mono">
+              ${escapeHtml(issuedDate)}
+            </td>
+            <td class="py-3 px-3.5 text-center font-black text-amber-400 font-mono">
+              ${escapeHtml(String(score))}
+            </td>
+            <td class="py-3 px-3.5 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                สมบูรณ์
+              </span>
+            </td>
+            <td class="py-3 px-3.5 text-right no-print">
+              <button type="button" onclick="viewCertificatePdf('${escapeJS(item.certId)}', '${escapeJS(item.username)}', '${escapeJS(item.sourceId)}', '${escapeJS(item.activityId)}', '${escapeJS(certUrl)}')" class="px-2.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-bold transition flex items-center gap-1 ml-auto active:scale-95 shadow-sm" title="เปิดดูใบเกียรติบัตร">
+                <i class="fas fa-file-pdf text-purple-400"></i> ดูไฟล์
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      renderPagination(totalPages);
+    }
+
+    function renderEmptyState(message) {
+      const tbody = document.getElementById('registry-table-body');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" class="text-center py-16 text-slate-500">
+            <div class="inline-flex flex-col items-center gap-2">
+              <i class="fas fa-folder-open text-3xl opacity-40"></i>
+              <span class="text-xs font-medium">${escapeHtml(message)}</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function renderPagination(totalPages) {
+      const paginationEl = document.getElementById('registry-pagination');
+      if (totalPages <= 1) {
+        paginationEl.innerHTML = '';
+        return;
+      }
+
+      let phtml = '';
+      phtml += `
+        <button type="button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-300 flex items-center justify-center text-xs transition">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          phtml += `
+            <button type="button" onclick="goToPage(${i})" class="w-7 h-7 rounded-lg text-xs font-bold transition ${i === currentPage ? 'bg-purple-600 text-white shadow' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}">
+              ${i}
+            </button>
+          `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          phtml += `<span class="px-1 text-slate-600">...</span>`;
+        }
+      }
+
+      phtml += `
+        <button type="button" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-300 flex items-center justify-center text-xs transition">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+
+      paginationEl.innerHTML = phtml;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderTable();
+    }
+
+    function viewCertificatePdf(certId, username, sourceId, activityId, certUrl) {
+      if (certUrl && (certUrl.startsWith('http') || certUrl.startsWith('/'))) {
+        window.open(certUrl, '_blank');
+        return;
+      }
+
+      showToast('กำลังเปิดไฟล์เกียรติบัตร...', 'info');
+      apiPost('generateCert', withAuthParams({
+        certId: certId,
+        username: username,
+        sourceId: sourceId,
+        activityId: activityId
+      }))
+        .then(res => {
+          if (res && res.status === 'success' && res.url) {
+            window.open(res.url, '_blank');
+          } else {
+            showToast(res.message || 'ไม่สามารถเปิดใบเกียรติบัตรได้', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('View cert error:', err);
+          showToast('เกิดข้อผิดพลาดในการเปิดไฟล์เกียรติบัตร', 'error');
+        });
+    }
+
+    function exportWordReport() {
+      showToast('⏳ กำลังสร้างเอกสาร Word เสนอผู้บริหาร...', 'info');
+
+      const amphoe = document.getElementById('filter-amphoe').value;
+      const tambon = document.getElementById('filter-tambon').value;
+      const dateFrom = document.getElementById('filter-date-from').value;
+      const dateTo = document.getElementById('filter-date-to').value;
+      const search = document.getElementById('filter-search').value.trim();
+
+      const params = new URLSearchParams(withAuthParams({
+        action: 'exportCertificateRegistryWord',
+        institutionId: amphoe,
+        tambon: tambon,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        search: search
+      }));
+
+      // Trigger download
+      window.location.href = `/api?${params.toString()}`;
+      setTimeout(() => {
+        showToast('✅ ดาวน์โหลดเอกสาร Word (.doc) สำเร็จเรียบร้อย!', 'success');
+      }, 1500);
+    }
+
+    function exportCsvData() {
+      if (!filteredRegistryItems.length) {
+        showToast('ไม่มีข้อมูลที่จะส่งออก', 'warning');
+        return;
+      }
+
+      const headers = ['ลำดับ', 'เลขที่อ้างอิง', 'ชื่อ-นามสกุล', 'เบอร์โทร', 'หลักสูตร/แหล่งเรียนรู้', 'ตำบล', 'สังกัด', 'วันที่ออก', 'ผลคะแนน', 'สถานะ'];
+      const rows = filteredRegistryItems.map((item, idx) => [
+        idx + 1,
+        `"${item.refNo || ''}"`,
+        `"${item.fullName || ''}"`,
+        `"${item.phone || ''}"`,
+        `"${item.sourceName || ''}"`,
+        `"${item.tambon || ''}"`,
+        `"${item.institution || ''}"`,
+        `"${item.issuedAt || ''}"`,
+        `"${item.score || ''}"`,
+        `"${item.status || 'สมบูรณ์'}"`
+      ]);
+
+      const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ทะเบียนคุมเกียรติบัตร_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('✅ ส่งออกไฟล์ CSV/Excel เรียบร้อย!', 'success');
+    }
+
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toastAlert');
+      if (!toast) return;
+
+      toast.className = `fixed bottom-6 right-6 z-50 p-4 rounded-2xl text-xs font-bold transition transform duration-300 shadow-2xl flex items-center gap-2 ${
+        type === 'error' ? 'bg-rose-900 border border-rose-700 text-rose-200' :
+        type === 'warning' ? 'bg-amber-900 border border-amber-700 text-amber-200' :
+        type === 'success' ? 'bg-emerald-900 border border-emerald-700 text-emerald-200' :
+        'bg-slate-900 border border-slate-700 text-purple-200'
+      }`;
+
+      const icon = type === 'error' ? 'fa-circle-xmark' :
+                   type === 'warning' ? 'fa-triangle-exclamation' :
+                   type === 'success' ? 'fa-circle-check' : 'fa-circle-info';
+
+      toast.innerHTML = `<i class="fas ${icon}"></i> <span>${msg}</span>`;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+      toast.style.pointerEvents = 'auto';
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(1rem)';
+        toast.style.pointerEvents = 'none';
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+  </script>
+</body>
+</html>

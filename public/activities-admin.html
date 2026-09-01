@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📅 จัดการกิจกรรมและกิจกรรมรายไตรมาส — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .custom-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xl shadow-md shadow-amber-500/20 shrink-0">
+          <i class="fas fa-calendar-days"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการกิจกรรมเด่นและรายไตรมาส
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              Activities & Quarters
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            กิจกรรมส่งเสริมการเรียนรู้ แบนเนอร์ไฮไลต์หน้าแรก และกิจกรรมประจำไตรมาส 1–4
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <a href="events-admin.html" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95">
+          <i class="fas fa-bullhorn"></i> กิจกรรมเช็กอิน & เกียรติบัตร
+        </a>
+        <button type="button" onclick="openActivityEditorModal()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-white shadow-md shadow-amber-600/30 transition-all active:scale-95">
+          <i class="fas fa-plus"></i> เพิ่มโครงการรายไตรมาส
+        </button>
+        <button type="button" onclick="openFeaturedEditorModal()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-star text-amber-400"></i> แบนเนอร์เด่น
+        </button>
+        <button type="button" onclick="loadAdminActivities(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Filter Bar -->
+    <section class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        <!-- 1. Institution Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-university mr-1 text-blue-400"></i>สถานศึกษาหลัก</label>
+          <select id="filter-institution" onchange="loadAdminActivities()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500 font-medium">
+            <option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>
+          </select>
+        </div>
+
+        <!-- 2. Quarter Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-clock mr-1 text-amber-400"></i>ประจำไตรมาส</label>
+          <select id="filter-quarter" onchange="loadAdminActivities()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500 font-bold">
+            <option value="1">🌱 ไตรมาสที่ 1 (ต.ค. - ธ.ค.)</option>
+            <option value="2">🌸 ไตรมาสที่ 2 (ม.ค. - มี.ค.)</option>
+            <option value="3">☀️ ไตรมาสที่ 3 (เม.ย. - มิ.ย.)</option>
+            <option value="4">🍂 ไตรมาสที่ 4 (ก.ค. - ก.ย.)</option>
+          </select>
+        </div>
+
+        <!-- 3. Year Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-calendar mr-1 text-teal-400"></i>ปี พ.ศ. / ค.ศ.</label>
+          <select id="filter-year" onchange="loadAdminActivities()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500 font-medium">
+            <option value="2026">พ.ศ. 2569 (2026)</option>
+            <option value="2025">พ.ศ. 2568 (2025)</option>
+            <option value="2024">พ.ศ. 2567 (2024)</option>
+          </select>
+        </div>
+
+        <!-- 4. Tambon Search -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-magnifying-glass mr-1 text-slate-400"></i>ค้นหาชื่อกิจกรรม/ตำบล</label>
+          <input type="text" id="filter-search" onkeyup="filterActivitiesLocal()" placeholder="พิมพ์ค้นหากิจกรรม..." class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+        </div>
+
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-700/50 mt-3 flex-wrap gap-2">
+        <span id="activities-summary-badge" class="font-bold text-amber-300">
+          <i class="fas fa-circle-info mr-1"></i>พบกิจกรรม 0 รายการ
+        </span>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ Featured Banner Preview Card ═══════════════════ -->
+    <div id="featured-banner-card" class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/60 to-purple-950/60 border border-indigo-500/30 mb-6 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5 flex-1 min-w-0">
+        <div class="w-16 h-16 rounded-xl bg-slate-800 bg-cover bg-center shrink-0 border border-slate-700 shadow-md" id="featured-preview-thumb">
+          <div class="w-full h-full flex items-center justify-center text-amber-400 text-xl"><i class="fas fa-star"></i></div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <i class="fas fa-star mr-1"></i>ไฮไลต์หน้าแรก (Featured Banner)
+            </span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white mt-1 m-0 truncate" id="featured-preview-title">
+            (ยังไม่ได้ตั้งค่าแบนเนอร์เด่น)
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5 m-0 line-clamp-1" id="featured-preview-location">
+            —
+          </p>
+        </div>
+      </div>
+
+      <button type="button" onclick="openFeaturedEditorModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition shrink-0">
+        <i class="fas fa-edit mr-1"></i> แก้ไขแบนเนอร์เด่น
+      </button>
+    </div>
+
+    <!-- Activities Grid Container -->
+    <main id="activities-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="col-span-full text-center py-16 text-slate-400">
+        <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-amber-500"></i>
+        <p class="text-sm font-semibold">กำลังโหลดกิจกรรม...</p>
+      </div>
+    </main>
+
+  </div> <!-- End Main Container -->
+
+  <!-- ═══════════════════ Modal: Add / Edit Activity ═══════════════════ -->
+  <div id="modal-activity-editor" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base">
+            <i class="fas fa-calendar-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="activity-modal-title">เพิ่มกิจกรรมรายไตรมาส</h3>
+            <p class="text-[11px] text-slate-400 m-0">กำหนดชื่อกิจกรรม สถานที่ วันที่ และรายละเอียด</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeActivityEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="activity-form" onsubmit="submitActivityForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="activity-form-id">
+
+        <!-- Title -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อกิจกรรม <span class="text-rose-400">*</span></label>
+          <input type="text" id="activity-form-name" required placeholder="เช่น อบรมการแปรรูปผลผลิตทางการเกษตรสร้างมูลค่าเพิ่ม" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Tambon & Location -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ตำบล / พื้นที่จัดงาน</label>
+            <input type="text" id="activity-form-tambon" placeholder="เช่น ตำบลเวียง, ตำบลป่าไหน่" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สถานที่จัดกิจกรรม</label>
+            <input type="text" id="activity-form-location" placeholder="เช่น ศกร.ระดับตำบลเวียง" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Quarter, Year, Order -->
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ไตรมาส</label>
+            <select id="activity-form-quarter" class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 font-bold">
+              <option value="1">ไตรมาส 1</option>
+              <option value="2">ไตรมาส 2</option>
+              <option value="3">ไตรมาส 3</option>
+              <option value="4">ไตรมาส 4</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ปี (ค.ศ.)</label>
+            <input type="number" id="activity-form-year" value="2026" class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ลำดับ</label>
+            <input type="number" id="activity-form-order" placeholder="เช่น 1, 2" class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Image URL -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">URL รูปภาพกิจกรรม</label>
+          <input type="text" id="activity-form-image" placeholder="https://..." class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Activity Date & Target Capacity -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">วัน/เวลาจัดกิจกรรม</label>
+            <input type="text" id="activity-form-date" placeholder="เช่น 15–16 พ.ย. 2568 เวลา 09.00-16.00 น." class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">เป้าหมายผู้เข้าร่วม (คน)</label>
+            <input type="text" id="activity-form-capacity" placeholder="เช่น 30 คน" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Contact info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ผู้รับผิดชอบโครงการ</label>
+            <input type="text" id="activity-form-contact-name" placeholder="เช่น ครูสมชาย ใจดี" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">เบอร์ติดต่อ</label>
+            <input type="text" id="activity-form-contact-phone" placeholder="เช่น 081-234-5678" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Points & Pass Score -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">แต้มสะสมเมื่อเช็กอิน (+แต้ม)</label>
+            <input type="number" id="activity-form-points" value="20" placeholder="20" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">เกณฑ์ผ่านแบบทดสอบ (%)</label>
+            <input type="number" id="activity-form-pass-score" value="80" placeholder="80" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดกิจกรรม / วัตถุประสงค์</label>
+          <textarea id="activity-form-description" rows="3" placeholder="ระบุรายละเอียดโครงการ ประโยชน์ที่ได้รับ..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeActivityEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="activity-form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold shadow-md shadow-amber-600/30 transition">
+            💾 บันทึกกิจกรรม
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Edit Featured Banner ═══════════════════ -->
+  <div id="modal-featured-editor" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+            <i class="fas fa-star text-amber-400"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">ตั้งค่าแบนเนอร์ไฮไลต์หน้าแรก</h3>
+            <p class="text-[11px] text-slate-400 m-0">แบนเนอร์ขนาดใหญ่แสดงบนหัวหน้าหลักของผู้เรียน</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeFeaturedEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="featured-form" onsubmit="submitFeaturedForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="featured-form-id">
+
+        <!-- Title -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">หัวข้อแบนเนอร์ไฮไลต์ <span class="text-rose-400">*</span></label>
+          <input type="text" id="featured-form-title" required placeholder="เช่น ขอเชิญชวนร่วมงานมหกรรมการเรียนรู้ตลอดชีวิต ประจำปี 2569" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <!-- Image URL -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">URL รูปภาพแบนเนอร์ (ขนาด 1200x500 px หรืออัตราส่วน 16:9)</label>
+          <input type="text" id="featured-form-image" placeholder="https://..." class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <!-- Location & Map -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สถานที่จัดงาน</label>
+            <input type="text" id="featured-form-location" placeholder="เช่น หอประชุมที่ว่าการอำเภอพร้าว" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ลิงก์ Google Maps</label>
+            <input type="text" id="featured-form-map" placeholder="https://maps.google.com/..." class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Start & End Date -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">วันที่เริ่มต้น</label>
+            <input type="text" id="featured-form-start" placeholder="เช่น 20 พ.ย. 2568" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">วันที่สิ้นสุด</label>
+            <input type="text" id="featured-form-end" placeholder="เช่น 22 พ.ย. 2568" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Short Description -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ข้อความประชาสัมพันธ์สั้น</label>
+          <textarea id="featured-form-desc" rows="3" placeholder="ข้อความสรุปไฮไลต์ของงาน..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeFeaturedEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="featured-form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold shadow-md shadow-indigo-600/30 transition">
+            💾 บันทึกแบนเนอร์เด่น
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Activity QR Code & Check-in Manager ═══════════════════ -->
+  <div id="modal-activity-qr" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] flex flex-col overflow-y-auto custom-scrollbar">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base border border-amber-500/30">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="qr-modal-title">QR Code เช็กอิน & ตรวจสอบรายชื่อ</h3>
+            <p class="text-[11px] text-slate-400 m-0" id="qr-modal-subtitle">เปิดให้ผู้เรียนสแกนเช็กอิน หรือตรวจสอบรายชื่อและผลการประเมิน</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeActivityQrModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="flex items-center gap-1.5 p-1 bg-slate-950 rounded-2xl border border-slate-800 my-3 shrink-0 text-xs font-bold">
+        <button type="button" id="tab-btn-qr-poster" onclick="switchQrModalTab('poster')" class="flex-1 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 transition">
+          <i class="fas fa-print mr-1"></i> ป้าย QR โปสเตอร์
+        </button>
+        <button type="button" id="tab-btn-qr-logs" onclick="switchQrModalTab('logs')" class="flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white transition">
+          <i class="fas fa-users mr-1"></i> รายชื่อผู้เช็กอิน (<span id="qr-modal-checkin-count">0</span>)
+        </button>
+      </div>
+
+      <!-- Tab 1: QR Poster Preview -->
+      <div id="tab-content-qr-poster" class="space-y-4 text-center max-w-md mx-auto w-full p-1">
+        <div id="printable-qr-poster" class="p-6 bg-white text-slate-950 rounded-2xl border-4 border-amber-500 shadow-xl space-y-3 mx-auto max-w-sm">
+          <div class="space-y-1 border-b-2 border-slate-200 pb-2.5">
+            <span class="text-[11px] font-black uppercase tracking-wider text-amber-600">สแกน QR Code เพื่อเช็กอิน</span>
+            <h4 class="text-base font-black leading-tight text-slate-900 m-0" id="poster-act-name">ชื่อกิจกรรม</h4>
+            <p class="text-xs text-slate-600 m-0" id="poster-act-loc">สถานที่จัดงาน</p>
+          </div>
+
+          <div class="py-2 flex justify-center">
+            <img id="poster-qr-image" src="" alt="QR Code" class="w-48 h-48 border-2 border-slate-900 rounded-xl p-1 bg-white shadow-md">
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-xs font-black">
+              <i class="fas fa-coins text-amber-600"></i> ได้รับคะแนนสะสม <span id="poster-act-points">+20</span> แต้ม
+            </div>
+            <div class="text-[11px] text-slate-500">
+              รหัสเช็กอิน: <b class="font-mono text-slate-900 select-all" id="poster-act-code">ACT001</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Tools -->
+        <div class="flex items-center justify-center gap-2 pt-2">
+          <button type="button" onclick="printActivityPoster()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-md transition active:scale-95 flex items-center gap-1.5">
+            <i class="fas fa-print"></i> พิมพ์โปสเตอร์ QR Code
+          </button>
+          <button type="button" onclick="copyActivityCode()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition active:scale-95 flex items-center gap-1.5">
+            <i class="fas fa-copy text-amber-400"></i> คัดลอกรหัส Code
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Check-in Logs & Analysis Table -->
+      <div id="tab-content-qr-logs" class="space-y-4 flex-1 flex flex-col min-h-0" style="display: none;">
+        
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400 font-medium">ผู้เช็กอินทั้งหมด</div>
+              <div class="text-base font-black text-white" id="qr-kpi-total">0 <span class="text-[10px] font-normal text-slate-400">คน</span></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400 font-medium">แต้มเช็กอินสะสม</div>
+              <div class="text-base font-black text-amber-300" id="qr-kpi-points">0 <span class="text-[10px] font-normal text-slate-400">แต้ม</span></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400 font-medium">ทำแบบทดสอบแล้ว</div>
+              <div class="text-base font-black text-purple-300" id="qr-kpi-quizzes">0 <span class="text-[10px] font-normal text-slate-400">คน</span></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
+              <i class="fas fa-award"></i>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400 font-medium">ได้รับเกียรติบัตร</div>
+              <div class="text-base font-black text-emerald-400" id="qr-kpi-certs">0 <span class="text-[10px] font-normal text-slate-400">ใบ</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-slate-950/60 p-2.5 rounded-2xl border border-slate-800/80">
+          <div class="flex-1 flex items-center gap-2">
+            <div class="relative flex-1">
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input type="text" id="qr-checkins-search" oninput="filterCheckInsLocal()" placeholder="ค้นหาชื่อ-นามสกุล, รหัสนักศึกษา, ตำบล..." class="w-full pl-8 pr-3 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            </div>
+            <select id="qr-checkins-filter-status" onchange="filterCheckInsLocal()" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-emerald-500">
+              <option value="ALL">ทุกสถานะ</option>
+              <option value="QUIZ_PASSED">✓ ผ่านแบบทดสอบแล้ว</option>
+              <option value="QUIZ_PENDING">⏳ ยังไม่ทำแบบทดสอบ</option>
+              <option value="HAS_CERT">🏆 ได้รับเกียรติบัตร</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0 justify-end">
+            <button type="button" onclick="exportCheckInsToCsv()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5" title="ส่งออกรายชื่อเป็นไฟล์ Excel/CSV">
+              <i class="fas fa-file-csv text-emerald-400"></i> ส่งออก CSV
+            </button>
+            <button type="button" onclick="loadActivityCheckIns(currentQrActivity?.id || currentQrActivity?.activityId)" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition" title="รีเฟรชข้อมูล">
+              <i class="fas fa-rotate text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Analytical Data Table -->
+        <div class="flex-1 overflow-x-auto overflow-y-auto max-h-[380px] custom-scrollbar rounded-2xl border border-slate-800 bg-slate-950/70">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="sticky top-0 z-10 bg-slate-900 text-slate-400 border-b border-slate-800 text-[11px] font-bold">
+              <tr>
+                <th class="py-2.5 px-3 text-center w-12">#</th>
+                <th class="py-2.5 px-3">ชื่อ-นามสกุล / ข้อมูลนักศึกษา</th>
+                <th class="py-2.5 px-3">สถานศึกษา / ตำบล</th>
+                <th class="py-2.5 px-3 text-center">เวลาเช็กอิน</th>
+                <th class="py-2.5 px-3 text-center">แต้มเช็กอิน</th>
+                <th class="py-2.5 px-3 text-center">แบบทดสอบ & เกียรติบัตร</th>
+                <th class="py-2.5 px-3 text-center w-24">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="qr-checkins-tbody" class="divide-y divide-slate-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Activity Quizzes Manager ═══════════════════ -->
+  <div id="modal-activity-quizzes" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <i class="fas fa-clipboard-question"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="act-quiz-modal-title">จัดการข้อสอบประจำกิจกรรม</h3>
+            <p class="text-[11px] text-slate-400 m-0" id="act-quiz-modal-subtitle">สร้างแบบทดสอบวัดความรู้เพื่อรับเกียรติบัตร</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeActivityQuizModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Quiz Passing Score Setting -->
+      <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 my-3 flex items-center justify-between gap-3 shrink-0 text-xs">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-award text-emerald-400 text-sm"></i>
+          <span class="font-bold text-slate-300">เกณฑ์คะแนนผ่านรับเกียรติบัตร:</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <input type="number" id="act-quiz-pass-score" min="10" max="100" value="80" class="w-16 px-2 py-1 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-purple-500">
+          <span class="text-slate-400 font-bold">%</span>
+        </div>
+      </div>
+
+      <!-- Quizzes List Builder -->
+      <div id="act-quizzes-builder-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-1">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800 mt-3 shrink-0">
+        <button type="button" onclick="addNewActivityQuestionRow()" class="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
+          <i class="fas fa-plus"></i> เพิ่มคำถามข้อใหม่
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeActivityQuizModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+            ยกเลิก
+          </button>
+          <button type="button" id="btn-save-act-quizzes" onclick="saveActivityQuizzesAction()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white font-bold text-xs shadow-md shadow-purple-600/30 transition active:scale-95">
+            💾 บันทึกชุดข้อสอบ
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Activity Certificate Template Manager ═══════════════════ -->
+  <div id="modal-activity-cert" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/30">
+            <i class="fas fa-award"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="act-cert-modal-title">ตั้งค่าเกียรติบัตรประจำกิจกรรม</h3>
+            <p class="text-[11px] text-slate-400 m-0">กำหนดข้อความและแม่แบบเกียรติบัตรเมื่อผ่านกิจกรรม</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeActivityCertModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="act-cert-form" onsubmit="saveActivityCertTemplateAction(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="act-cert-form-id">
+
+        <!-- Course / Activity Title -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อหลักสูตร / กิจกรรมบนใบประกาศ <span class="text-rose-400">*</span></label>
+          <input type="text" id="act-cert-course-name" required placeholder="เช่น โครงการอบรมเชิงปฏิบัติการพัฒนาทักษะอาชีพชุมชน" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-bold">
+        </div>
+
+        <!-- Description / Achievement text -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ข้อความแสดงผลการเรียนรู้</label>
+          <textarea id="act-cert-desc-text" rows="2" placeholder="เช่น ได้ผ่านการฝึกอบรมและทดสอบความรู้ตามเกณฑ์มาตรฐาน" class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+        </div>
+
+        <!-- Organization Name -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อสถานศึกษา / หน่วยงานผู้ออกใบประกาศ</label>
+          <input type="text" id="act-cert-org-name" value="ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Signer Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ชื่อผู้อำนวยการ / ผู้ลงนาม</label>
+            <input type="text" id="act-cert-signer-name" placeholder="เช่น นายสมชาย ใจดี" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ตำแหน่งผู้ลงนาม</label>
+            <input type="text" id="act-cert-signer-position" value="ผู้อำนวยการ สกร.ระดับอำเภอ" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <!-- Designer Link Helper Card -->
+        <div class="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between gap-3 mt-2">
+          <div>
+            <h4 class="text-xs font-bold text-emerald-300 m-0"><i class="fas fa-palette mr-1"></i> เครื่องมือปรับแต่งดีไซน์สด</h4>
+            <p class="text-[10px] text-slate-400 m-0">ปรับกรอบ ฟอนต์ สี ตราสัญลักษณ์ และทดสอบ PDF</p>
+          </div>
+          <a href="cert-editor.html" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition active:scale-95 shrink-0 flex items-center gap-1">
+            <i class="fas fa-external-link-alt"></i> เปิด Live Editor
+          </a>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeActivityCertModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-save-act-cert" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold shadow-md shadow-emerald-600/30 transition">
+            💾 บันทึกแม่แบบเกียรติบัตร
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Admin Navigation Drawer / Hub ═══════════════════ -->
+  <div id="modal-admin-nav" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700 sm:rounded-3xl rounded-t-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <i class="fas fa-toolbox"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white m-0">ศูนย์จัดการระบบ (Admin Hub)</h3>
+            <p class="text-[10px] text-slate-400 m-0">เลือกระบบงานที่ต้องการเข้าจัดการข้อมูล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminNavModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto custom-scrollbar p-1">
+        <a href="sources.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">แหล่งเรียนรู้ ม.6</span>
+          <span class="text-[10px] text-slate-400">จัดการข้อมูลและปราชญ์</span>
+        </a>
+
+        <a href="events-admin.html" class="p-3 rounded-2xl bg-emerald-950/40 hover:bg-emerald-950/60 border border-emerald-500/40 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-bullhorn"></i>
+          </div>
+          <span class="text-xs font-bold text-emerald-300">กิจกรรม & QR เช็กอิน</span>
+          <span class="text-[10px] text-slate-400">กิจกรรมสถานศึกษา / รับแต้ม</span>
+        </a>
+
+        <a href="activities-admin.html" class="p-3 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/30 text-amber-300 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-calendar-days"></i>
+          </div>
+          <span class="text-xs font-bold text-amber-300">แผนกิจกรรมรายไตรมาส</span>
+          <span class="text-[10px] text-slate-400">โครงการอบรม 4 ไตรมาส</span>
+        </a>
+
+        <a href="quizzes.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-purple-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-clipboard-question"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-purple-400">ข้อสอบ & เกณฑ์</span>
+          <span class="text-[10px] text-slate-400">แบบทดสอบวัดผลการเรียนรู้</span>
+        </a>
+
+        <a href="institutions.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-blue-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-school"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-blue-400">สถานศึกษา & หน่วยจัด</span>
+          <span class="text-[10px] text-slate-400">จัดการศูนย์ สกร. และ ศกร.ตำบล</span>
+        </a>
+
+        <a href="users.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-blue-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-blue-400">จัดการผู้เรียน & สิทธิ์</span>
+          <span class="text-[10px] text-slate-400">รายชื่อผู้เรียนและระดับ</span>
+        </a>
+
+        <a href="cert-editor.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-emerald-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-emerald-400">ออกแบบเกียรติบัตร</span>
+          <span class="text-[10px] text-slate-400">แม่แบบและจัดวางตำแหน่งสด</span>
+        </a>
+
+        <a href="market-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-store"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">ตลาดชุมชน</span>
+          <span class="text-[10px] text-slate-400">จัดการสินค้าและคูปอง</span>
+        </a>
+
+        <a href="upskill-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-video"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">คลังวิดีโอ Upskill</span>
+          <span class="text-[10px] text-slate-400">จัดการสื่อเรียนรู้ออนไลน์</span>
+        </a>
+
+        <a href="stats.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-cyan-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-cyan-400">สถิติ & รายงาน</span>
+          <span class="text-[10px] text-slate-400">Executive Dashboard</span>
+        </a>
+
+        <a href="settings.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-slate-700 text-slate-300 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-cog"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-slate-300">ตั้งค่าระบบ</span>
+          <span class="text-[10px] text-slate-400">API Keys & ระบบทั่วไป</span>
+        </a>
+
+        <a href="index.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-home"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">หน้าหลัก (ผู้เรียน)</span>
+          <span class="text-[10px] text-slate-400">มุมมองผู้ใช้งานทั่วไป</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-activities-v1"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-activities-v1"></script>
+
+  <script>
+    let allInstitutions = [];
+    let currentActivities = [];
+    let currentFeatured = null;
+
+    // Toast Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-amber-600 text-white border-amber-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function openAdminNavModal() {
+      const modal = document.getElementById('modal-admin-nav');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeAdminNavModal() {
+      const modal = document.getElementById('modal-admin-nav');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function goBackToHub() {
+      openAdminNavModal();
+    }
+
+    // ─── Initialize ──────────────────────────────────────────────
+    function initData() {
+      // Automatically detect current quarter
+      const month = new Date().getMonth() + 1;
+      const quarter = Math.ceil(month / 3);
+      const qSelect = document.getElementById('filter-quarter');
+      if (qSelect) qSelect.value = String(quarter);
+
+      loadInstitutionsDropdown();
+      loadAdminActivities(true);
+    }
+
+    function loadInstitutionsDropdown() {
+      const instSelect = document.getElementById('filter-institution');
+      apiGet('getInstitutions', withAuthParams({}))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.institutions)) {
+            allInstitutions = res.institutions;
+            let html = '<option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>';
+            allInstitutions.forEach(inst => {
+              html += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name || inst.id)}</option>`;
+            });
+            instSelect.innerHTML = html;
+
+            const userInst = (localStorage.getItem('userInstitution') || '').trim();
+            if (userInst && userInst !== 'ALL' && userInst !== 'ทั้งหมด') {
+              instSelect.value = userInst;
+            } else {
+              instSelect.value = 'INS_PHRAO';
+            }
+          }
+        })
+        .catch(err => console.error('Load institutions error:', err));
+    }
+
+    // ─── Load Admin Activities ───────────────────────────────────
+    function loadAdminActivities(force = false) {
+      const inst = (document.getElementById('filter-institution')?.value || 'ALL').trim();
+      const quarter = (document.getElementById('filter-quarter')?.value || '1').trim();
+      const year = (document.getElementById('filter-year')?.value || '2026').trim();
+      const container = document.getElementById('activities-container');
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      apiGet('getHomeAdminData', withAuthParams({
+        institutionId: inst,
+        quarter: quarter,
+        year: year
+      }))
+        .then(res => {
+          if (icon) icon.classList.remove('fa-spin');
+          let list = [];
+          if (res && res.status === 'success') {
+            currentFeatured = res.featured || null;
+            list = res.activitiesAdmin || [];
+          }
+
+          currentActivities = list;
+          renderFeaturedCard(currentFeatured);
+          filterActivitiesLocal();
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Load activities error:', err);
+          container.innerHTML = `
+            <div class="col-span-full text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดกิจกรรม</h4>
+            </div>
+          `;
+        });
+    }
+
+    function renderFeaturedCard(featured) {
+      const titleEl = document.getElementById('featured-preview-title');
+      const locEl = document.getElementById('featured-preview-location');
+      const thumbEl = document.getElementById('featured-preview-thumb');
+
+      if (featured && featured.title) {
+        titleEl.innerText = featured.title;
+        locEl.innerText = `${featured.locationName || ''} ${featured.startDate ? `(${featured.startDate} - ${featured.endDate || ''})` : ''}`.trim() || 'แบนเนอร์พร้อมใช้งาน';
+        if (featured.imageUrl) {
+          thumbEl.style.backgroundImage = `url('${escapeHtml(featured.imageUrl)}')`;
+          thumbEl.innerHTML = '';
+        } else {
+          thumbEl.style.backgroundImage = '';
+          thumbEl.innerHTML = '<div class="w-full h-full flex items-center justify-center text-amber-400 text-xl"><i class="fas fa-star"></i></div>';
+        }
+      } else {
+        titleEl.innerText = '(ยังไม่ได้ตั้งค่าแบนเนอร์เด่น)';
+        locEl.innerText = 'กดปุ่ม "แก้ไขแบนเนอร์เด่น" เพื่อตั้งค่าข้อความและภาพโปรโมทหน้าแรก';
+        thumbEl.style.backgroundImage = '';
+        thumbEl.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500 text-xl"><i class="fas fa-image"></i></div>';
+      }
+    }
+
+    function filterActivitiesLocal() {
+      const q = (document.getElementById('filter-search')?.value || '').trim().toLowerCase();
+      let filtered = currentActivities;
+
+      if (q) {
+        filtered = filtered.filter(a => {
+          const name = String(a.activityName || '').toLowerCase();
+          const tambon = String(a.tambon || a.areaCode || '').toLowerCase();
+          const loc = String(a.locationName || '').toLowerCase();
+          return name.includes(q) || tambon.includes(q) || loc.includes(q);
+        });
+      }
+
+      renderActivitiesGrid(filtered);
+    }
+
+    function renderActivitiesGrid(list) {
+      const container = document.getElementById('activities-container');
+      const badge = document.getElementById('activities-summary-badge');
+      if (badge) badge.innerHTML = `<i class="fas fa-circle-info mr-1"></i>พบกิจกรรม <b>${list.length}</b> จาก <b>${currentActivities.length}</b> รายการ`;
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-calendar-xmark text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ไม่พบกิจกรรมในไตรมาสนี้</h4>
+            <p class="text-xs text-slate-500 mt-1">คลิกปุ่ม "+ เพิ่มกิจกรรม" เพื่อสร้างกิจกรรมใหม่</p>
+            <button onclick="openActivityEditorModal()" class="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold rounded-xl transition">
+              <i class="fas fa-plus mr-1"></i> เพิ่มกิจกรรมใหม่
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach(act => {
+        const id = act.activityId || act.id || '';
+        const name = act.activityName || '(ไม่มีชื่อกิจกรรม)';
+        const tambon = act.tambon || act.areaCode || '';
+        const location = act.locationName || '';
+        const date = act.activityDate || '';
+        const capacity = act.capacity || '';
+        const contact = act.contactName || '';
+        const phone = act.contactPhone || '';
+        const img = act.imageUrl || '';
+        const order = act.displayOrder || 0;
+        const checkInPoints = act.checkInPoints || 20;
+        const checkInsCount = act.checkInsCount || 0;
+        const quizCount = Array.isArray(act.quizzes) ? act.quizzes.length : (act.quizzesCount || 0);
+        const hasCert = !!act.certificateTemplate || !!act.hasCertificate;
+
+        html += `
+          <div class="custom-card flex flex-col overflow-hidden" data-activity-id="${escapeHtml(id)}">
+            
+            <!-- Cover Image -->
+            <div class="relative h-44 bg-slate-800 bg-cover bg-center" style="${img ? `background-image:url('${escapeHtml(img)}');` : ''}">
+              ${!img ? '<div class="w-full h-full flex items-center justify-center text-slate-600 text-3xl"><i class="fas fa-calendar-days"></i></div>' : ''}
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/40"></div>
+              
+              <!-- Badges -->
+              <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                ${tambon ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/90 text-slate-900 shadow-md"><i class="fas fa-map-pin mr-1"></i>${escapeHtml(tambon)}</span>` : '<span></span>'}
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-900/80 text-amber-300 border border-amber-500/30">
+                  ไตรมาส ${act.quarter || 1}/${act.year || 2026}
+                </span>
+              </div>
+            </div>
+
+            <!-- Content Body -->
+            <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-white leading-snug m-0 line-clamp-2" title="${escapeHtml(name)}">
+                  ${escapeHtml(name)}
+                </h3>
+                
+                <div class="mt-3 space-y-1.5 text-xs text-slate-300">
+                  ${location ? `<div class="flex items-center gap-1.5 text-slate-400"><i class="fas fa-location-dot text-rose-400 w-4 text-center"></i><span class="truncate">${escapeHtml(location)}</span></div>` : ''}
+                  ${date ? `<div class="flex items-center gap-1.5 text-slate-400"><i class="fas fa-clock text-amber-400 w-4 text-center"></i><span>${escapeHtml(date)}</span></div>` : ''}
+                  ${capacity ? `<div class="flex items-center gap-1.5 text-slate-400"><i class="fas fa-users text-teal-400 w-4 text-center"></i><span>เป้าหมาย: ${escapeHtml(capacity)}</span></div>` : ''}
+                  ${(contact || phone) ? `<div class="flex items-center gap-1.5 text-slate-400"><i class="fas fa-user-tie text-purple-400 w-4 text-center"></i><span>${escapeHtml(contact)} ${phone ? `(${escapeHtml(phone)})` : ''}</span></div>` : ''}
+                </div>
+
+                <!-- Feature Status Badges -->
+                <div class="mt-3 flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <i class="fas fa-qrcode mr-1"></i>เช็กอิน +${checkInPoints} แต้ม
+                  </span>
+                  ${checkInsCount > 0 ? `
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      <i class="fas fa-users mr-1"></i>${checkInsCount} คนเช็กอิน
+                    </span>
+                  ` : ''}
+                  ${quizCount > 0 ? `
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <i class="fas fa-clipboard-question mr-1"></i>ข้อสอบ ${quizCount} ข้อ
+                    </span>
+                  ` : ''}
+                  ${hasCert ? `
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <i class="fas fa-award mr-1"></i>เกียรติบัตร
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="pt-3 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <button type="button" onclick="openActivityQrModal('${escapeJS(id)}')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/30 transition active:scale-95 flex items-center gap-1" title="แสดง QR Code สำหรับเช็กอินและพิมพ์ป้าย">
+                    <i class="fas fa-qrcode"></i> QR เช็กอิน
+                  </button>
+                  <button type="button" onclick="openActivityQuizModal('${escapeJS(id)}')" class="px-2.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-bold border border-purple-500/30 transition active:scale-95 flex items-center gap-1" title="จัดการข้อสอบของกิจกรรมนี้">
+                    <i class="fas fa-clipboard-question"></i> ข้อสอบ
+                  </button>
+                  <a href="cert-editor.html?activityId=${encodeURIComponent(id)}" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition active:scale-95 flex items-center gap-1" title="จัดการและออกแบบเกียรติบัตรของกิจกรรมนี้">
+                    <i class="fas fa-award"></i> เกียรติบัตร
+                  </a>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="openActivityEditorModal('${escapeJS(id)}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition active:scale-95 flex items-center gap-1" title="แก้ไขข้อมูลกิจกรรม">
+                    <i class="fas fa-edit"></i> แก้ไข
+                  </button>
+                  <button type="button" onclick="deleteActivityAction('${escapeJS(id)}', '${escapeJS(name)}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/20 transition active:scale-95" title="ลบกิจกรรมนี้">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Add / Edit Activity ─────────────────────────────────────
+    function openActivityEditorModal(activityId = '') {
+      const form = document.getElementById('activity-form');
+      if (form) form.reset();
+
+      const titleEl = document.getElementById('activity-modal-title');
+      const submitBtn = document.getElementById('activity-form-submit-btn');
+      const idInput = document.getElementById('activity-form-id');
+      const nameInput = document.getElementById('activity-form-name');
+      const tambonInput = document.getElementById('activity-form-tambon');
+      const locInput = document.getElementById('activity-form-location');
+      const qInput = document.getElementById('activity-form-quarter');
+      const yearInput = document.getElementById('activity-form-year');
+      const orderInput = document.getElementById('activity-form-order');
+      const imgInput = document.getElementById('activity-form-image');
+      const dateInput = document.getElementById('activity-form-date');
+      const capInput = document.getElementById('activity-form-capacity');
+      const contactInput = document.getElementById('activity-form-contact-name');
+      const phoneInput = document.getElementById('activity-form-contact-phone');
+      const pointsInput = document.getElementById('activity-form-points');
+      const passScoreInput = document.getElementById('activity-form-pass-score');
+      const descInput = document.getElementById('activity-form-description');
+
+      // Sync with current filter
+      if (qInput) qInput.value = document.getElementById('filter-quarter')?.value || '1';
+      if (yearInput) yearInput.value = document.getElementById('filter-year')?.value || '2026';
+      if (pointsInput) pointsInput.value = '20';
+      if (passScoreInput) passScoreInput.value = '80';
+
+      if (activityId) {
+        const item = currentActivities.find(a => String(a.activityId || a.id) === String(activityId));
+        if (item) {
+          if (titleEl) titleEl.innerText = '✏️ แก้ไขกิจกรรมรายไตรมาส';
+          if (submitBtn) submitBtn.innerText = '💾 บันทึกการแก้ไข';
+          if (idInput) idInput.value = item.activityId || item.id;
+          if (nameInput) nameInput.value = item.activityName || '';
+          if (tambonInput) tambonInput.value = item.tambon || item.areaCode || '';
+          if (locInput) locInput.value = item.locationName || '';
+          if (qInput) qInput.value = item.quarter || '1';
+          if (yearInput) yearInput.value = item.year || '2026';
+          if (orderInput) orderInput.value = item.displayOrder != null ? item.displayOrder : '';
+          if (imgInput) imgInput.value = item.imageUrl || '';
+          if (dateInput) dateInput.value = item.activityDate || '';
+          if (capInput) capInput.value = item.capacity || '';
+          if (contactInput) contactInput.value = item.contactName || '';
+          if (phoneInput) phoneInput.value = item.contactPhone || '';
+          if (pointsInput) pointsInput.value = item.checkInPoints || 20;
+          if (passScoreInput) passScoreInput.value = item.quizPassScore || 80;
+          if (descInput) descInput.value = item.description || '';
+        }
+      } else {
+        if (titleEl) titleEl.innerText = '📅 เพิ่มกิจกรรมรายไตรมาสใหม่';
+        if (submitBtn) submitBtn.innerText = '💾 สร้างกิจกรรม';
+        if (idInput) idInput.value = '';
+        if (orderInput) orderInput.value = currentActivities.length + 1;
+      }
+
+      const modal = document.getElementById('modal-activity-editor');
+      if (modal) modal.style.display = 'flex';
+      if (nameInput) nameInput.focus();
+    }
+
+    function closeActivityEditorModal() {
+      document.getElementById('modal-activity-editor').style.display = 'none';
+    }
+
+    function submitActivityForm(e) {
+      e.preventDefault();
+      const inst = (document.getElementById('filter-institution')?.value || 'INS_PHRAO').trim();
+      const rawId = (document.getElementById('activity-form-id')?.value || '').trim();
+      const name = (document.getElementById('activity-form-name')?.value || '').trim();
+      const tambon = (document.getElementById('activity-form-tambon')?.value || '').trim();
+      const loc = (document.getElementById('activity-form-location')?.value || '').trim();
+      const quarter = (document.getElementById('activity-form-quarter')?.value || '1').trim();
+      const year = (document.getElementById('activity-form-year')?.value || '2026').trim();
+      const order = (document.getElementById('activity-form-order')?.value || '').trim();
+      const img = (document.getElementById('activity-form-image')?.value || '').trim();
+      const date = (document.getElementById('activity-form-date')?.value || '').trim();
+      const cap = (document.getElementById('activity-form-capacity')?.value || '').trim();
+      const contact = (document.getElementById('activity-form-contact-name')?.value || '').trim();
+      const phone = (document.getElementById('activity-form-contact-phone')?.value || '').trim();
+      const points = (document.getElementById('activity-form-points')?.value || '20').trim();
+      const passScore = (document.getElementById('activity-form-pass-score')?.value || '80').trim();
+      const desc = (document.getElementById('activity-form-description')?.value || '').trim();
+
+      if (!name) {
+        showToast('กรุณากรอกชื่อกิจกรรม', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('activity-form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        activityId: rawId || undefined,
+        institutionId: inst,
+        activityName: name,
+        tambon: tambon,
+        areaCode: tambon,
+        locationName: loc,
+        quarter: quarter,
+        year: year,
+        displayOrder: order || 0,
+        imageUrl: img,
+        activityDate: date,
+        capacity: cap,
+        contactName: contact,
+        contactPhone: phone,
+        checkInPoints: parseInt(points) || 20,
+        quizPassScore: parseInt(passScore) || 80,
+        description: desc,
+        status: 'Active'
+      };
+
+      apiPost('saveQuarterActivity', withAuthParams(payload))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกกิจกรรม';
+          if (res && res.status === 'success') {
+            showToast(rawId ? 'แก้ไขกิจกรรมเรียบร้อย' : 'เพิ่มกิจกรรมใหม่สำเร็จ', 'success');
+            closeActivityEditorModal();
+            loadAdminActivities(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกกิจกรรม';
+          console.error('Save activity error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกกิจกรรม', 'error');
+        });
+    }
+
+    function deleteActivityAction(activityId, name) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบกิจกรรม',
+        message: `ต้องการลบกิจกรรม "${name}" ใช่หรือไม่?`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        apiPost('deleteQuarterActivity', withAuthParams({ activityId: activityId }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`ลบกิจกรรม "${name}" เรียบร้อยแล้ว`, 'success');
+              loadAdminActivities(true);
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Delete activity error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบกิจกรรม', 'error');
+          });
+      });
+    }
+
+    // ─── Activity QR & Check-in Manager ─────────────────────────
+    let currentQrActivity = null;
+
+    function openActivityQrModal(activityId) {
+      const act = currentActivities.find(a => String(a.activityId || a.id) === String(activityId));
+      if (!act) {
+        showToast('ไม่พบข้อมูลกิจกรรม', 'warning');
+        return;
+      }
+      currentQrActivity = act;
+
+      const id = act.activityId || act.id || '';
+      const name = act.activityName || '(ไม่มีชื่อกิจกรรม)';
+      const loc = act.locationName || act.tambon || '';
+      const points = act.checkInPoints || 20;
+
+      document.getElementById('qr-modal-title').innerText = `QR Code: ${name}`;
+      document.getElementById('qr-modal-subtitle').innerText = `รหัสกิจกรรม: ${id}`;
+      document.getElementById('poster-act-name').innerText = name;
+      document.getElementById('poster-act-loc').innerText = loc ? `📍 สถานที่: ${loc}` : '';
+      document.getElementById('poster-act-points').innerText = `+${points}`;
+      document.getElementById('poster-act-code').innerText = id;
+
+      // QR Image URL
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(id)}`;
+      document.getElementById('poster-qr-image').src = qrUrl;
+
+      switchQrModalTab('poster');
+      loadActivityCheckIns(id);
+
+      document.getElementById('modal-activity-qr').style.display = 'flex';
+    }
+
+    function closeActivityQrModal() {
+      document.getElementById('modal-activity-qr').style.display = 'none';
+      currentQrActivity = null;
+    }
+
+    function switchQrModalTab(tab) {
+      const posterBtn = document.getElementById('tab-btn-qr-poster');
+      const logsBtn = document.getElementById('tab-btn-qr-logs');
+      const posterContent = document.getElementById('tab-content-qr-poster');
+      const logsContent = document.getElementById('tab-content-qr-logs');
+
+      if (tab === 'poster') {
+        posterBtn.className = 'flex-1 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 transition font-black';
+        logsBtn.className = 'flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white transition';
+        posterContent.style.display = 'block';
+        logsContent.style.display = 'none';
+      } else {
+        logsBtn.className = 'flex-1 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 transition font-black';
+        posterBtn.className = 'flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white transition';
+        posterContent.style.display = 'none';
+        logsContent.style.display = 'block';
+      }
+    }
+
+    function copyActivityCode() {
+      if (!currentQrActivity) return;
+      const id = currentQrActivity.activityId || currentQrActivity.id || '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(() => {
+          showToast(`คัดลอกรหัส "${id}" เรียบร้อยแล้ว`, 'success');
+        });
+      } else {
+        showToast(`รหัสเช็กอิน: ${id}`, 'info');
+      }
+    }
+
+    function printActivityPoster() {
+      if (!currentQrActivity) return;
+      const id = currentQrActivity.activityId || currentQrActivity.id || '';
+      const name = currentQrActivity.activityName || 'กิจกรรมการเรียนรู้';
+      const loc = currentQrActivity.locationName || currentQrActivity.tambon || 'สถานที่จัดกิจกรรม';
+      const points = currentQrActivity.checkInPoints || 20;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(id)}`;
+
+      const printWindow = window.open('', '_blank', 'width=800,height=900');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+          <meta charset="UTF-8">
+          <title>ป้าย QR Code เช็กอิน - ${escapeHtml(name)}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;900&display=swap" rel="stylesheet">
+          <style>
+            body {
+              font-family: 'Prompt', sans-serif;
+              margin: 0;
+              padding: 40px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+              box-sizing: border-box;
+              background: #fff;
+              color: #0f172a;
+            }
+            .poster {
+              border: 8px solid #f59e0b;
+              border-radius: 28px;
+              padding: 40px;
+              text-align: center;
+              width: 100%;
+              max-width: 540px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            .header-tag {
+              display: inline-block;
+              background: #fef3c7;
+              color: #b45309;
+              font-weight: 900;
+              font-size: 14px;
+              padding: 6px 16px;
+              border-radius: 20px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 12px;
+            }
+            h1 {
+              font-size: 26px;
+              font-weight: 900;
+              margin: 0 0 10px 0;
+              line-height: 1.3;
+              color: #0f172a;
+            }
+            .location {
+              font-size: 15px;
+              color: #475569;
+              margin: 0 0 25px 0;
+            }
+            .qr-box {
+              margin: 20px auto;
+              display: inline-block;
+              padding: 16px;
+              background: #ffffff;
+              border: 4px solid #0f172a;
+              border-radius: 20px;
+            }
+            .qr-box img {
+              width: 260px;
+              height: 260px;
+              display: block;
+            }
+            .points-badge {
+              display: inline-block;
+              background: #ecfdf5;
+              color: #047857;
+              border: 2px solid #a7f3d0;
+              font-size: 18px;
+              font-weight: 900;
+              padding: 10px 24px;
+              border-radius: 16px;
+              margin: 15px 0;
+            }
+            .code-box {
+              font-size: 14px;
+              color: #64748b;
+              margin-top: 15px;
+            }
+            .code-box b {
+              font-family: monospace;
+              font-size: 18px;
+              color: #0f172a;
+            }
+            .footer-note {
+              margin-top: 25px;
+              font-size: 12px;
+              color: #94a3b8;
+              border-top: 1px dashed #cbd5e1;
+              padding-top: 15px;
+            }
+          </style>
+        </head>
+        <body onload="window.print()">
+          <div class="poster">
+            <div class="header-tag">✨ สแกนเข้าร่วมกิจกรรม ✨</div>
+            <h1>${escapeHtml(name)}</h1>
+            <div class="location">📍 ${escapeHtml(loc)}</div>
+            <div class="qr-box">
+              <img src="${qrUrl}" alt="QR Code">
+            </div>
+            <div>
+              <div class="points-badge">🎁 ได้รับคะแนนสะสม +${points} แต้ม</div>
+            </div>
+            <div class="code-box">
+              หรือกรอกรหัส: <b>${escapeHtml(id)}</b>
+            </div>
+            <div class="footer-note">
+              เปิดเมนู "สแกน QR" ในระบบเพื่อรับคะแนนสะสมและเกียรติบัตร
+            </div>
+          </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    let currentCheckInsData = [];
+
+    function loadActivityCheckIns(activityId) {
+      const tbody = document.getElementById('qr-checkins-tbody');
+      const countEl = document.getElementById('qr-modal-checkin-count');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-500 text-xs"><i class="fas fa-circle-notch fa-spin mr-1 text-emerald-400"></i> กำลังโหลดรายชื่อผู้เช็กอิน...</td></tr>';
+
+      apiGet('getActivityCheckIns', withAuthParams({ activityId }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            const list = res.checkIns || res.data || [];
+            currentCheckInsData = list;
+            if (countEl) countEl.innerText = list.length;
+
+            const summary = res.summary || {};
+            const elTotal = document.getElementById('qr-kpi-total');
+            const elPoints = document.getElementById('qr-kpi-points');
+            const elQuizzes = document.getElementById('qr-kpi-quizzes');
+            const elCerts = document.getElementById('qr-kpi-certs');
+
+            if (elTotal) elTotal.innerHTML = `${list.length} <span class="text-[10px] font-normal text-slate-400">คน</span>`;
+            if (elPoints) elPoints.innerHTML = `+${summary.totalPoints || (list.length * (currentQrActivity?.checkInPoints || 20))} <span class="text-[10px] font-normal text-slate-400">แต้ม</span>`;
+            if (elQuizzes) elQuizzes.innerHTML = `${summary.quizTakenCount || list.filter(c => c.quiz_taken).length} <span class="text-[10px] font-normal text-slate-400">คน</span>`;
+            if (elCerts) elCerts.innerHTML = `${summary.certCount || list.filter(c => c.has_cert).length} <span class="text-[10px] font-normal text-slate-400">ใบ</span>`;
+
+            filterCheckInsLocal();
+          } else {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500 text-xs">ไม่พบข้อมูลเช็กอิน</td></tr>';
+          }
+        })
+        .catch(err => {
+          console.error('Checkin error:', err);
+          if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-rose-400 text-xs">เกิดข้อผิดพลาดในการโหลดรายชื่อ</td></tr>';
+        });
+    }
+
+    function filterCheckInsLocal() {
+      const q = (document.getElementById('qr-checkins-search')?.value || '').trim().toLowerCase();
+      const status = document.getElementById('qr-checkins-filter-status')?.value || 'ALL';
+      const tbody = document.getElementById('qr-checkins-tbody');
+      if (!tbody) return;
+
+      let filtered = currentCheckInsData;
+
+      if (status === 'QUIZ_PASSED') {
+        filtered = filtered.filter(ci => ci.quiz_passed);
+      } else if (status === 'QUIZ_PENDING') {
+        filtered = filtered.filter(ci => !ci.quiz_taken);
+      } else if (status === 'HAS_CERT') {
+        filtered = filtered.filter(ci => ci.has_cert);
+      }
+
+      if (q) {
+        filtered = filtered.filter(ci => {
+          const fn = String(ci.full_name || '').toLowerCase();
+          const un = String(ci.username || '').toLowerCase();
+          const ph = String(ci.phone || '').toLowerCase();
+          const tb = String(ci.tambon || '').toLowerCase();
+          const inst = String(ci.institution_name || '').toLowerCase();
+          return fn.includes(q) || un.includes(q) || ph.includes(q) || tb.includes(q) || inst.includes(q);
+        });
+      }
+
+      if (!filtered.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-10 text-slate-500 text-xs">
+              <i class="fas fa-users-slash text-2xl mb-2 text-slate-600"></i>
+              <p class="m-0 font-bold text-slate-400">ไม่พบรายชื่อตามเงื่อนไขที่ค้นหา</p>
+              <p class="text-[11px] text-slate-600 m-0 mt-1">ผู้เรียนสามารถสแกน QR Code หน้างานเพื่อรับแต้มทันที</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let rows = '';
+      filtered.forEach((ci, idx) => {
+        const initial = (ci.full_name || ci.username || '?').charAt(0);
+        const hasCert = !!ci.has_cert;
+        const quizTaken = !!ci.quiz_taken;
+        const quizPassed = !!ci.quiz_passed;
+
+        let quizBadge = '';
+        if (hasCert) {
+          quizBadge = `
+            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[10px] inline-flex items-center gap-1">
+              <i class="fas fa-award"></i> ได้รับเกียรติบัตร
+            </span>
+            <div class="text-[10px] text-slate-400 mt-0.5">${ci.quiz_score !== null ? `คะแนน ${ci.quiz_score}/${ci.quiz_total} (${ci.quiz_percent}%)` : 'ผ่านเกณฑ์'}</div>
+          `;
+        } else if (quizTaken) {
+          if (quizPassed) {
+            quizBadge = `
+              <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] inline-flex items-center gap-1">
+                <i class="fas fa-check-circle"></i> ผ่านข้อสอบ (${ci.quiz_percent}%)
+              </span>
+            `;
+          } else {
+            quizBadge = `
+              <span class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-[10px] inline-flex items-center gap-1">
+                <i class="fas fa-times-circle"></i> ไม่ผ่าน (${ci.quiz_percent}%)
+              </span>
+            `;
+          }
+        } else {
+          quizBadge = `
+            <span class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700 text-[10px] inline-flex items-center gap-1">
+              <i class="fas fa-clock"></i> ยังไม่ทำแบบทดสอบ
+            </span>
+          `;
+        }
+
+        const actId = currentQrActivity?.id || currentQrActivity?.activityId || '';
+
+        rows += `
+          <tr class="hover:bg-slate-900/60 transition group">
+            <td class="py-3 px-3 text-center text-slate-500 font-mono font-bold">${idx + 1}</td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+                  ${escapeHtml(initial)}
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-white text-sm group-hover:text-emerald-400 transition">${escapeHtml(ci.full_name || ci.username)}</div>
+                  <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    <span class="font-mono text-slate-300 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">รหัส: ${escapeHtml(ci.username)}</span>
+                    ${ci.phone ? `<span><i class="fas fa-phone text-[9px] text-slate-500 mr-0.5"></i>${escapeHtml(ci.phone)}</span>` : ''}
+                    <span class="text-slate-500">• ${escapeHtml(ci.user_category || 'นักศึกษา')}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3">
+              <div class="font-semibold text-slate-200">${escapeHtml(ci.institution_name || 'สกร.ระดับอำเภอพร้าว')}</div>
+              <div class="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fas fa-location-dot text-[10px]"></i> ต.${escapeHtml(ci.tambon || 'ในสังกัด')}
+              </div>
+            </td>
+            <td class="py-3 px-3 text-center text-slate-300 text-[11px]">
+              ${escapeHtml(ci.createdAt)}
+            </td>
+            <td class="py-3 px-3 text-center">
+              <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-xs inline-flex items-center gap-1">
+                <i class="fas fa-coins text-[10px]"></i> +${ci.points} แต้ม
+              </span>
+            </td>
+            <td class="py-3 px-3 text-center">
+              ${quizBadge}
+            </td>
+            <td class="py-3 px-3 text-center">
+              ${hasCert ? `
+                <a href="api.php?action=generateCertificatePdf&activityId=${encodeURIComponent(actId)}&username=${encodeURIComponent(ci.username)}" target="_blank" class="px-2.5 py-1 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition inline-flex items-center gap-1" title="ดูเกียรติบัตร">
+                  <i class="fas fa-file-pdf"></i> เกียรติบัตร
+                </a>
+              ` : `
+                <span class="text-[11px] text-slate-600">-</span>
+              `}
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = rows;
+    }
+
+    function exportCheckInsToCsv() {
+      if (!currentCheckInsData || !currentCheckInsData.length) {
+        showToast('ไม่มีข้อมูลสำหรับส่งออก', 'warning');
+        return;
+      }
+      const headers = ['ลำดับ', 'ชื่อ-นามสกุล', 'รหัสนักศึกษา/Username', 'เบอร์โทร', 'ประเภทผู้เรียน', 'สถานศึกษา', 'ตำบล', 'เวลาเช็กอิน', 'แต้มเช็กอิน', 'สถานะแบบทดสอบ', 'คะแนนทดสอบ', 'เปอร์เซ็นต์', 'เกียรติบัตร'];
+      const rows = currentCheckInsData.map((ci, i) => [
+        i + 1,
+        `"${(ci.full_name || '').replace(/"/g, '""')}"`,
+        `"${ci.username}"`,
+        `"${ci.phone || ''}"`,
+        `"${ci.user_category || ''}"`,
+        `"${ci.institution_name || ''}"`,
+        `"${ci.tambon || ''}"`,
+        `"${ci.createdAt || ''}"`,
+        ci.points,
+        ci.quiz_taken ? (ci.quiz_passed ? 'ผ่าน' : 'ไม่ผ่าน') : 'ยังไม่ทำ',
+        ci.quiz_score !== null ? `${ci.quiz_score}/${ci.quiz_total}` : '-',
+        ci.quiz_percent !== null ? `${ci.quiz_percent}%` : '-',
+        ci.has_cert ? (ci.cert_no || 'ได้รับแล้ว') : '-'
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `รายงานผู้เช็กอิน_${(currentQrActivity?.activityName || currentQrActivity?.name || 'กิจกรรม').replace(/[^a-zA-Z0-9ก-๙]/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('ส่งออกไฟล์ CSV สำเร็จ!', 'success');
+    }
+
+    // ─── Activity Quizzes Manager ───────────────────────────────
+    let currentQuizActivityId = null;
+
+    function openActivityQuizModal(activityId) {
+      const act = currentActivities.find(a => String(a.activityId || a.id) === String(activityId));
+      if (!act) {
+        showToast('ไม่พบข้อมูลกิจกรรม', 'warning');
+        return;
+      }
+      currentQuizActivityId = activityId;
+
+      const name = act.activityName || '(ไม่มีชื่อกิจกรรม)';
+      document.getElementById('act-quiz-modal-title').innerText = `ข้อสอบ: ${name}`;
+      document.getElementById('act-quiz-pass-score').value = act.quizPassScore || 80;
+
+      const listEl = document.getElementById('act-quizzes-builder-list');
+      listEl.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs"><i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังโหลดข้อสอบ...</div>';
+
+      document.getElementById('modal-activity-quizzes').style.display = 'flex';
+
+      apiGet('getActivityQuizzes', withAuthParams({ activityId }))
+        .then(res => {
+          listEl.innerHTML = '';
+          const quizzes = (res && Array.isArray(res.quizzes)) ? res.quizzes : (act.quizzes || []);
+          if (quizzes.length > 0) {
+            quizzes.forEach(q => addNewActivityQuestionRow(q));
+          } else {
+            addNewActivityQuestionRow();
+          }
+        })
+        .catch(() => {
+          listEl.innerHTML = '';
+          addNewActivityQuestionRow();
+        });
+    }
+
+    function closeActivityQuizModal() {
+      document.getElementById('modal-activity-quizzes').style.display = 'none';
+      currentQuizActivityId = null;
+    }
+
+    function addNewActivityQuestionRow(data = null) {
+      const listEl = document.getElementById('act-quizzes-builder-list');
+      const count = listEl.querySelectorAll('.quiz-question-row').length + 1;
+
+      const question = data ? (data.question || '') : '';
+      const choices = data ? (data.choices || ['', '', '', '']) : ['', '', '', ''];
+      const answer = data ? (data.answer || 'A').toUpperCase() : 'A';
+      const quizId = data ? (data.quizId || '') : '';
+
+      const choiceKeys = ['A', 'B', 'C', 'D'];
+      const choiceLabels = ['ก', 'ข', 'ค', 'ง'];
+
+      let choicesHtml = '';
+      for (let i = 0; i < 4; i++) {
+        const k = choiceKeys[i];
+        const label = choiceLabels[i];
+        const val = choices[i] || '';
+        const isSelected = (answer === k);
+
+        choicesHtml += `
+          <div class="quiz-choice-item p-2.5 rounded-2xl ${isSelected ? 'border-2 border-emerald-500 bg-emerald-950/40 ring-1 ring-emerald-500/30' : 'border border-slate-700/80 bg-slate-900/60 hover:border-slate-500'} transition-all space-y-1.5" data-choice-key="${k}">
+            <div class="flex items-center justify-between select-none">
+              <div class="flex items-center gap-1.5">
+                <span class="choice-badge w-6 h-6 rounded-lg ${isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-400 font-bold border border-slate-700'} text-xs flex items-center justify-center">${label}.</span>
+                <span class="text-[11px] font-bold ${isSelected ? 'text-emerald-300' : 'text-slate-400'}">ตัวเลือก ${label} (${k})</span>
+              </div>
+              <button type="button" onclick="setActivityChoiceAnswer(this, '${k}')" class="choice-status-btn px-2.5 py-0.5 rounded-lg ${isSelected ? 'bg-emerald-500 text-slate-950 font-black shadow-sm' : 'bg-slate-800/90 hover:bg-emerald-950/50 hover:text-emerald-300 text-slate-400 font-semibold border border-slate-700/80 cursor-pointer'} text-[10px] flex items-center gap-1 transition">
+                ${isSelected ? '<i class="fas fa-check"></i> ข้อที่ถูก' : '<i class="far fa-circle text-[9px]"></i> คลิกเฉลย'}
+              </button>
+            </div>
+            <input type="text" class="q-choice-${k.toLowerCase()} w-full px-3 py-1.5 bg-slate-900/90 border ${isSelected ? 'border-emerald-500/50 text-emerald-100' : 'border-slate-700 text-white'} rounded-xl placeholder-slate-600 focus:outline-none focus:border-purple-500 text-xs transition" placeholder="พิมพ์ข้อความตัวเลือก ${label}..." value="${escapeHtml(val)}">
+          </div>
+        `;
+      }
+
+      const div = document.createElement('div');
+      div.className = 'quiz-question-row p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2.5 text-xs';
+      div.innerHTML = `
+        <input type="hidden" class="quiz-id-field" value="${escapeHtml(quizId)}">
+        <input type="hidden" class="q-answer-field" value="${escapeHtml(answer)}">
+        <div class="flex items-center justify-between gap-2 pb-1 border-b border-slate-800/60">
+          <span class="font-black text-purple-400 text-xs"><i class="fas fa-circle-question mr-1"></i>ข้อที่ <span class="q-num">${count}</span></span>
+          <button type="button" onclick="removeActivityQuestionRow(this)" class="w-6 h-6 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center transition" title="ลบข้อนี้">
+            <i class="fas fa-trash text-[10px]"></i>
+          </button>
+        </div>
+        <div>
+          <input type="text" class="q-question-field w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-medium placeholder-slate-500 focus:outline-none focus:border-purple-500 text-xs" placeholder="ระบุคำถาม เช่น ข้อใดคือประโยชน์ของกิจกรรมนี้..." value="${escapeHtml(question)}">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+          ${choicesHtml}
+        </div>
+      `;
+      listEl.appendChild(div);
+    }
+
+    function setActivityChoiceAnswer(btn, choiceKey) {
+      const row = btn.closest('.quiz-question-row');
+      if (!row) return;
+
+      const hiddenAnswer = row.querySelector('.q-answer-field');
+      if (hiddenAnswer) hiddenAnswer.value = choiceKey;
+
+      const choices = row.querySelectorAll('.quiz-choice-item');
+      choices.forEach(ch => {
+        const key = ch.getAttribute('data-choice-key');
+        const isSelected = (key === choiceKey);
+        const badge = ch.querySelector('.choice-badge');
+        const statusBtn = ch.querySelector('.choice-status-btn');
+        const input = ch.querySelector('input[type="text"]');
+
+        if (isSelected) {
+          ch.className = 'quiz-choice-item p-2.5 rounded-2xl border-2 border-emerald-500 bg-emerald-950/40 ring-1 ring-emerald-500/30 transition-all space-y-1.5';
+          if (badge) {
+            badge.className = 'choice-badge w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-sm';
+          }
+          if (statusBtn) {
+            statusBtn.className = 'choice-status-btn px-2.5 py-0.5 rounded-lg bg-emerald-500 text-slate-950 font-black text-[10px] flex items-center gap-1 shadow-sm';
+            statusBtn.innerHTML = '<i class="fas fa-check"></i> ข้อที่ถูก';
+          }
+          if (input) {
+            input.className = 'q-choice-' + key.toLowerCase() + ' w-full px-3 py-1.5 bg-slate-900/90 border border-emerald-500/50 text-emerald-100 rounded-xl placeholder-slate-600 focus:outline-none focus:border-purple-500 text-xs transition';
+          }
+        } else {
+          ch.className = 'quiz-choice-item p-2.5 rounded-2xl border border-slate-700/80 bg-slate-900/60 hover:border-slate-500 transition-all space-y-1.5';
+          if (badge) {
+            badge.className = 'choice-badge w-6 h-6 rounded-lg bg-slate-800 text-slate-400 font-bold border border-slate-700 text-xs flex items-center justify-center';
+          }
+          if (statusBtn) {
+            statusBtn.className = 'choice-status-btn px-2.5 py-0.5 rounded-lg bg-slate-800/90 hover:bg-emerald-950/50 hover:text-emerald-300 text-slate-400 font-semibold border border-slate-700/80 cursor-pointer text-[10px] flex items-center gap-1 transition';
+            statusBtn.innerHTML = '<i class="far fa-circle text-[9px]"></i> คลิกเฉลย';
+          }
+          if (input) {
+            input.className = 'q-choice-' + key.toLowerCase() + ' w-full px-3 py-1.5 bg-slate-900/90 border border-slate-700 text-white rounded-xl placeholder-slate-600 focus:outline-none focus:border-purple-500 text-xs transition';
+          }
+        }
+      });
+    }
+
+    function removeActivityQuestionRow(btn) {
+      const row = btn.closest('.quiz-question-row');
+      if (row) {
+        row.remove();
+        // Re-number
+        const listEl = document.getElementById('act-quizzes-builder-list');
+        listEl.querySelectorAll('.quiz-question-row').forEach((r, idx) => {
+          const numEl = r.querySelector('.q-num');
+          if (numEl) numEl.innerText = idx + 1;
+        });
+      }
+    }
+
+    function saveActivityQuizzesAction() {
+      if (!currentQuizActivityId) return;
+
+      const passScore = parseInt(document.getElementById('act-quiz-pass-score').value) || 80;
+      const rows = document.querySelectorAll('#act-quizzes-builder-list .quiz-question-row');
+      const quizzes = [];
+
+      rows.forEach((row, idx) => {
+        const question = row.querySelector('.q-question-field')?.value.trim() || '';
+        const choiceA = row.querySelector('.q-choice-a')?.value.trim() || '';
+        const choiceB = row.querySelector('.q-choice-b')?.value.trim() || '';
+        const choiceC = row.querySelector('.q-choice-c')?.value.trim() || '';
+        const choiceD = row.querySelector('.q-choice-d')?.value.trim() || '';
+        const answer = row.querySelector('.q-answer-field')?.value || 'A';
+        const quizId = row.querySelector('.quiz-id-field')?.value || `Q-ACT-${Date.now()}-${idx+1}`;
+
+        if (question) {
+          quizzes.push({
+            quizId: quizId,
+            question: question,
+            choices: [choiceA, choiceB, choiceC, choiceD],
+            choiceA: choiceA,
+            choiceB: choiceB,
+            choiceC: choiceC,
+            choiceD: choiceD,
+            answer: answer,
+            displayOrder: idx + 1
+          });
+        }
+      });
+
+      const btn = document.getElementById('btn-save-act-quizzes');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('saveActivityQuizzes', withAuthParams({
+        activityId: currentQuizActivityId,
+        quizzes: quizzes,
+        quizPassScore: passScore
+      }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerText = '💾 บันทึกชุดข้อสอบ';
+          if (res && res.status === 'success') {
+            showToast(`บันทึกข้อสอบ ${quizzes.length} ข้อ เรียบร้อยแล้ว`, 'success');
+            closeActivityQuizModal();
+            loadAdminActivities(true);
+          } else {
+            showToast(res.message || 'บันทึกข้อสอบไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = '💾 บันทึกชุดข้อสอบ';
+          console.error('Save activity quizzes error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกข้อสอบ', 'error');
+        });
+    }
+
+    // ─── Activity Certificate Template Manager ──────────────────
+    let currentCertActivityId = null;
+
+    function openActivityCertModal(activityId) {
+      const act = currentActivities.find(a => String(a.activityId || a.id) === String(activityId));
+      if (!act) {
+        showToast('ไม่พบข้อมูลกิจกรรม', 'warning');
+        return;
+      }
+      currentCertActivityId = activityId;
+
+      const name = act.activityName || '(ไม่มีชื่อกิจกรรม)';
+      document.getElementById('act-cert-modal-title').innerText = `เกียรติบัตร: ${name}`;
+      document.getElementById('act-cert-form-id').value = activityId;
+      document.getElementById('act-cert-course-name').value = name;
+
+      const tpl = act.certificateTemplate || {};
+      document.getElementById('act-cert-desc-text').value = tpl.description || 'ได้เข้าร่วมและผ่านการทดสอบองค์ความรู้ตามโครงการ';
+      document.getElementById('act-cert-org-name').value = tpl.institutionName || 'ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว';
+      document.getElementById('act-cert-signer-name').value = tpl.signerName || '';
+      document.getElementById('act-cert-signer-position').value = tpl.signerPosition || 'ผู้อำนวยการ สกร.ระดับอำเภอ';
+
+      document.getElementById('modal-activity-cert').style.display = 'flex';
+    }
+
+    function closeActivityCertModal() {
+      document.getElementById('modal-activity-cert').style.display = 'none';
+      currentCertActivityId = null;
+    }
+
+    function saveActivityCertTemplateAction(e) {
+      e.preventDefault();
+      if (!currentCertActivityId) return;
+
+      const course = document.getElementById('act-cert-course-name').value.trim();
+      const desc = document.getElementById('act-cert-desc-text').value.trim();
+      const org = document.getElementById('act-cert-org-name').value.trim();
+      const signer = document.getElementById('act-cert-signer-name').value.trim();
+      const pos = document.getElementById('act-cert-signer-position').value.trim();
+
+      const template = {
+        courseName: course,
+        description: desc,
+        institutionName: org,
+        signerName: signer,
+        signerPosition: pos,
+        updatedAt: new Date().toISOString()
+      };
+
+      const btn = document.getElementById('btn-save-act-cert');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('saveActivityCertificateTemplate', withAuthParams({
+        activityId: currentCertActivityId,
+        certificateTemplate: template
+      }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerText = '💾 บันทึกแม่แบบเกียรติบัตร';
+          if (res && res.status === 'success') {
+            showToast('บันทึกแม่แบบเกียรติบัตรเรียบร้อยแล้ว', 'success');
+            closeActivityCertModal();
+            loadAdminActivities(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = '💾 บันทึกแม่แบบเกียรติบัตร';
+          console.error('Save activity cert template error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกแม่แบบเกียรติบัตร', 'error');
+        });
+    }
+
+    // ─── Featured Banner Modal ───────────────────────────────────
+    function openFeaturedEditorModal() {
+      const form = document.getElementById('featured-form');
+      if (form) form.reset();
+
+      const idInput = document.getElementById('featured-form-id');
+      const titleInput = document.getElementById('featured-form-title');
+      const imgInput = document.getElementById('featured-form-image');
+      const locInput = document.getElementById('featured-form-location');
+      const mapInput = document.getElementById('featured-form-map');
+      const startInput = document.getElementById('featured-form-start');
+      const endInput = document.getElementById('featured-form-end');
+      const descInput = document.getElementById('featured-form-desc');
+
+      if (currentFeatured) {
+        if (idInput) idInput.value = currentFeatured.featuredId || '';
+        if (titleInput) titleInput.value = currentFeatured.title || '';
+        if (imgInput) imgInput.value = currentFeatured.imageUrl || '';
+        if (locInput) locInput.value = currentFeatured.locationName || '';
+        if (mapInput) mapInput.value = currentFeatured.mapLink || '';
+        if (startInput) startInput.value = currentFeatured.startDate || '';
+        if (endInput) endInput.value = currentFeatured.endDate || '';
+        if (descInput) descInput.value = currentFeatured.shortDesc || '';
+      }
+
+      const modal = document.getElementById('modal-featured-editor');
+      if (modal) modal.style.display = 'flex';
+      if (titleInput) titleInput.focus();
+    }
+
+    function closeFeaturedEditorModal() {
+      document.getElementById('modal-featured-editor').style.display = 'none';
+    }
+
+    function submitFeaturedForm(e) {
+      e.preventDefault();
+      const inst = (document.getElementById('filter-institution')?.value || 'INS_PHRAO').trim();
+      const rawId = document.getElementById('featured-form-id').value.trim();
+      const title = document.getElementById('featured-form-title').value.trim();
+      const img = document.getElementById('featured-form-image').value.trim();
+      const loc = document.getElementById('featured-form-location').value.trim();
+      const map = document.getElementById('featured-form-map').value.trim();
+      const start = document.getElementById('featured-form-start').value.trim();
+      const end = document.getElementById('featured-form-end').value.trim();
+      const desc = document.getElementById('featured-form-desc').value.trim();
+
+      if (!title) {
+        showToast('กรุณากรอกหัวข้อแบนเนอร์เด่น', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('featured-form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        featuredId: rawId || undefined,
+        institutionId: inst,
+        title: title,
+        imageUrl: img,
+        image: img,
+        locationName: loc,
+        location: loc,
+        mapLink: map,
+        startDate: start,
+        endDate: end,
+        shortDesc: desc,
+        description: desc,
+        isActive: true
+      };
+
+      apiPost('saveFeaturedActivity', withAuthParams(payload))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกแบนเนอร์เด่น';
+          if (res && res.status === 'success') {
+            showToast('บันทึกแบนเนอร์เด่นเรียบร้อยแล้ว', 'success');
+            closeFeaturedEditorModal();
+            loadAdminActivities(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกแบนเนอร์เด่น';
+          console.error('Save featured error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกแบนเนอร์เด่น', 'error');
+        });
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+  <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

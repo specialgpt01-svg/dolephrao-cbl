@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="assets/loft-logo.svg">
+  <title>ตลาดชุมชนและคูปองส่วนลด | PHRAO LEARNING DISTRICT</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      font-family: 'Prompt', sans-serif;
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+      overflow-x: hidden;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 10px;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-950 pb-36 md:pb-16">
+
+  <!-- ═══════════════════ Top Header Bar ═══════════════════ -->
+  <header class="w-full sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <a href="index.html" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition active:scale-95">
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
+        <div>
+          <h1 class="text-xs sm:text-sm font-black text-white m-0 flex items-center gap-1.5">
+            <i class="fas fa-store text-amber-400"></i> ตลาดและภูมิปัญญาชุมชน
+          </h1>
+          <p class="text-[10px] text-slate-400 m-0 hidden sm:block">สินค้า OTOP ผลผลิตทางการเกษตร และคูปองส่วนลด</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openCouponWalletModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5">
+          <i class="fas fa-ticket text-amber-400"></i> <span class="hidden sm:inline">คูปองของฉัน</span> (<span id="user-coupon-count">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ Main Content ═══════════════════ -->
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 pb-28 md:pb-10 space-y-5">
+    
+    <!-- Hero Banner Card -->
+    <div class="p-5 sm:p-7 rounded-3xl bg-gradient-to-r from-amber-600/20 via-slate-900 to-slate-900 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-2 max-w-xl text-center sm:text-left">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          OTOP & WISDOM MARKET
+        </span>
+        <h2 class="text-xl sm:text-2xl font-black text-white m-0">ตลาดสินค้าภูมิปัญญา & แลกคูปองส่วนลด</h2>
+        <p class="text-xs text-slate-300 m-0 leading-relaxed">
+          นำแต้มสะสมจากการเรียนรู้และทำแบบทดสอบ มาแลกรับคูปองส่วนลดพิเศษเพื่ออุดหนุนสินค้าวิสาหกิจชุมชน
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <button type="button" onclick="openLuckySpinModal()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/30 transition active:scale-95 flex items-center gap-2">
+          <i class="fas fa-dharmachakra fa-spin text-sm"></i> วงล้อนำโชค 🎡
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="p-3.5 sm:p-4 rounded-3xl bg-slate-900/80 border border-slate-700/80 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 justify-between shadow-lg">
+      <div class="relative flex-1">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="market-search-input" onkeyup="filterMarketProducts()" placeholder="ค้นหาชื่อสินค้า ผู้ผลิต หรือตำบล..." class="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+        <select id="market-district-filter" onchange="onMarketDistrictChange(this.value)" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+          <option value="INS_PHRAO" selected>📍 อำเภอพร้าว</option>
+          <option value="INS_MAERIM">📍 อำเภอแม่ริม</option>
+          <option value="ALL">🌍 ทุกอำเภอ</option>
+        </select>
+        <select id="market-category-filter" onchange="filterMarketProducts()" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+          <option value="">ทุกหมวดหมู่สินค้า</option>
+          <option value="OTOP">OTOP / สินค้าชุมชน</option>
+          <option value="Wisdom">ภูมิปัญญา / หัตถกรรม</option>
+          <option value="Agriculture">เกษตรแปรรูป</option>
+          <option value="Other">อื่น ๆ</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="market-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- Rendered via JS -->
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════ Product Detail & Redeem Modal ═══════════════════ -->
+  <div id="product-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm" style="display:none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h4 class="text-sm font-black text-white m-0">รายละเอียดสินค้าชุมชน</h4>
+        <button type="button" onclick="closeProductModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="h-44 w-full bg-slate-800 rounded-2xl overflow-hidden relative">
+        <img id="modal-product-img" src="assets/loft-logo.svg" class="w-full h-full object-cover">
+        <div class="absolute bottom-2.5 left-2.5 px-3 py-1 rounded-full text-xs font-black bg-slate-950/90 text-amber-400 border border-amber-500/30">
+          ราคา ฿<span id="modal-product-price">0</span>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <h3 id="modal-product-name" class="text-base font-black text-white m-0">ชื่อสินค้า</h3>
+        <p id="modal-product-tambon" class="text-xs text-sky-400 m-0">📍 ตำบล...</p>
+        <p id="modal-product-desc" class="text-xs text-slate-300 leading-relaxed pt-1">-</p>
+      </div>
+
+      <!-- Seller Contact Info -->
+      <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-1.5 text-xs">
+        <span class="text-[10px] text-slate-400 font-bold uppercase block">ข้อมูลติดต่อผู้ผลิต / ร้านค้า</span>
+        <p id="modal-seller-contact" class="text-slate-200 m-0 font-medium">📞 ติดต่อร้านค้า</p>
+      </div>
+
+      <!-- Coupon Redemption Action -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/30 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-emerald-400">สิทธิพิเศษแลกคูปองส่วนลด</span>
+            <p class="text-[10px] text-slate-400 m-0">ใช้แต้มสะสม <strong id="modal-coupon-points" class="text-amber-400">50</strong> แต้ม</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            ลด ฿<span id="modal-coupon-discount">20</span>
+          </span>
+        </div>
+
+        <button type="button" id="btn-redeem-coupon" onclick="redeemProductCouponAction()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/20 transition active:scale-95">
+          <i class="fas fa-ticket mr-1"></i> ยืนยันแลกคูปองส่วนลด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Coupon Wallet Modal ═══════════════════ -->
+  <div id="coupon-wallet-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm" style="display:none;">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col overflow-hidden animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-wallet text-emerald-400"></i>
+          <h4 class="text-sm font-black text-white m-0">กระเป๋าคูปองของฉัน (Active Coupons)</h4>
+        </div>
+        <button type="button" onclick="closeCouponWalletModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="user-coupons-list" class="flex-1 overflow-y-auto space-y-3 text-xs custom-scrollbar pr-1">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Lucky Spin Wheel Modal ═══════════════════ -->
+  <div id="lucky-spin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl text-center space-y-4 animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h4 class="text-sm font-black text-amber-400 m-0">🎡 วงล้อนำโชค OTOP</h4>
+        <button type="button" onclick="document.getElementById('lucky-spin-modal').style.display='none'" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="py-6 flex flex-col items-center justify-center space-y-4">
+        <div class="w-36 h-36 rounded-full border-4 border-amber-500/40 bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-amber-500/30">
+          <i class="fas fa-gift text-4xl text-slate-950"></i>
+        </div>
+        <p class="text-xs text-slate-300">หมุนวงล้อเพื่อรับแต้มสะสมพิเศษ หรือคูปองส่วนลดสินค้าชุมชนฟรี!</p>
+      </div>
+
+      <button type="button" onclick="spinLuckyWheelAction()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/30 transition active:scale-95">
+        หมุนวงล้อทันที! 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260830-fix-v1"></script>
+  <script src="js/core/auth.js?v=20260830-fix-v1"></script>
+
+  <script>
+    let allMarketProducts = [];
+    let currentSelectedProduct = null;
+    let userActiveCoupons = [];
+    let currentInstitution = localStorage.getItem('nfe_selected_institution') || 'INS_PHRAO';
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) {
+        const div = document.createElement('div');
+        div.id = 'toast-container';
+        div.className = 'fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 pointer-events-none';
+        document.body.appendChild(div);
+      }
+      const container = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-100 border border-slate-700');
+      t.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold pointer-events-auto transition duration-300 ${bg}`;
+      t.innerHTML = msg;
+      container.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function onMarketDistrictChange(instId) {
+      currentInstitution = instId;
+      localStorage.setItem('nfe_selected_institution', instId);
+      loadMarketProducts();
+    }
+
+    function loadMarketProducts() {
+      apiGet('getProducts', withAuthParams({ institutionId: currentInstitution, district: currentInstitution === 'INS_MAERIM' ? 'แม่ริม' : (currentInstitution === 'INS_PHRAO' ? 'พร้าว' : 'ALL') }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.products || res.data)) || []);
+          allMarketProducts = list;
+          filterMarketProducts();
+        })
+        .catch(err => {
+          console.warn('Load products fallback:', err);
+          allMarketProducts = [];
+          filterMarketProducts();
+        });
+      loadUserCoupons();
+    }
+
+    function filterMarketProducts() {
+      const cat = document.getElementById('market-category-filter').value;
+      const search = document.getElementById('market-search-input').value.trim().toLowerCase();
+
+      const filtered = allMarketProducts.filter(p => {
+        const c = p.category || '';
+        const name = (p.name || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        const tambon = (p.tambon || '').toLowerCase();
+
+        if (cat && c !== cat) return false;
+        if (search && !name.includes(search) && !desc.includes(search) && !tambon.includes(search)) return false;
+        return true;
+      });
+
+      renderProductsGrid(filtered);
+    }
+
+    function renderProductsGrid(products) {
+      const grid = document.getElementById('market-products-grid');
+      if (!grid) return;
+
+      if (products.length === 0) {
+        grid.innerHTML = '<div class="col-span-4 text-center py-12 text-slate-500 text-xs">ไม่พบรายการสินค้าชุมชน</div>';
+        return;
+      }
+
+      grid.innerHTML = products.map(p => {
+        const rawImg = p.imageUrl || p.image_url || p.image || '';
+        const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : (rawImg || 'assets/loft-logo.svg');
+        const name = escapeHtml(p.name || 'สินค้าชุมชน');
+        const price = p.price || 0;
+        const pts = p.coupon_points || 50;
+        const discount = p.discount_amount || 20;
+
+        return `
+          <div onclick="openProductDetailModal('${p.id}')" class="group rounded-3xl bg-slate-900/80 border border-slate-700/80 overflow-hidden hover:border-amber-500/50 cursor-pointer transition flex flex-col shadow-xl">
+            <div class="h-36 w-full bg-slate-800 relative overflow-hidden">
+              <img src="${img}" onerror="this.onerror=null; this.src='assets/loft-logo.svg'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-950/80 text-emerald-400 backdrop-blur-md border border-emerald-500/30">
+                ลด ฿${discount}
+              </div>
+            </div>
+            <div class="p-3.5 flex-1 flex flex-col justify-between space-y-2.5">
+              <div>
+                <h4 class="text-xs font-bold text-white group-hover:text-amber-400 transition line-clamp-1">${name}</h4>
+                <p class="text-[10px] text-slate-400 m-0">📍 ${escapeHtml(p.tambon ? (p.tambon.startsWith('ศกร.ระดับตำบล') ? 'ต.' + p.tambon.replace('ศกร.ระดับตำบล', '') : (p.tambon.startsWith('ต.') || p.tambon.startsWith('ตำบล') || p.tambon.startsWith('ศศช.') ? p.tambon : 'ต.' + p.tambon)) : 'อ.พร้าว')}</p>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+                <span class="font-black text-amber-400">฿${price}</span>
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  🪙 ${pts} แต้ม
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openProductDetailModal(productId) {
+      const p = allMarketProducts.find(item => String(item.id) === String(productId));
+      if (!p) return;
+
+      currentSelectedProduct = p;
+
+      const rawImg = p.imageUrl || p.image_url || p.image || '';
+      const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : (rawImg || 'assets/loft-logo.svg');
+      const imgEl = document.getElementById('modal-product-img');
+      if (imgEl) {
+        imgEl.src = img;
+        imgEl.onerror = function() { this.src = 'assets/loft-logo.svg'; };
+      }
+      document.getElementById('modal-product-name').innerText = p.name || '';
+      document.getElementById('modal-product-price').innerText = p.price || 0;
+      const tambonDisplay = p.tambon ? (p.tambon.startsWith('ศกร.ระดับตำบล') ? 'ต.' + p.tambon.replace('ศกร.ระดับตำบล', '') : (p.tambon.startsWith('ต.') || p.tambon.startsWith('ตำบล') || p.tambon.startsWith('ศศช.') ? p.tambon : 'ต.' + p.tambon)) : 'อ.พร้าว';
+      document.getElementById('modal-product-tambon').innerText = '📍 ' + tambonDisplay;
+      document.getElementById('modal-product-desc').innerText = p.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+      document.getElementById('modal-seller-contact').innerText = p.contact_info || p.contact || 'ติดต่อผ่าน ศกร.ตำบล';
+
+      document.getElementById('modal-coupon-points').innerText = p.coupon_points || 50;
+      document.getElementById('modal-coupon-discount').innerText = p.discount_amount || 20;
+
+      document.getElementById('product-detail-modal').style.display = 'flex';
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-detail-modal').style.display = 'none';
+    }
+
+    function redeemProductCouponAction() {
+      if (!currentSelectedProduct) return;
+
+      const token = localStorage.getItem('nfe_auth_token');
+      if (!token) {
+        showToast('กรุณาเข้าสู่ระบบก่อนทำการแลกคูปอง', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('btn-redeem-coupon');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังแลกคูปอง...';
+
+      apiPost('redeemCoupon', withAuthParams({ productId: currentSelectedProduct.id }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-ticket mr-1"></i> ยืนยันแลกคูปองส่วนลด';
+          if (res && res.status === 'success') {
+            showToast('🎉 แลกรับคูปองส่วนลดสำเร็จแล้ว!', 'success');
+            closeProductModal();
+            loadUserCoupons();
+            openCouponWalletModal();
+          } else {
+            showToast(res.message || 'แต้มสะสมไม่เพียงพอสำหรับการแลกคูปอง', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-ticket mr-1"></i> ยืนยันแลกคูปองส่วนลด';
+          showToast('เกิดข้อผิดพลาดในการแลกคูปอง', 'error');
+        });
+    }
+
+    function loadUserCoupons() {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token');
+      const phone = localStorage.getItem('userPhone');
+      if (!token || !phone || phone === 'guest') {
+        userActiveCoupons = [];
+        const countEl = document.getElementById('user-coupon-count');
+        if (countEl) countEl.innerText = '0';
+        return;
+      }
+
+      apiGet('getUserCoupons', withAuthParams({}))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.coupons || res.data)) || []);
+          userActiveCoupons = list;
+          const countEl = document.getElementById('user-coupon-count');
+          if (countEl) countEl.innerText = userActiveCoupons.length;
+        })
+        .catch(() => {
+          userActiveCoupons = [];
+          const countEl = document.getElementById('user-coupon-count');
+          if (countEl) countEl.innerText = '0';
+        });
+    }
+
+    function openCouponWalletModal() {
+      const list = document.getElementById('user-coupons-list');
+      if (userActiveCoupons.length === 0) {
+        list.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs">คุณยังไม่มีคูปองส่วนลดในกระเป๋า</div>';
+      } else {
+        list.innerHTML = userActiveCoupons.map(c => {
+          return `
+            <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-emerald-500/40 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-white text-xs">${escapeHtml(c.product_name || 'คูปองส่วนลด')}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">ลด ฿${c.discount_amount || 20}</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900 text-center font-mono font-black text-sm text-amber-400 tracking-wider">
+                ${escapeHtml(c.coupon_code || 'CPN-XXXX')}
+              </div>
+              <p class="text-[10px] text-slate-400 m-0 text-center">ยื่นรหัสนี้ให้ผู้ขายเพื่อรับส่วนลด</p>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('coupon-wallet-modal').style.display = 'flex';
+    }
+
+    function closeCouponWalletModal() {
+      document.getElementById('coupon-wallet-modal').style.display = 'none';
+    }
+
+    function openLuckySpinModal() {
+      document.getElementById('lucky-spin-modal').style.display = 'flex';
+    }
+
+    function spinLuckyWheelAction() {
+      showToast('🎉 ยินดีด้วยครับ! คุณได้รับแต้มสะสมพิเศษ 20 แต้ม!', 'success');
+      document.getElementById('lucky-spin-modal').style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const sel = document.getElementById('market-district-filter');
+      if (sel) sel.value = currentInstitution;
+      loadMarketProducts();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

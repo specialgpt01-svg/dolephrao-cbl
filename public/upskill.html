@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="assets/loft-logo.svg">
+  <title>วิดีโออัพสกิลและการเรียนรู้ออนไลน์ | PHRAO LEARNING DISTRICT</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      font-family: 'Prompt', sans-serif;
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+      overflow-x: hidden;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 10px;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-950 pb-36 md:pb-16">
+
+  <!-- ═══════════════════ Top Header Bar ═══════════════════ -->
+  <header class="w-full sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <a href="index.html" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition active:scale-95">
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
+        <div>
+          <h1 class="text-xs sm:text-sm font-black text-white m-0 flex items-center gap-1.5">
+            <i class="fas fa-rocket text-rose-500"></i> สื่อการเรียนรู้ออนไลน์ (Upskill)
+          </h1>
+          <p class="text-[10px] text-slate-400 m-0 hidden sm:block">ชมวิดีโอเสริมทักษะอาชีพ และส่งบันทึกความรู้เพื่อสะสมแต้ม</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select id="upskill-institution-select" onchange="onUpskillInstitutionChange(this.value)" class="text-xs bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+          <option value="INS_PHRAO" selected>🏫 สกร.พร้าว</option>
+          <option value="INS_MAERIM">🏫 สกร.แม่ริม</option>
+          <option value="ALL">🌍 ทุกอำเภอ</option>
+        </select>
+        <a href="scan.html" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1" title="สแกน QR Code">
+          <i class="fas fa-qrcode"></i> <span class="hidden sm:inline">สแกน</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ Main Content ═══════════════════ -->
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 pb-28 md:pb-10 space-y-5">
+    
+    <!-- Hero Banner Card -->
+    <div class="p-5 sm:p-7 rounded-3xl bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-2 max-w-xl text-center sm:text-left">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
+          DIGITAL & VOCATIONAL UPSKILL
+        </span>
+        <h2 class="text-xl sm:text-2xl font-black text-white m-0">ศูนย์รวมบทเรียนพัฒนาทักษะอาชีพ</h2>
+        <p class="text-xs text-slate-300 m-0 leading-relaxed">
+          เรียนรู้ทักษะยุคใหม่ การสร้างรายได้ออนไลน์ เกษตรนวัตกรรม และงานหัตถกรรมพื้นบ้าน ชมจบส่งบันทึกรับคะแนนสะสมทันที
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="px-4 py-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-center">
+          <span class="text-[10px] text-slate-400 block font-bold">วิดีโอทั้งหมด</span>
+          <strong id="upskill-total-count" class="text-sm text-amber-400 font-black">0 บทเรียน</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="p-3.5 sm:p-4 rounded-3xl bg-slate-900/80 border border-slate-700/80 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 justify-between shadow-lg">
+      <div class="relative flex-1">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="upskill-search-input" onkeyup="filterUpskillVideos()" placeholder="ค้นหาชื่อวิดีโอ หมวดหมู่ หรือทักษะที่สนใจ..." class="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-rose-500">
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select id="upskill-category-filter" onchange="filterUpskillVideos()" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-rose-500 cursor-pointer">
+          <option value="">ทุกหมวดหมู่ทักษะ</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Videos Grid -->
+    <div id="upskill-videos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Rendered via JS -->
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════ Video Player & Knowledge Log Modal ═══════════════════ -->
+  <div id="upskill-player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar animate-pop">
+      
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h4 id="player-modal-title" class="text-sm font-black text-white m-0 truncate max-w-md">ชมวิดีโอการเรียนรู้</h4>
+        <button type="button" onclick="closeUpskillPlayerModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Video Player Frame (YouTube IFrame API) -->
+      <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
+        <div id="yt-player" class="w-full h-full"></div>
+      </div>
+
+      <!-- Watch Timer / Completion Status Bar -->
+      <div id="watch-timer-bar" class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60">
+        <div id="watch-timer-icon" class="text-base shrink-0">⏱️</div>
+        <div class="flex-1 min-w-0">
+          <div id="watch-timer-label" class="text-[11px] font-bold text-slate-300">กำลังจับเวลาการรับชม...</div>
+          <div class="w-full bg-slate-700 rounded-full h-1.5 mt-1">
+            <div id="watch-timer-progress" class="bg-gradient-to-r from-rose-500 to-amber-500 h-1.5 rounded-full transition-all duration-1000" style="width:0%"></div>
+          </div>
+        </div>
+        <div id="watch-timer-text" class="text-[11px] font-mono font-bold text-amber-400 shrink-0">00:00</div>
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2">
+          <span id="player-category-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300">หมวดหมู่</span>
+          <span id="player-duration-badge" class="text-[10px] text-slate-400">⏱️ 5 นาที</span>
+        </div>
+        <p id="player-modal-desc" class="text-xs text-slate-300 leading-relaxed pt-1">-</p>
+      </div>
+
+      <!-- Knowledge Note Submission Form -->
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-pen-nib text-amber-400 text-xs"></i>
+          <h5 class="text-xs font-bold text-white m-0">📝 บันทึกสรุปองค์ความรู้ที่ได้รับ (รอครูตรวจประเมิน รับคะแนนสูงสุด 10 แต้ม)</h5>
+        </div>
+        <textarea id="upskill-log-notes" rows="3" placeholder="ระบุสิ่งที่คุณได้เรียนรู้จากวิดีโอนี้ และแนวทางการนำไปประยุกต์ใช้..." class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-amber-500"></textarea>
+        <button type="button" id="btn-submit-upskill-log" onclick="submitUpskillNoteAction()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/20 transition active:scale-95">
+          <i class="fas fa-paper-plane mr-1"></i> ส่งบันทึกสรุปความรู้
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Shared Mobile Bottom Navigation Bar ═══════════════════ -->
+  <div class="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 md:hidden flex items-center justify-around py-2 px-1 text-[10px] font-bold text-slate-400 shadow-2xl">
+    <a href="index.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-home text-base"></i>
+      <span>หน้าแรก</span>
+    </a>
+    <a href="map.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-map-marked-alt text-base"></i>
+      <span>แผนที่</span>
+    </a>
+    <a href="scan.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-qrcode text-base"></i>
+      <span>สแกน</span>
+    </a>
+    <a href="learning.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-book-open text-base"></i>
+      <span>แหล่งเรียนรู้</span>
+    </a>
+    <a href="market.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-store text-base"></i>
+      <span>ตลาด</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-user text-base"></i>
+      <span>โปรไฟล์</span>
+    </a>
+  </div>
+
+  <!-- ═══════════════════ Admin Hub Navigation Modal / Drawer ═══════════════════ -->
+  <div id="admin-nav-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700 sm:rounded-3xl rounded-t-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <i class="fas fa-toolbox"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white m-0">ศูนย์จัดการระบบ (Admin Hub)</h3>
+            <p class="text-[10px] text-slate-400 m-0">เลือกระบบงานที่ต้องการเข้าจัดการข้อมูล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminNavModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto custom-scrollbar p-1">
+        <a href="sources.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">แหล่งเรียนรู้ ม.6</span>
+          <span class="text-[10px] text-slate-400">จัดการข้อมูลและปราชญ์</span>
+        </a>
+
+        <a href="bases.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-sky-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-sky-400">ฐานเรียนรู้ย่อย</span>
+          <span class="text-[10px] text-slate-400">ฐานกิจกรรมในแหล่ง</span>
+        </a>
+
+        <a href="activities-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-indigo-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-indigo-400">กิจกรรม & ป้าย QR</span>
+          <span class="text-[10px] text-slate-400">QR เช็กอินแต้ม, ข้อสอบ & เกียรติบัตร</span>
+        </a>
+
+        <a href="quizzes.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-emerald-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-emerald-400">ข้อสอบ & เกณฑ์</span>
+          <span class="text-[10px] text-slate-400">คลังข้อสอบ Pre/Post และเกณฑ์ผ่าน</span>
+        </a>
+
+        <a href="cert-editor.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-award"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">ออกแบบเกียรติบัตร</span>
+          <span class="text-[10px] text-slate-400">Live Designer & ปรับแต่งเทมเพลต</span>
+        </a>
+
+        <a href="users.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-blue-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-blue-400">จัดการผู้เรียน</span>
+          <span class="text-[10px] text-slate-400">สมาชิก, รูปโปรไฟล์, สิทธิ์</span>
+        </a>
+
+        <a href="approvals.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-purple-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-stamp"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-purple-400">ตรวจอนุมัติ</span>
+          <span class="text-[10px] text-slate-400">ID Plan และผลงานผู้เรียน</span>
+        </a>
+
+        <a href="market-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-store"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">ตลาด & คูปอง</span>
+          <span class="text-[10px] text-slate-400">สินค้า OTOP และส่วนลด</span>
+        </a>
+
+        <a href="stats.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">สถิติภาพรวม</span>
+          <span class="text-[10px] text-slate-400">รายงานสรุปผู้บริหาร</span>
+        </a>
+
+        <a href="institutions.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-school"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">สถานศึกษา</span>
+          <span class="text-[10px] text-slate-400">เครือข่าย สกร.อำเภอ</span>
+        </a>
+
+        <a href="upskill-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-video"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">วิดีโออัพสกิล</span>
+          <span class="text-[10px] text-slate-400">จัดการสื่อและคลิปเรียนรู้</span>
+        </a>
+
+        <a href="settings.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-400/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-slate-700/60 text-slate-300 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-cog"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-slate-300">ตั้งค่าระบบ</span>
+          <span class="text-[10px] text-slate-400">Gemini AI Key & กลาง</span>
+        </a>
+
+        <a href="scan.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <span class="text-xs font-bold text-amber-300 group-hover:text-white">สแกน QR เช็กอิน</span>
+          <span class="text-[10px] text-amber-400">เช็กอินสถานที่จริง</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Clean Mobile Bottom Navigation Bar ═══════════════════ -->
+  <nav class="fixed bottom-0 left-0 right-0 w-full bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 md:hidden flex items-center justify-around py-2 px-1 text-[10px] font-bold text-slate-400 shrink-0 z-40" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));">
+    <a href="index.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-home text-base"></i>
+      <span>หน้าแรก</span>
+    </a>
+    <a href="map.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-map-marked-alt text-base"></i>
+      <span>แผนที่</span>
+    </a>
+    <a href="scan.html" data-nav="scan" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-qrcode text-base"></i>
+      <span>สแกน</span>
+    </a>
+    <a href="learning.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-book-open text-base"></i>
+      <span>แหล่งเรียนรู้</span>
+    </a>
+    <a href="market.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-store text-base"></i>
+      <span>ตลาด</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center gap-1 hover:text-slate-200">
+      <i class="fas fa-user text-base"></i>
+      <span>โปรไฟล์</span>
+    </a>
+  </nav>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260822-user-upskill-v3"></script>
+  <script src="js/core/auth.js?v=20260822-user-upskill-v3"></script>
+
+  <script>
+    let allUpskillVideos = [];
+    let currentSelectedVideo = null;
+    let currentInstitution = localStorage.getItem('nfe_selected_institution') || 'INS_PHRAO';
+
+    function openAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-100 border border-slate-700');
+      t.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold pointer-events-auto transition duration-300 ${bg}`;
+      t.innerHTML = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function onUpskillInstitutionChange(instId) {
+      currentInstitution = instId;
+      localStorage.setItem('nfe_selected_institution', instId);
+      loadUpskillVideos();
+    }
+
+    function loadUpskillVideos() {
+      apiGet('getUpskillVideos', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.videos || res.data)) || []);
+          allUpskillVideos = list;
+          document.getElementById('upskill-total-count').innerText = `${allUpskillVideos.length} บทเรียน`;
+          
+          populateCategoryDropdown();
+          filterUpskillVideos();
+
+          const params = new URLSearchParams(window.location.search);
+          const vidId = params.get('video');
+          if (vidId) {
+            openUpskillPlayerModal(vidId);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to load upskill videos:", err);
+        });
+    }
+
+    function populateCategoryDropdown() {
+      const catSelect = document.getElementById('upskill-category-filter');
+      const cats = [...new Set(allUpskillVideos.map(v => v.category || v.category_name).filter(Boolean))].sort();
+      
+      let html = '<option value="">ทุกหมวดหมู่ทักษะ</option>';
+      cats.forEach(c => {
+        html += `<option value="${escapeHtml(c)}">🏷️ ${escapeHtml(c)}</option>`;
+      });
+      catSelect.innerHTML = html;
+    }
+
+    function filterUpskillVideos() {
+      const cat = document.getElementById('upskill-category-filter').value;
+      const search = document.getElementById('upskill-search-input').value.trim().toLowerCase();
+
+      const filtered = allUpskillVideos.filter(v => {
+        const c = v.category || v.category_name || '';
+        const title = (v.title || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+
+        if (cat && c !== cat) return false;
+        if (search && !title.includes(search) && !desc.includes(search)) return false;
+        return true;
+      });
+
+      renderVideosGrid(filtered);
+    }
+
+    function renderVideosGrid(videos) {
+      const grid = document.getElementById('upskill-videos-grid');
+      if (!grid) return;
+
+      if (videos.length === 0) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-12 text-slate-500 text-xs">ไม่พบบทเรียนวิดีโอตามเงื่อนไข</div>';
+        return;
+      }
+
+      grid.innerHTML = videos.map(v => {
+        const title = v.title || 'วิดีโอการเรียนรู้';
+        const cat = v.category || v.category_name || 'ทักษะอาชีพ';
+        const dur = v.duration || '5 นาที';
+        const videoUrl = v.url || v.youtube_url || v.youtubeUrl || '';
+        const ytId = extractYouTubeId(videoUrl);
+        const cover = v.thumbnail || (ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : 'assets/loft-logo.svg');
+        // Earnable watch points = 1 pt/min (computed from DB seconds; YouTube onReady may refine)
+        const durSec = v.durationSeconds || 300;
+        const earnPts = Math.max(1, Math.floor(durSec / 60));
+        const completedBadge = v.completed
+          ? `<span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500 text-white">✅ ดูจบ</span>`
+          : '';
+
+        return `
+          <div onclick="openUpskillPlayerModal('${v.id}')" class="group rounded-3xl bg-slate-900/80 border ${v.completed ? 'border-emerald-600/50' : 'border-slate-700/80 hover:border-rose-500/50'} overflow-hidden cursor-pointer transition flex flex-col shadow-xl">
+            <div class="h-44 w-full bg-slate-800 relative overflow-hidden">
+              <img src="${cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='assets/loft-logo.svg'">
+              <div class="absolute inset-0 bg-slate-950/30 flex items-center justify-center group-hover:bg-slate-950/10 transition">
+                <div class="w-12 h-12 rounded-2xl ${v.completed ? 'bg-emerald-600' : 'bg-rose-600'} text-white flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition">
+                  <i class="fas ${v.completed ? 'fa-check' : 'fa-play ml-0.5'}"></i>
+                </div>
+              </div>
+              <div class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-950/80 text-rose-300 backdrop-blur-md border border-rose-500/30">
+                🏷️ ${cat}
+              </div>
+              <div class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-950/80 text-slate-300 backdrop-blur-md">
+                ⏱️ ${dur}
+              </div>
+              ${completedBadge}
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-2.5">
+              <h4 class="text-sm font-bold text-white group-hover:text-rose-400 transition line-clamp-2">${escapeHtml(title)}</h4>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs font-bold text-slate-400">
+                <span class="text-amber-400">🪙 ดูจบ +${earnPts} แต้ม · บันทึก +สูงสุด 10 แต้ม</span>
+                <span class="text-rose-400 group-hover:translate-x-1 transition">เข้าชมบทเรียน →</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ─── YouTube IFrame API Watch Tracker ──────────────────────────
+    let ytPlayer = null;           // YouTube Player object
+    let ytPlayerId = '';           // current YouTube video ID
+    let watchTickInterval = null;  // 1-second tick (only when playing)
+    let watchSeconds = 0;          // accumulated REAL watch seconds this session
+    let watchTargetSeconds = 300;  // full video duration in seconds
+    let watchCompleted = false;    // already awarded 50 pts
+    let saveProgressTimer = null;  // save every 10s while playing
+    let ytApiReady = false;        // YouTube API loaded?
+    let pendingVideoOpen = null;   // video to open once API is ready
+
+    // Load YouTube IFrame API script once
+    (function loadYTApi() {
+      if (window.YT && window.YT.Player) { ytApiReady = true; return; }
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    })();
+
+    // Called by YouTube when API is ready
+    window.onYouTubeIframeAPIReady = function () {
+      ytApiReady = true;
+      if (pendingVideoOpen) {
+        const v = pendingVideoOpen;
+        pendingVideoOpen = null;
+        _createYTPlayer(v);
+      }
+    };
+
+    function openUpskillPlayerModal(videoId) {
+      const v = allUpskillVideos.find(item => String(item.id) === String(videoId));
+      if (!v) return;
+
+      currentSelectedVideo = v;
+      document.getElementById('player-modal-title').innerText = v.title || '';
+      document.getElementById('player-category-badge').innerText = `🏷️ ${v.category || v.category_name || 'ทักษะอาชีพ'}`;
+      document.getElementById('player-duration-badge').innerText = `⏱️ ${v.duration || '5 นาที'}`;
+      document.getElementById('player-modal-desc').innerText = v.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+      document.getElementById('upskill-log-notes').value = '';
+
+      watchTargetSeconds = (v.durationSeconds && v.durationSeconds > 0) ? v.durationSeconds : parseDurationToSeconds(v.duration || '5 นาที');
+      // Restore accumulated watch seconds from backend (progressSeconds = total watched so far)
+      watchSeconds = (v.progressSeconds && v.progressSeconds > 0) ? Math.min(v.progressSeconds, watchTargetSeconds) : 0;
+      watchCompleted = !!v.completed;
+
+      document.getElementById('upskill-player-modal').style.display = 'flex';
+      _stopYTTick();
+      updateWatchTimerUI();
+
+      const videoUrl = v.url || v.youtube_url || v.youtubeUrl || '';
+      const newYtId = extractYouTubeId(videoUrl);
+
+      if (ytApiReady) {
+        _createYTPlayer(v, newYtId);
+      } else {
+        pendingVideoOpen = v;
+        // Fallback: show loading state
+        document.getElementById('yt-player').innerHTML =
+          '<div class="flex items-center justify-center h-full text-slate-400 text-xs"><i class="fas fa-circle-notch fa-spin mr-2"></i>กำลังโหลดเครื่องเล่น...</div>';
+      }
+    }
+
+    function _createYTPlayer(v, ytId) {
+      ytId = ytId || extractYouTubeId(v.url || v.youtube_url || v.youtubeUrl || '');
+      if (!ytId) return;
+
+      // Seek position: resume from progressSeconds saved in DB
+      // (Don't cap by watchTargetSeconds here — we'll get real duration in onReady)
+      const resumeSec = (v.progressSeconds && v.progressSeconds > 0 && !v.completed)
+        ? Math.floor(v.progressSeconds)
+        : 0;
+
+      ytPlayerId = ytId;
+
+      // Destroy old player if it exists
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch(e) {}
+        ytPlayer = null;
+      }
+      // Re-create the container div (destroy removes it)
+      const wrapper = document.querySelector('.w-full.aspect-video.bg-black');
+      wrapper.innerHTML = '<div id="yt-player" class="w-full h-full"></div>';
+
+      ytPlayer = new YT.Player('yt-player', {
+        videoId: ytId,
+        playerVars: {
+          autoplay: 1,
+          start: resumeSec,
+          rel: 0,
+          modestbranding: 1,
+          enablejsapi: 1
+        },
+        events: {
+          onReady: function(e) {
+            // Get real video duration from YouTube (overrides DB value)
+            try {
+              const realDur = Math.floor(e.target.getDuration());
+              if (realDur && realDur > 0) {
+                watchTargetSeconds = realDur;
+                // Re-cap accumulated watch seconds to real duration
+                if (watchSeconds > watchTargetSeconds) watchSeconds = watchTargetSeconds;
+                updateWatchTimerUI();
+
+                // Sync real duration back to DB if it was missing (0)
+                const vidObj = allUpskillVideos.find(x => String(x.id) === String(currentSelectedVideo.id));
+                const dbDur  = vidObj ? (vidObj.durationSeconds || 0) : 0;
+                if (dbDur === 0 || dbDur === 300) {
+                  // Update local cache first so card re-renders correctly
+                  if (vidObj) vidObj.durationSeconds = realDur;
+                  // Persist to backend (fire-and-forget)
+                  apiPost('updateUpskillVideoDuration', withAuthParams({
+                    videoId: currentSelectedVideo.id,
+                    durationSeconds: realDur
+                  })).catch(() => {});
+                }
+              }
+            } catch(err) {}
+          },
+          onStateChange: function(e) {
+            if (watchCompleted) return;
+            if (e.data === YT.PlayerState.PLAYING) {
+              _startYTTick();
+            } else if (e.data === YT.PlayerState.ENDED) {
+              _stopYTTick();
+              // Video ended naturally – count remaining seconds and complete
+              watchSeconds = watchTargetSeconds;
+              updateWatchTimerUI();
+              triggerVideoCompletion();
+            } else {
+              // Paused / buffering / cued
+              _stopYTTick();
+              _saveProgress();
+            }
+          }
+        }
+      });
+    }
+
+    function _startYTTick() {
+      if (watchTickInterval) return; // already running
+      watchTickInterval = setInterval(() => {
+        if (watchCompleted) { _stopYTTick(); return; }
+        watchSeconds++;
+        updateWatchTimerUI();
+        if (watchSeconds >= watchTargetSeconds) {
+          _stopYTTick();
+          triggerVideoCompletion();
+        }
+      }, 1000);
+
+      // Save progress every 10 seconds
+      if (!saveProgressTimer) {
+        saveProgressTimer = setInterval(_saveProgress, 10000);
+      }
+    }
+
+    function _stopYTTick() {
+      if (watchTickInterval) { clearInterval(watchTickInterval); watchTickInterval = null; }
+      if (saveProgressTimer) { clearInterval(saveProgressTimer); saveProgressTimer = null; }
+    }
+
+    function _saveProgress() {
+      if (!currentSelectedVideo || watchCompleted) return;
+      const token = localStorage.getItem('nfe_auth_token');
+      if (!token) return;
+      // Get real YouTube position if possible
+      let ytPos = watchSeconds;
+      try {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+          ytPos = Math.floor(ytPlayer.getCurrentTime());
+        }
+      } catch(e) {}
+      // Update local cache
+      const idx = allUpskillVideos.findIndex(x => String(x.id) === String(currentSelectedVideo.id));
+      if (idx !== -1) allUpskillVideos[idx].progressSeconds = Math.max(watchSeconds, ytPos);
+      // Save to backend
+      apiPost('saveUpskillProgress', withAuthParams({
+        videoId: currentSelectedVideo.id,
+        progressSeconds: Math.max(watchSeconds, ytPos),
+        watchedSeconds: watchSeconds
+      })).catch(() => {});
+    }
+
+    function parseDurationToSeconds(str) {
+      if (!str) return 300;
+      const colonMatch = String(str).match(/^(\d+):(\d{2})/);
+      if (colonMatch) return parseInt(colonMatch[1]) * 60 + parseInt(colonMatch[2]);
+      const minMatch = String(str).match(/(\d+(?:\.\d+)?)\s*น/);
+      if (minMatch) return Math.round(parseFloat(minMatch[1]) * 60);
+      const num = parseFloat(str);
+      if (!isNaN(num)) return Math.round(num > 10 ? num : num * 60);
+      return 300;
+    }
+
+    function updateWatchTimerUI() {
+      const label = document.getElementById('watch-timer-label');
+      const icon  = document.getElementById('watch-timer-icon');
+      const bar   = document.getElementById('watch-timer-progress');
+      const txt   = document.getElementById('watch-timer-text');
+      if (!label) return;
+
+      if (watchCompleted) {
+        icon.textContent = '✅';
+        label.textContent = 'ดูจบแล้ว! ได้รับ 50 แต้มแล้ว';
+        label.className = 'text-[11px] font-bold text-emerald-400';
+        bar.style.width = '100%';
+        bar.className = 'bg-emerald-500 h-1.5 rounded-full transition-all duration-500';
+        txt.textContent = '✓';
+        txt.className = 'text-[11px] font-mono font-bold text-emerald-400 shrink-0';
+      } else {
+        const pct = Math.min(100, Math.round((watchSeconds / watchTargetSeconds) * 100));
+        const mm  = String(Math.floor(watchSeconds / 60)).padStart(2, '0');
+        const ss  = String(watchSeconds % 60).padStart(2, '0');
+        const tmm = String(Math.floor(watchTargetSeconds / 60)).padStart(2, '0');
+        const tss = String(watchTargetSeconds % 60).padStart(2, '0');
+        const earnablePts = Math.max(1, Math.floor(watchTargetSeconds / 60));
+        icon.textContent = '⏱️';
+        label.textContent = watchSeconds > 0
+          ? `กำลังรับชม... ดูจบรับ +${earnablePts} แต้ม`
+          : `กด ▶ เพื่อเริ่มดู — ดูจบรับ +${earnablePts} แต้ม`;
+        label.className = 'text-[11px] font-bold text-slate-300';
+        bar.style.width = pct + '%';
+        bar.className = 'bg-gradient-to-r from-rose-500 to-amber-500 h-1.5 rounded-full transition-all duration-500';
+        txt.textContent = `${mm}:${ss} / ${tmm}:${tss}`;
+        txt.className = 'text-[11px] font-mono font-bold text-amber-400 shrink-0';
+      }
+    }
+
+    function triggerVideoCompletion() {
+      if (!currentSelectedVideo || watchCompleted) return;
+      const token = localStorage.getItem('nfe_auth_token');
+      if (!token) return;
+
+      watchCompleted = true;
+      const idx = allUpskillVideos.findIndex(x => String(x.id) === String(currentSelectedVideo.id));
+      if (idx !== -1) { allUpskillVideos[idx].completed = true; allUpskillVideos[idx].progressSeconds = watchTargetSeconds; }
+
+      const earnablePts = Math.max(1, Math.floor(watchTargetSeconds / 60));
+      updateWatchTimerUI();
+      showToast(`🎉 ดูวิดีโอจบแล้ว! กำลังบันทึก +${earnablePts} แต้ม...`, 'success');
+
+      apiPost('completeUpskillVideo', withAuthParams({
+        videoId: currentSelectedVideo.id,
+        realDurationSeconds: watchTargetSeconds   // pass real YouTube duration to backend
+      }))
+        .then(res => {
+          if (res && (res.status === 'success' || res.success)) {
+            const awarded = res.pointsAwarded || earnablePts;
+            showToast(`🏆 บันทึก +${awarded} แต้มสำเร็จ! (นาทีละ 1 แต้ม)`, 'success');
+          }
+        })
+        .catch(() => {});
+    }
+
+    function closeUpskillPlayerModal() {
+      _stopYTTick();
+      _saveProgress(); // save position before closing
+      // Pause and detach player
+      try { if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo(); } catch(e) {}
+      // Clear player container
+      setTimeout(() => {
+        try { if (ytPlayer && ytPlayer.destroy) ytPlayer.destroy(); } catch(e) {}
+        ytPlayer = null;
+        const wrapper = document.querySelector('.w-full.aspect-video.bg-black');
+        if (wrapper) wrapper.innerHTML = '<div id="yt-player" class="w-full h-full"></div>';
+      }, 200);
+      document.getElementById('upskill-player-modal').style.display = 'none';
+    }
+
+    function submitUpskillNoteAction() {
+      if (!currentSelectedVideo) return;
+
+      const token = localStorage.getItem('nfe_auth_token');
+      if (!token) {
+        showToast('กรุณาเข้าสู่ระบบก่อนส่งบันทึกสรุปองค์ความรู้', 'warning');
+        return;
+      }
+
+      const notes = document.getElementById('upskill-log-notes').value.trim();
+      if (!notes) {
+        showToast('กรุณาระบุข้อความสรุปองค์ความรู้ที่ได้รับ', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-upskill-log');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('submitUpskillLog', withAuthParams({ videoId: currentSelectedVideo.id, notes: notes, text: notes }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ส่งบันทึกสรุปความรู้';
+          if (res && (res.status === 'success' || res.success)) {
+            showToast('📝 ส่งบันทึกสรุปความรู้สำเร็จแล้ว! รอครูตรวจประเมิน (สูงสุด 10 แต้ม)', 'success');
+            closeUpskillPlayerModal();
+          } else {
+            showToast(res.message || 'บันทึกสำเร็จ!', 'success');
+            closeUpskillPlayerModal();
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ส่งบันทึกสรุปความรู้';
+          showToast('ส่งบันทึกเรียบร้อยแล้ว!', 'success');
+          closeUpskillPlayerModal();
+        });
+    }
+
+    function extractYouTubeId(url) {
+      if (!url) return '';
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : '');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const sel = document.getElementById('upskill-institution-select');
+      if (sel) sel.value = currentInstitution;
+      loadUpskillVideos();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

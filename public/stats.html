@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 รายงานภาพรวมระบบและสถิติ — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .custom-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .custom-card {
+        background: #ffffff !important;
+        border: 1px solid #cccccc !important;
+        box-shadow: none !important;
+        color: #000000 !important;
+      }
+      .text-white {
+        color: #000000 !important;
+      }
+      .text-slate-400, .text-slate-300 {
+        color: #555555 !important;
+      }
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg no-print">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-xl shadow-md shadow-blue-600/30 shrink-0">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              รายงานภาพรวมระบบและสถิติ
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Executive Analytics
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            สถิติผู้เรียน การกระจายตัวเชิงพื้นที่ เกียรติบัตร และการประเมินคุณภาพ
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95">
+          <i class="fas fa-print"></i> พิมพ์รายงาน
+        </button>
+        <button type="button" onclick="loadDashboardStats(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Filter Bar (No Print) -->
+    <section class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md no-print">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        
+        <!-- 1. Institution Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-university mr-1 text-blue-400"></i>สถานศึกษาหลัก</label>
+          <select id="filter-institution" onchange="loadDashboardStats()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-medium">
+            <option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>
+          </select>
+        </div>
+
+        <!-- 2. Tambon Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-map-pin mr-1 text-emerald-400"></i>พื้นที่ตำบล</label>
+          <select id="filter-tambon" onchange="loadDashboardStats()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-medium">
+            <option value="ALL">📍 ทุกตำบลในอำเภอ</option>
+          </select>
+        </div>
+
+        <div class="flex items-end">
+          <button type="button" onclick="loadDashboardStats(true)" class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md shadow-blue-600/30">
+            <i class="fas fa-filter mr-1"></i> กรองและประมวลผลสถิติ
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════ KPI Metric Cards (Top Row) ═══════════════════ -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- Card 1: Total Learners -->
+      <div class="custom-card p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl shrink-0">
+          <i class="fas fa-users"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-400 font-bold m-0 uppercase tracking-wider">ผู้เรียนทั้งหมด</p>
+          <h3 class="text-xl sm:text-2xl font-black text-white m-0 mt-0.5" id="stat-total-learners">0</h3>
+          <p class="text-[10px] text-blue-400 m-0 font-semibold" id="stat-avg-score">เฉลี่ย 0 คะแนน/คน</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Total Points -->
+      <div class="custom-card p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-400 font-bold m-0 uppercase tracking-wider">คะแนนรวมสะสม</p>
+          <h3 class="text-xl sm:text-2xl font-black text-white m-0 mt-0.5" id="stat-total-score">0</h3>
+          <p class="text-[10px] text-amber-400 m-0 font-semibold">แต้มการเรียนรู้</p>
+        </div>
+      </div>
+
+      <!-- Card 3: Total Certificates -->
+      <div class="custom-card p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl shrink-0">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-400 font-bold m-0 uppercase tracking-wider">เกียรติบัตรที่ออก</p>
+          <h3 class="text-xl sm:text-2xl font-black text-white m-0 mt-0.5" id="stat-total-certs">0</h3>
+          <p class="text-[10px] text-emerald-400 m-0 font-semibold">ฉบับดิจิทัล</p>
+        </div>
+      </div>
+
+      <!-- Card 4: Avg Satisfaction -->
+      <div class="custom-card p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl shrink-0">
+          <i class="fas fa-star"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-400 font-bold m-0 uppercase tracking-wider">ความพึงพอใจเฉลี่ย</p>
+          <h3 class="text-xl sm:text-2xl font-black text-white m-0 mt-0.5" id="stat-avg-rating">0.0</h3>
+          <p class="text-[10px] text-purple-400 m-0 font-semibold" id="stat-total-ratings">จาก 0 รีวิว</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ Main Content Grid ═══════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      
+      <!-- Left Column: Area Breakdown Table (2 spans) -->
+      <div class="lg:col-span-2 custom-card p-5 sm:p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm">
+                <i class="fas fa-map-location-dot"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white m-0">สถิติการกระจายตัวเชิงพื้นที่ (รายตำบล)</h3>
+                <p class="text-[11px] text-slate-400 m-0">เปรียบเทียบจำนวนผู้เรียน แหล่งเรียนรู้ และเกียรติบัตร</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-700/60 text-slate-400 uppercase text-[10px] tracking-wider">
+                  <th class="py-2.5 px-3">ตำบล</th>
+                  <th class="py-2.5 px-3 text-center">ผู้เรียน</th>
+                  <th class="py-2.5 px-3 text-center">แหล่งเรียนรู้</th>
+                  <th class="py-2.5 px-3 text-center">ใบประกาศ</th>
+                  <th class="py-2.5 px-3 text-right">คะแนนรวม</th>
+                </tr>
+              </thead>
+              <tbody id="area-table-body" class="divide-y divide-slate-800/60">
+                <tr>
+                  <td colspan="5" class="py-8 text-center text-slate-500">กำลังประมวลผลข้อมูล...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Standard Evaluation & Quality (1 span) -->
+      <div class="custom-card p-5 sm:p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm">
+                <i class="fas fa-award"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white m-0">มาตรฐานแหล่งเรียนรู้ (มาตรา 6)</h3>
+                <p class="text-[11px] text-slate-400 m-0">ผลการประเมินคุณภาพมาตรฐาน</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quality Metric Highlight -->
+          <div class="p-4 rounded-2xl bg-teal-950/30 border border-teal-500/30 mb-4 text-center">
+            <p class="text-[11px] text-teal-300 font-bold m-0 uppercase tracking-wider">คะแนนมาตรฐานเฉลี่ย</p>
+            <h2 class="text-3xl font-black text-white m-0 mt-1" id="eval-avg-score">0.0</h2>
+            <p class="text-[10px] text-slate-400 m-0 mt-0.5" id="eval-total-summary">ประเมินแล้ว 0 จาก 0 แหล่ง</p>
+          </div>
+
+          <!-- Grade Breakdown -->
+          <div class="space-y-2.5 text-xs" id="eval-grades-container">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300 font-bold">ดีมาก (80-100%)</span>
+              <span class="font-mono font-bold text-emerald-400" id="grade-great">0 แหล่ง</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300 font-bold">ดี (70-79%)</span>
+              <span class="font-mono font-bold text-teal-400" id="grade-good">0 แหล่ง</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300 font-bold">พอใช้ (60-69%)</span>
+              <span class="font-mono font-bold text-amber-400" id="grade-fair">0 แหล่ง</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300 font-bold">ควรปรับปรุง (&lt;60%)</span>
+              <span class="font-mono font-bold text-rose-400" id="grade-improve">0 แหล่ง</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ Top Learners Leaderboard ═══════════════════ -->
+    <section class="custom-card p-5 sm:p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+            <i class="fas fa-ranking-star"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">อันดับผู้เรียนยอดเยี่ยม (Top Learners)</h3>
+            <p class="text-[11px] text-slate-400 m-0">ผู้เรียนที่มีคะแนนสะสมสูงสุดในระบบ</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="top-learners-grid">
+        <div class="col-span-full text-center py-8 text-slate-500 text-xs">
+          กำลังโหลดอันดับผู้เรียน...
+        </div>
+      </div>
+    </section>
+
+  </div> <!-- End Main Container -->
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-stats-v1"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-stats-v1"></script>
+
+  <script>
+    let allInstitutions = [];
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Initialize ──────────────────────────────────────────────
+    function initData() {
+      loadInstitutionsDropdown();
+      loadDashboardStats(true);
+    }
+
+    function loadInstitutionsDropdown() {
+      const instSelect = document.getElementById('filter-institution');
+      apiGet('getInstitutions', withAuthParams({}))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.institutions)) {
+            allInstitutions = res.institutions;
+            let html = '<option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>';
+            allInstitutions.forEach(inst => {
+              html += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name || inst.id)}</option>`;
+            });
+            instSelect.innerHTML = html;
+
+            const userInst = (localStorage.getItem('userInstitution') || '').trim();
+            if (userInst && userInst !== 'ALL' && userInst !== 'ทั้งหมด') {
+              instSelect.value = userInst;
+            } else {
+              instSelect.value = 'INS_PHRAO';
+            }
+          }
+        })
+        .catch(err => console.error('Load institutions error:', err));
+    }
+
+    // ─── Load Stats ──────────────────────────────────────────────
+    function loadDashboardStats(force = false) {
+      const inst = (document.getElementById('filter-institution')?.value || 'ALL').trim();
+      const tambon = (document.getElementById('filter-tambon')?.value || 'ALL').trim();
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      apiGet('getAdminDashboardStats', withAuthParams({
+        institutionId: inst,
+        tambon: tambon
+      }))
+        .then(res => {
+          if (icon) icon.classList.remove('fa-spin');
+          if (res && res.status === 'success') {
+            renderKPIs(res);
+            renderAreaTable(res.areaComparisonTable || []);
+            renderEvaluation(res.evaluationStats || {});
+            renderTopLearners(res.learners || []);
+          }
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Load stats error:', err);
+        });
+    }
+
+    function renderKPIs(data) {
+      document.getElementById('stat-total-learners').innerText = (data.totalLearners || 0).toLocaleString();
+      document.getElementById('stat-avg-score').innerText = `เฉลี่ย ${data.avgScore || 0} คะแนน/คน`;
+      document.getElementById('stat-total-score').innerText = (data.totalScore || 0).toLocaleString();
+      document.getElementById('stat-total-certs').innerText = (data.totalCerts || 0).toLocaleString();
+      document.getElementById('stat-avg-rating').innerText = `${data.avgSatisfaction || 0} / 5.0`;
+      document.getElementById('stat-total-ratings').innerText = `จาก ${data.totalRatings || 0} ความคิดเห็น`;
+    }
+
+    function renderAreaTable(rows) {
+      const tbody = document.getElementById('area-table-body');
+      const tambonSelect = document.getElementById('filter-tambon');
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">ไม่พบข้อมูลสถิติเชิงพื้นที่</td></tr>`;
+        return;
+      }
+
+      // Populate tambon filter options if only 1 option currently
+      if (tambonSelect.options.length <= 1) {
+        rows.forEach(r => {
+          if (r.tambon) {
+            const opt = document.createElement('option');
+            opt.value = r.tambon;
+            opt.innerText = `📍 ${r.tambon}`;
+            tambonSelect.appendChild(opt);
+          }
+        });
+      }
+
+      let html = '';
+      rows.forEach(r => {
+        html += `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2.5 px-3 font-bold text-white flex items-center gap-1.5">
+              <i class="fas fa-location-dot text-rose-400 text-[10px]"></i>
+              ${escapeHtml(r.tambon)}
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold text-blue-400">${(r.usersCount || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-center font-mono text-slate-300">${(r.sourcesCount || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold text-emerald-400">${(r.certsCount || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-amber-300">${(r.totalScore || 0).toLocaleString()}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function renderEvaluation(evalStats) {
+      document.getElementById('eval-avg-score').innerText = evalStats.avgScore ? `${evalStats.avgScore}%` : '0.0%';
+      document.getElementById('eval-total-summary').innerText = `ประเมินแล้ว ${evalStats.evaluatedCount || 0} จาก ${evalStats.totalSources || 0} แหล่ง`;
+
+      const grades = evalStats.grades || {};
+      document.getElementById('grade-great').innerText = `${grades['ดีมาก'] || 0} แหล่ง`;
+      document.getElementById('grade-good').innerText = `${grades['ดี'] || 0} แหล่ง`;
+      document.getElementById('grade-fair').innerText = `${grades['พอใช้'] || 0} แหล่ง`;
+      document.getElementById('grade-improve').innerText = `${(grades['ควรปรับปรุง'] || 0) + (grades['ต้องปรับปรุง'] || 0)} แหล่ง`;
+    }
+
+    function renderTopLearners(learners) {
+      const container = document.getElementById('top-learners-grid');
+      const topList = learners.slice(0, 9);
+
+      if (!topList.length) {
+        container.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">ไม่พบข้อมูลผู้เรียน</div>`;
+        return;
+      }
+
+      let html = '';
+      topList.forEach((u, idx) => {
+        const medalColors = ['from-amber-400 to-amber-600', 'from-slate-300 to-slate-500', 'from-amber-700 to-yellow-800'];
+        const medalBg = medalColors[idx] || 'from-slate-800 to-slate-900 border border-slate-700';
+
+        html += `
+          <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-700/60 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br ${medalBg} flex items-center justify-center text-white font-black text-xs shrink-0 shadow-md">
+                ${idx + 1}
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-xs font-bold text-white m-0 truncate">${escapeHtml(u.fullName || u.name || u.username)}</h4>
+                <p class="text-[10px] text-slate-400 m-0 truncate">📍 ${escapeHtml(u.tambon || 'ไม่ระบุตำบล')}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-xs font-black font-mono text-amber-300">${(u.score || 0).toLocaleString()}</span>
+              <p class="text-[9px] text-slate-500 m-0 font-bold">แต้มสะสม</p>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

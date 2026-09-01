@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สตูดิโอออกแบบใบประกาศนียบัตร (8 แถวอิสระ) — Live Certificate Studio</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- HTML2Canvas for Pixel-Perfect High-Res PNG Certificate Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --font-main: 'Prompt', 'Sarabun', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b1120 !important;
+      color: #f8fafc !important;
+      overflow: hidden !important;
+    }
+
+    #app-main-wrapper {
+      height: 100vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+    
+    /* A4 Landscape Ratio: 297mm x 210mm = 1.4142857 */
+    .cert-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .cert-canvas-container {
+      container-type: inline-size;
+      aspect-ratio: 297 / 210;
+      height: min(calc(100vh - 140px), 520px);
+      width: auto;
+      max-width: 100%;
+      max-height: calc(100vh - 130px);
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      color: #0f172a;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: auto;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .cert-canvas-container {
+        height: auto;
+        width: 100%;
+        max-width: 100%;
+        max-height: calc(100vh - 300px);
+      }
+    }
+
+    /* Container Query Proportional Scaling for Live Exact Ratio */
+    .cert-header-text {
+      font-size: calc(var(--header-fs, 40) * 0.1cqw);
+    }
+    .cert-headersub-text {
+      font-size: calc(var(--headersub-fs, 16) * 0.1cqw);
+    }
+    .cert-subtitle-text {
+      font-size: calc(var(--subtitle-fs, 16) * 0.1cqw);
+    }
+    .cert-name-text {
+      font-size: calc(var(--name-fs, 38) * 0.1cqw);
+    }
+    .cert-desc-text {
+      font-size: calc(var(--desc-fs, 15) * 0.1cqw);
+    }
+    .cert-subject-text {
+      font-size: calc(var(--subject-fs, 34) * 0.1cqw);
+    }
+    .cert-badge-text {
+      font-size: 1.45cqw;
+    }
+    .cert-date-text {
+      font-size: calc(var(--date-fs, 14) * 0.1cqw);
+    }
+    .cert-director-name {
+      font-size: calc(var(--sig-fs, 14) * 0.13cqw);
+    }
+    .cert-director-title {
+      font-size: calc(var(--sig-fs, 14) * 0.095cqw);
+    }
+    .cert-ref-text {
+      font-size: 1.2cqw;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none">
+
+  <div id="app-main-wrapper" class="app-main-layout w-full h-screen flex flex-col overflow-hidden">
+
+    <!-- ═══════════════════ Top Header Bar ═══════════════════ -->
+    <header class="h-16 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between z-10 shrink-0">
+      <div class="flex items-center gap-3">
+        <a href="activities-admin.html" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition active:scale-95" title="ย้อนกลับ">
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-base shadow-md shadow-emerald-500/20">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <div>
+            <h1 class="text-xs sm:text-sm font-black text-white m-0 flex items-center gap-1.5">
+              สตูดิโอออกแบบใบประกาศนียบัตร (8 แถวอิสระ)
+            </h1>
+            <p class="text-[10px] text-slate-400 m-0 hidden sm:block">ปรับแต่งข้อความ ฟอนต์ สี และระยะห่างแยกอิสระได้ครบทั้ง 8 แถว</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="flex items-center gap-2">
+        <a href="cert-registry.html" class="px-3.5 py-2 bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 text-purple-200 border border-purple-500/40 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 shadow-md">
+          <i class="fas fa-file-signature text-purple-400"></i>
+          <span>📑 ทะเบียนคุมเกียรติบัตร & รายงาน Word</span>
+        </a>
+
+        <!-- Zoom Controls -->
+        <div class="hidden md:flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700 text-xs font-bold mr-1">
+          <button type="button" onclick="setCanvasZoom(0.75)" id="zoom-btn-75" class="px-2.5 py-1 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition">75%</button>
+          <button type="button" onclick="setCanvasZoom(1.0)" id="zoom-btn-100" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white transition">Fit (100%)</button>
+          <button type="button" onclick="setCanvasZoom(1.15)" id="zoom-btn-115" class="px-2.5 py-1 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition">115%</button>
+        </div>
+
+        <button type="button" id="btnPngTest" onclick="exportPngTest()" class="px-3.5 sm:px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 hover:text-emerald-200 rounded-xl text-xs font-bold border border-slate-700 hover:border-emerald-500/50 transition active:scale-95 flex items-center gap-1.5 shadow">
+          <i class="fas fa-image text-emerald-400"></i> <span>ทดสอบโหลดภาพ PNG (300 DPI)</span>
+        </button>
+
+        <button type="button" id="btnSave" onclick="saveCertSettings()" class="px-4 sm:px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/40 transition active:scale-95 flex items-center gap-1.5">
+          <i class="fas fa-floppy-disk"></i> <span>บันทึกลงระบบ</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══════════════════ Main Editor Workspace ═══════════════════ -->
+    <div class="flex-1 flex overflow-hidden relative" style="height: calc(100vh - 64px);">
+
+      <!-- ── Left Control Sidebar Panel (Scrollable) ── -->
+      <aside class="w-80 sm:w-96 bg-slate-900/95 border-r border-slate-800 p-4 sm:p-5 overflow-y-auto custom-scrollbar shrink-0 space-y-4 text-xs select-none h-full" style="height: 100%;">
+        
+        <!-- Panel 0: Target Selector with Cascading Amphoe & Tambon Filters -->
+        <div class="bg-gradient-to-br from-slate-800/90 to-slate-850 p-4 rounded-2xl border border-emerald-500/40 space-y-3 shadow-lg">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-emerald-400 flex items-center gap-2 m-0 uppercase tracking-wider">
+              <i class="fas fa-layer-group"></i> เลือกรายการที่ต้องการปรับแต่ง
+            </h3>
+            <span id="targetStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-700 text-slate-300">ส่วนกลาง</span>
+          </div>
+
+          <!-- Cascading Filters: อำเภอ & ตำบล -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <div>
+              <label class="block text-[11px] text-slate-300 mb-1 font-semibold flex items-center gap-1">
+                <i class="fas fa-building text-sky-400 text-[10px]"></i> กรองอำเภอ:
+              </label>
+              <select id="filterAmphoe" onchange="onFilterAmphoeChanged()" class="w-full px-2 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-medium focus:outline-none focus:border-sky-500">
+                <option value="ALL">🏢 ทุกอำเภอ (ทั้งหมด)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] text-slate-300 mb-1 font-semibold flex items-center gap-1">
+                <i class="fas fa-map-pin text-emerald-400 text-[10px]"></i> กรองตำบล:
+              </label>
+              <select id="filterTambon" onchange="onFilterTambonChanged()" class="w-full px-2 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-medium focus:outline-none focus:border-emerald-500">
+                <option value="ALL">📍 ทุกตำบล (ทั้งหมด)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quick Search Box -->
+          <div>
+            <div class="relative">
+              <input type="text" id="filterSearchSource" oninput="applySourceFilters()" placeholder="🔍 ค้นหาชื่อแหล่งเรียนรู้..." class="w-full pl-7 pr-3 py-1.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-medium">
+              <i class="fas fa-search absolute left-2.5 top-2 text-slate-500 text-[10px]"></i>
+            </div>
+          </div>
+
+          <!-- Target Dropdown -->
+          <div>
+            <div class="flex justify-between items-center text-slate-300 mb-1">
+              <label class="font-semibold text-[11px]">แม่แบบของ (กิจกรรม / แหล่งเรียนรู้ / ส่วนกลาง):</label>
+              <span id="sourcesCountBadge" class="text-[10px] text-emerald-400 font-bold"></span>
+            </div>
+            <select id="selectCertTarget" onchange="onTargetChanged()" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-medium focus:outline-none focus:border-emerald-500">
+              <option value="global">🌐 ค่าเริ่มต้นของระบบ (Global Default Template)</option>
+              <optgroup id="optgroupActivities" label="── 🎯 กิจกรรมเช็กอินรับแต้ม & เกียรติบัตร (Activities) ──"></optgroup>
+              <optgroup id="optgroupSources" label="── 🏛️ รายชื่อแหล่งเรียนรู้ (Learning Sources) ──"></optgroup>
+            </select>
+          </div>
+
+          <div id="customTargetNotice" class="text-[11px] text-slate-400 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <span id="targetDescText"><i class="fas fa-info-circle text-sky-400 mr-1"></i> ยึดตามค่าเริ่มต้นของระบบ</span>
+            <button type="button" id="btnResetTarget" onclick="resetTargetToDefault()" class="hidden px-2 py-1 bg-rose-900/40 hover:bg-rose-800/60 border border-rose-700/60 text-rose-300 rounded-lg text-[10px] font-bold transition">
+              <i class="fas fa-rotate-left mr-1"></i> คืนค่าเริ่มต้น
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Background: Artwork Uploader -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-amber-400 flex items-center gap-2 m-0 uppercase tracking-wider">
+              <i class="fas fa-image"></i> ภาพพื้นหลังเกียรติบัตร (Background)
+            </h3>
+            <span id="bgStatusBadge" class="text-[10px] text-slate-400 font-normal">ไม่มีภาพพื้นหลัง</span>
+          </div>
+
+          <!-- Thumbnail Box -->
+          <div class="relative w-full aspect-[297/210] rounded-xl overflow-hidden border-2 border-dashed border-slate-700 bg-slate-950/60 flex items-center justify-center group">
+            <img id="bgThumbImg" src="" alt="Background Preview" class="w-full h-full object-cover hidden">
+            <div id="bgThumbPlaceholder" class="text-center p-3 text-slate-500">
+              <i class="fas fa-file-image text-3xl mb-1.5 opacity-40"></i>
+              <p class="text-[11px] m-0">ยังไม่มีภาพพื้นหลัง</p>
+              <p class="text-[9px] text-slate-500 m-0">ระบบจะแสดงผลบนพื้นกระดาษขาว</p>
+            </div>
+            
+            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2 p-2">
+              <button type="button" onclick="triggerBgUpload()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[11px] shadow flex items-center gap-1">
+                <i class="fas fa-upload"></i> เปลี่ยนภาพ
+              </button>
+              <button type="button" id="btnRemoveBg" onclick="removeBackground()" class="hidden px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-bold text-[11px] shadow flex items-center gap-1">
+                <i class="fas fa-trash"></i> ลบ
+              </button>
+            </div>
+          </div>
+
+          <input type="file" id="inputBgFile" accept="image/*" class="hidden" onchange="handleBgFileSelected(this)">
+
+          <div class="flex gap-2">
+            <button type="button" onclick="triggerBgUpload()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-bold text-center transition flex items-center justify-center gap-1.5">
+              <i class="fas fa-cloud-arrow-up text-emerald-400"></i> <span>อัปโหลดภาพพื้นหลัง</span>
+            </button>
+            <button type="button" onclick="removeBackground()" class="px-3 py-2 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 border border-slate-700 rounded-xl font-bold transition" title="ลบภาพพื้นหลัง">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 1 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-emerald-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black border border-emerald-500/30">1</span>
+            แถวที่ 1: ชื่อหน่วยงาน / สถาบัน
+          </h3>
+          
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ข้อความ</label>
+            <input type="text" id="inputCertHeader" value="ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-bold">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดฟอนต์</label>
+                <span id="valHeaderFontSize" class="font-bold text-emerald-400">42</span>
+              </div>
+              <input type="range" id="inputHeaderFontSize" min="18" max="55" value="42" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความ</label>
+              <input type="color" id="inputHeaderColor" value="#064e3b" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valHeaderMarginTop" class="font-bold text-amber-400">+154px</span>
+            </div>
+            <input type="range" id="inputHeaderMarginTop" min="-50" max="250" value="154" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 2 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-sky-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-[10px] font-black border border-sky-500/30">2</span>
+            แถวที่ 2: สังกัด / หน่วยงานต้นสังกัด
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ข้อความ</label>
+            <input type="text" id="inputCertHeaderSub" value="กรมส่งเสริมการเรียนรู้ กระทรวงศึกษาธิการ" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-medium">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดฟอนต์</label>
+                <span id="valHeaderSubFontSize" class="font-bold text-emerald-400">23</span>
+              </div>
+              <input type="range" id="inputHeaderSubFontSize" min="10" max="35" value="23" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความ</label>
+              <input type="color" id="inputHeaderSubColor" value="#475569" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valHeaderSubMarginTop" class="font-bold text-amber-400">+19px</span>
+            </div>
+            <input type="range" id="inputHeaderSubMarginTop" min="-30" max="120" value="19" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 3 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-indigo-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-black border border-indigo-500/30">3</span>
+            แถวที่ 3: คำเกริ่นมอบเกียรติบัตร (Subtitle)
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ข้อความ</label>
+            <input type="text" id="inputCertSubtitle" value="ขอมอบไว้เพื่อแสดงว่า" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดฟอนต์</label>
+                <span id="valSubtitleFontSize" class="font-bold text-emerald-400">20</span>
+              </div>
+              <input type="range" id="inputSubtitleFontSize" min="10" max="35" value="20" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความ</label>
+              <input type="color" id="inputSubtitleColor" value="#334155" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valSubtitleMarginTop" class="font-bold text-amber-400">+19px</span>
+            </div>
+            <input type="range" id="inputSubtitleMarginTop" min="-30" max="120" value="19" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 4 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-amber-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px] font-black border border-amber-500/30">4</span>
+            แถวที่ 4: ชื่อผู้รับเกียรติบัตร (Student Name)
+          </h3>
+          
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ตัวอย่างชื่อผู้รับ</label>
+            <input type="text" id="inputTestName" value="นายสมชาย รักดี (ทดสอบระบบ)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-bold">
+            <p class="text-[10px] text-slate-400 mt-1">* ในระบบจริงจะดึงชื่อของผู้เรียนแต่ละคนมาแสดงผลโดยอัตโนมัติ</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดชื่อ</label>
+                <span id="valNameFontSize" class="font-bold text-emerald-400">33</span>
+              </div>
+              <input type="range" id="inputNameFontSize" min="20" max="60" value="33" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีชื่อผู้รับ</label>
+              <input type="color" id="inputNameColor" value="#064e3b" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valNameMarginTop" class="font-bold text-amber-400">-10px</span>
+            </div>
+            <input type="range" id="inputNameMarginTop" min="-60" max="120" value="-10" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 5 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-teal-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-[10px] font-black border border-teal-500/30">5</span>
+            แถวที่ 5: ข้อความเกริ่นหลักสูตร (Description)
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ข้อความ</label>
+            <input type="text" id="inputCertDesc" value="ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-medium">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดฟอนต์</label>
+                <span id="valDescFontSize" class="font-bold text-emerald-400">20</span>
+              </div>
+              <input type="range" id="inputDescFontSize" min="10" max="35" value="20" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความ</label>
+              <input type="color" id="inputDescColor" value="#334155" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valDescMarginTop" class="font-bold text-amber-400">+18px</span>
+            </div>
+            <input type="range" id="inputDescMarginTop" min="-30" max="120" value="18" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 6 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-emerald-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black border border-emerald-500/30">6</span>
+            แถวที่ 6: ชื่อหลักสูตร / แหล่งเรียนรู้ (Subject)
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ตัวอย่างชื่อหลักสูตร / เรื่อง</label>
+            <input type="text" id="inputTestSubject" value="กัมมี่ผักเชียงดา(Gymnema Inodorum)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-bold">
+            <p class="text-[10px] text-slate-400 mt-1">* ในระบบจริงจะดึงชื่อของแหล่งเรียนรู้/วิชาที่สอบผ่านโดยอัตโนมัติ</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดชื่อเรื่อง</label>
+                <span id="valSubjectFontSize" class="font-bold text-emerald-400">25</span>
+              </div>
+              <input type="range" id="inputSubjectFontSize" min="18" max="55" value="25" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีชื่อเรื่อง</label>
+              <input type="color" id="inputSubjectColor" value="#064e3b" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valSubjectMarginTop" class="font-bold text-amber-400">+12px</span>
+            </div>
+            <input type="range" id="inputSubjectMarginTop" min="-30" max="120" value="12" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 7 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-violet-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-[10px] font-black border border-violet-500/30">7</span>
+            แถวที่ 7: วันที่ออกเกียรติบัตร (Date)
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">คำนำหน้าวันที่</label>
+            <input type="text" id="inputCertDatePrefix" value="ให้ไว้ ณ วันที่" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดฟอนต์วันที่</label>
+                <span id="valDateFontSize" class="font-bold text-emerald-400">19</span>
+              </div>
+              <input type="range" id="inputDateFontSize" min="10" max="30" value="19" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความวันที่</label>
+              <input type="color" id="inputDateColor" value="#334155" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับ (Y Offset)</label>
+              <span id="valDateMarginTop" class="font-bold text-amber-400">+19px</span>
+            </div>
+            <input type="range" id="inputDateMarginTop" min="-30" max="120" value="19" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- ═══════════════════ แถวที่ 8 ═══════════════════ -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 space-y-3 shadow">
+          <h3 class="text-xs font-bold text-orange-400 flex items-center gap-2 m-0">
+            <span class="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-black border border-orange-500/30">8</span>
+            แถวที่ 8: บล็อกผู้ลงนาม & ตำแหน่ง (Signer & Title)
+          </h3>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ชื่อผู้ลงนาม / ผู้บริหาร</label>
+            <input type="text" id="inputDirectorName" value="นายประวิตร ประธรรมโย" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500 font-bold">
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ตำแหน่งผู้ลงนาม</label>
+            <input type="text" id="inputDirectorTitle" value="ผู้อำนวยการ สกร.ระดับอำเภอพร้าว" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <label class="font-medium">ขนาดชื่อผู้บริหาร</label>
+                <span id="valSigFontSize" class="font-bold text-emerald-400">16</span>
+              </div>
+              <input type="range" id="inputSigFontSize" min="10" max="30" value="16" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-medium">สีข้อความชื่อ</label>
+              <input type="color" id="inputSigColor" value="#0f172a" class="w-full h-8 bg-slate-700 border border-slate-600 rounded-xl cursor-pointer">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1">
+              <label class="text-amber-300 font-medium"><i class="fas fa-arrows-up-down mr-1"></i>ระยะขยับบล็อกผู้ลงนาม (Y Offset)</label>
+              <span id="valSigMarginTop" class="font-bold text-amber-400">-21px</span>
+            </div>
+            <input type="range" id="inputSigMarginTop" min="-60" max="120" value="-21" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <div class="h-10"></div>
+      </aside>
+
+      <!-- ── Right Live Preview Canvas Workspace ── -->
+      <main class="flex-1 bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden h-full">
+        
+        <!-- Live Indicator Badge -->
+        <div class="text-xs text-slate-400 flex items-center gap-2 shrink-0 py-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="font-bold text-slate-300">แสดงผลตัวอย่างสด (Live Canvas 100% Exact Ratio — A4 Landscape 297x210 mm)</span>
+        </div>
+
+        <!-- ═════════ Exact Ratio A4 Certificate Canvas Stage ═════════ -->
+        <div class="cert-stage flex-1">
+          <div class="cert-canvas-container" id="certCanvas">
+            
+            <!-- Full Stretch Background Layer -->
+            <img id="pvBgImg" src="" alt="Certificate Background" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 1; display: none;">
+
+            <!-- Certificate Dynamic Content Container (8 Lines) -->
+            <div id="pvContent" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; padding: 3.2% 6% 5% 6%; text-align: center; box-sizing: border-box;">
+              
+              <!-- ── TOP SECTION (แถว 1, แถว 2, แถว 3) ── -->
+              <div>
+                <!-- แถวที่ 1 -->
+                <div id="pvHeader" class="cert-header-text" style="font-family: 'Sarabun', 'Prompt', sans-serif; font-weight: 800; color: #064e3b; margin-top: 6cqw; line-height: 1.15; transition: margin-top 0.1s;">
+                  ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว
+                </div>
+
+                <!-- แถวที่ 2 -->
+                <div id="pvHeaderSub" class="cert-headersub-text" style="font-weight: 700; color: #475569; margin-top: 0px; line-height: 1.15; font-family: 'Sarabun', sans-serif; transition: margin-top 0.1s;">
+                  กรมส่งเสริมการเรียนรู้ กระทรวงศึกษาธิการ
+                </div>
+
+                <!-- แถวที่ 3 -->
+                <div id="pvSubtitle" class="cert-subtitle-text" style="font-family: 'Sarabun', sans-serif; font-weight: 600; color: #334155; margin-top: 0px; margin-bottom: 0.4cqw; transition: margin-top 0.1s;">
+                  ขอมอบไว้เพื่อแสดงว่า
+                </div>
+              </div>
+
+              <!-- ── MIDDLE SECTION (แถว 4, แถว 5, แถว 6, แถว 7) ── -->
+              <div>
+                <!-- แถวที่ 4 -->
+                <div id="pvName" class="cert-name-text" style="font-family: 'Sarabun', 'Prompt', sans-serif; font-weight: 800; color: #064e3b; margin-top: -1cqw; line-height: 1.2; transition: margin-top 0.1s;">
+                  นายสมชาย รักดี (ทดสอบระบบ)
+                </div>
+
+                <!-- แถวที่ 5 -->
+                <div id="pvDesc" class="cert-desc-text" style="font-family: 'Sarabun', sans-serif; font-weight: 600; color: #334155; margin-top: 0px; margin-bottom: 0.2cqw; transition: margin-top 0.1s;">
+                  ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง
+                </div>
+
+                <!-- แถวที่ 6 -->
+                <div id="pvSubject" class="cert-subject-text" style="font-family: 'Sarabun', 'Prompt', sans-serif; font-weight: 800; color: #064e3b; margin-top: 3cqw; line-height: 1.25; transition: margin-top 0.1s;">
+                  การแปรรูปและพัฒนาผลิตภัณฑ์สบู่จากถ่านไบโอชาร์
+                </div>
+
+                <!-- แถวที่ 7 -->
+                <div id="pvRow7" style="margin-top: 0px; transition: margin-top 0.1s;">
+                  <div id="pvDate" class="cert-date-text" style="font-family: 'Sarabun', sans-serif; font-weight: 600; color: #334155; margin-top: 0.9cqw;">
+                    ให้ไว้ ณ วันที่ 31 สิงหาคม พ.ศ. 2569
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── BOTTOM SECTION (แถว 8: ผู้ลงนาม & ลายเซ็น) ── -->
+              <div>
+                <!-- แถวที่ 8 -->
+                <div id="pvSigBlock" style="margin-top: 0cqw; text-align: center; transition: margin-top 0.1s;">
+                  <img id="pvSigImg" src="" class="h-[8.5cqw] w-auto max-w-[28cqw] mx-auto object-contain mb-0.5" style="display:none;">
+                  <svg id="pvSigSvg" viewBox="0 0 150 36" class="h-12 mx-auto mb-0.5 opacity-80" fill="none" stroke="#0f172a" stroke-width="2">
+                    <path d="M 10 26 Q 30 5, 50 20 T 90 16 T 135 26" />
+                  </svg>
+                  <div id="pvDirectorName" class="cert-director-name" style="font-family: 'Sarabun', sans-serif; font-weight: 800; color: #0f172a; line-height: 1.15;">
+                    นายประวิตร ประธรรมโย
+                  </div>
+                  <div id="pvDirectorTitle" class="cert-director-title" style="font-family: 'Sarabun', sans-serif; font-weight: 600; color: #475569; margin-top: 1px;">
+                    ผู้อำนวยการ สกร.ระดับอำเภอพร้าว
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Absolute Reference Footer Floating on top of Background Layer -->
+            <div class="cert-ref-text" style="position: absolute; left: 3.5cqw; bottom: 2.2cqw; z-index: 50; color: #475569; font-weight: 600; font-family: 'Sarabun', sans-serif; pointer-events: none;">
+              เลขที่อ้างอิง: CERT-20260831-DEMO9999
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastAlert" class="fixed bottom-6 right-6 z-50 p-4 rounded-2xl text-xs font-bold transition transform duration-300 translate-y-4 opacity-0 pointer-events-none shadow-2xl flex items-center gap-2"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js"></script>
+  <script src="js/core/auth.js"></script>
+
+  <script>
+    let currentZoom = 1.0;
+    let currentTarget = 'global';
+    let currentBgUrl = '';
+    let currentSigUrl = '';
+    let institutionsList = [];
+    let sourcesList = [];
+    let activitiesList = [];
+
+    const el = {
+      filterAmphoe: document.getElementById('filterAmphoe'),
+      filterTambon: document.getElementById('filterTambon'),
+      filterSearchSource: document.getElementById('filterSearchSource'),
+      sourcesCountBadge: document.getElementById('sourcesCountBadge'),
+      selectTarget: document.getElementById('selectCertTarget'),
+      optgroupActivities: document.getElementById('optgroupActivities'),
+      optgroupSources: document.getElementById('optgroupSources'),
+      optgroupBases: document.getElementById('optgroupBases'),
+      targetStatusBadge: document.getElementById('targetStatusBadge'),
+      customTargetNotice: document.getElementById('customTargetNotice'),
+      targetDescText: document.getElementById('targetDescText'),
+      btnResetTarget: document.getElementById('btnResetTarget'),
+
+      // Background Controls
+      bgThumbImg: document.getElementById('bgThumbImg'),
+      bgThumbPlaceholder: document.getElementById('bgThumbPlaceholder'),
+      bgStatusBadge: document.getElementById('bgStatusBadge'),
+      btnRemoveBg: document.getElementById('btnRemoveBg'),
+      inputBgFile: document.getElementById('inputBgFile'),
+
+      // Row 1
+      certHeader: document.getElementById('inputCertHeader'),
+      headerFontSize: document.getElementById('inputHeaderFontSize'),
+      valHeaderFontSize: document.getElementById('valHeaderFontSize'),
+      headerColor: document.getElementById('inputHeaderColor'),
+      headerMarginTop: document.getElementById('inputHeaderMarginTop'),
+      valHeaderMarginTop: document.getElementById('valHeaderMarginTop'),
+
+      // Row 2
+      certHeaderSub: document.getElementById('inputCertHeaderSub'),
+      headerSubFontSize: document.getElementById('inputHeaderSubFontSize'),
+      valHeaderSubFontSize: document.getElementById('valHeaderSubFontSize'),
+      headerSubColor: document.getElementById('inputHeaderSubColor'),
+      headerSubMarginTop: document.getElementById('inputHeaderSubMarginTop'),
+      valHeaderSubMarginTop: document.getElementById('valHeaderSubMarginTop'),
+
+      // Row 3
+      certSubtitle: document.getElementById('inputCertSubtitle'),
+      subtitleFontSize: document.getElementById('inputSubtitleFontSize'),
+      valSubtitleFontSize: document.getElementById('valSubtitleFontSize'),
+      subtitleColor: document.getElementById('inputSubtitleColor'),
+      subtitleMarginTop: document.getElementById('inputSubtitleMarginTop'),
+      valSubtitleMarginTop: document.getElementById('valSubtitleMarginTop'),
+
+      // Row 4
+      testName: document.getElementById('inputTestName'),
+      nameFontSize: document.getElementById('inputNameFontSize'),
+      valNameFontSize: document.getElementById('valNameFontSize'),
+      nameColor: document.getElementById('inputNameColor'),
+      nameMarginTop: document.getElementById('inputNameMarginTop'),
+      valNameMarginTop: document.getElementById('valNameMarginTop'),
+
+      // Row 5
+      certDesc: document.getElementById('inputCertDesc'),
+      descFontSize: document.getElementById('inputDescFontSize'),
+      valDescFontSize: document.getElementById('valDescFontSize'),
+      descColor: document.getElementById('inputDescColor'),
+      descMarginTop: document.getElementById('inputDescMarginTop'),
+      valDescMarginTop: document.getElementById('valDescMarginTop'),
+
+      // Row 6
+      testSubject: document.getElementById('inputTestSubject'),
+      subjectFontSize: document.getElementById('inputSubjectFontSize'),
+      valSubjectFontSize: document.getElementById('valSubjectFontSize'),
+      subjectColor: document.getElementById('inputSubjectColor'),
+      subjectMarginTop: document.getElementById('inputSubjectMarginTop'),
+      valSubjectMarginTop: document.getElementById('valSubjectMarginTop'),
+
+      // Row 7
+      certDatePrefix: document.getElementById('inputCertDatePrefix'),
+      dateFontSize: document.getElementById('inputDateFontSize'),
+      valDateFontSize: document.getElementById('valDateFontSize'),
+      dateColor: document.getElementById('inputDateColor'),
+      dateMarginTop: document.getElementById('inputDateMarginTop'),
+      valDateMarginTop: document.getElementById('valDateMarginTop'),
+
+      // Row 8
+      directorName: document.getElementById('inputDirectorName'),
+      directorTitle: document.getElementById('inputDirectorTitle'),
+      sigFontSize: document.getElementById('inputSigFontSize'),
+      valSigFontSize: document.getElementById('valSigFontSize'),
+      sigColor: document.getElementById('inputSigColor'),
+      sigMarginTop: document.getElementById('inputSigMarginTop'),
+      valSigMarginTop: document.getElementById('valSigMarginTop'),
+
+      // Canvas Elements
+      certCanvas: document.getElementById('certCanvas'),
+      pvBgImg: document.getElementById('pvBgImg'),
+      pvHeader: document.getElementById('pvHeader'),
+      pvHeaderSub: document.getElementById('pvHeaderSub'),
+      pvSubtitle: document.getElementById('pvSubtitle'),
+      pvName: document.getElementById('pvName'),
+      pvDesc: document.getElementById('pvDesc'),
+      pvSubject: document.getElementById('pvSubject'),
+      pvRow7: document.getElementById('pvRow7'),
+      pvDate: document.getElementById('pvDate'),
+      pvSigBlock: document.getElementById('pvSigBlock'),
+      pvDirectorName: document.getElementById('pvDirectorName'),
+      pvDirectorTitle: document.getElementById('pvDirectorTitle'),
+
+      toastAlert: document.getElementById('toastAlert'),
+      btnSave: document.getElementById('btnSave'),
+      btnPdfTest: document.getElementById('btnPdfTest')
+    };
+
+    function setCanvasZoom(level) {
+      currentZoom = level;
+      el.certCanvas.style.transform = `scale(${level})`;
+
+      ['75', '100', '115'].forEach(z => {
+        const btn = document.getElementById(`zoom-btn-${z}`);
+        if (btn) {
+          if ((z === '75' && level === 0.75) || (z === '100' && level === 1.0) || (z === '115' && level === 1.15)) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-emerald-600 text-white transition font-black';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition';
+          }
+        }
+      });
+    }
+
+    function updateLivePreview() {
+      // 1. Numerical Labels
+      el.valHeaderFontSize.textContent = el.headerFontSize.value;
+      el.valHeaderMarginTop.textContent = (el.headerMarginTop.value >= 0 ? '+' : '') + el.headerMarginTop.value + 'px';
+
+      el.valHeaderSubFontSize.textContent = el.headerSubFontSize.value;
+      el.valHeaderSubMarginTop.textContent = (el.headerSubMarginTop.value >= 0 ? '+' : '') + el.headerSubMarginTop.value + 'px';
+
+      el.valSubtitleFontSize.textContent = el.subtitleFontSize.value;
+      el.valSubtitleMarginTop.textContent = (el.subtitleMarginTop.value >= 0 ? '+' : '') + el.subtitleMarginTop.value + 'px';
+
+      el.valNameFontSize.textContent = el.nameFontSize.value;
+      el.valNameMarginTop.textContent = (el.nameMarginTop.value >= 0 ? '+' : '') + el.nameMarginTop.value + 'px';
+
+      el.valDescFontSize.textContent = el.descFontSize.value;
+      el.valDescMarginTop.textContent = (el.descMarginTop.value >= 0 ? '+' : '') + el.descMarginTop.value + 'px';
+
+      el.valSubjectFontSize.textContent = el.subjectFontSize.value;
+      el.valSubjectMarginTop.textContent = (el.subjectMarginTop.value >= 0 ? '+' : '') + el.subjectMarginTop.value + 'px';
+
+      el.valDateFontSize.textContent = el.dateFontSize.value;
+      el.valDateMarginTop.textContent = (el.dateMarginTop.value >= 0 ? '+' : '') + el.dateMarginTop.value + 'px';
+
+      el.valSigFontSize.textContent = el.sigFontSize.value;
+      el.valSigMarginTop.textContent = (el.sigMarginTop.value >= 0 ? '+' : '') + el.sigMarginTop.value + 'px';
+
+      // 2. Background Image
+      if (currentBgUrl) {
+        el.pvBgImg.src = currentBgUrl;
+        el.pvBgImg.style.display = 'block';
+        el.bgThumbImg.src = currentBgUrl;
+        el.bgThumbImg.classList.remove('hidden');
+        el.bgThumbPlaceholder.classList.add('hidden');
+        el.btnRemoveBg.classList.remove('hidden');
+        el.bgStatusBadge.textContent = 'มีภาพพื้นหลัง';
+        el.bgStatusBadge.className = 'text-[10px] text-emerald-400 font-bold';
+      } else {
+        el.pvBgImg.style.display = 'none';
+        el.pvBgImg.src = '';
+        el.bgThumbImg.classList.add('hidden');
+        el.bgThumbImg.src = '';
+        el.bgThumbPlaceholder.classList.remove('hidden');
+        el.btnRemoveBg.classList.add('hidden');
+        el.bgStatusBadge.textContent = 'ไม่มีภาพพื้นหลัง';
+        el.bgStatusBadge.className = 'text-[10px] text-slate-400 font-normal';
+      }
+
+      // 3. Row 1
+      el.pvHeader.textContent = el.certHeader.value || 'ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว';
+      el.pvHeader.style.setProperty('--header-fs', el.headerFontSize.value);
+      el.pvHeader.style.color = el.headerColor.value;
+      el.pvHeader.style.marginTop = (el.headerMarginTop.value * 0.1) + 'cqw';
+
+      // 4. Row 2
+      el.pvHeaderSub.textContent = el.certHeaderSub.value || 'กรมส่งเสริมการเรียนรู้ กระทรวงศึกษาธิการ';
+      el.pvHeaderSub.style.setProperty('--headersub-fs', el.headerSubFontSize.value);
+      el.pvHeaderSub.style.color = el.headerSubColor.value;
+      el.pvHeaderSub.style.marginTop = (el.headerSubMarginTop.value * 0.1) + 'cqw';
+
+      // 5. Row 3
+      el.pvSubtitle.textContent = el.certSubtitle.value || 'ขอมอบไว้เพื่อแสดงว่า';
+      el.pvSubtitle.style.setProperty('--subtitle-fs', el.subtitleFontSize.value);
+      el.pvSubtitle.style.color = el.subtitleColor.value;
+      el.pvSubtitle.style.marginTop = (el.subtitleMarginTop.value * 0.1) + 'cqw';
+
+      // 6. Row 4
+      el.pvName.textContent = el.testName.value || 'นายสมชาย รักดี (ทดสอบระบบ)';
+      el.pvName.style.setProperty('--name-fs', el.nameFontSize.value);
+      el.pvName.style.color = el.nameColor.value;
+      el.pvName.style.marginTop = (el.nameMarginTop.value * 0.1) + 'cqw';
+
+      // 7. Row 5
+      el.pvDesc.textContent = el.certDesc.value || 'ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง';
+      el.pvDesc.style.setProperty('--desc-fs', el.descFontSize.value);
+      el.pvDesc.style.color = el.descColor.value;
+      el.pvDesc.style.marginTop = (el.descMarginTop.value * 0.1) + 'cqw';
+
+      // 8. Row 6
+      el.pvSubject.textContent = el.testSubject.value || 'การแปรรูปและพัฒนาผลิตภัณฑ์สบู่จากถ่านไบโอชาร์';
+      el.pvSubject.style.setProperty('--subject-fs', el.subjectFontSize.value);
+      el.pvSubject.style.color = el.subjectColor.value;
+      el.pvSubject.style.marginTop = (el.subjectMarginTop.value * 0.1) + 'cqw';
+
+      // 9. Row 7
+      const datePrefix = el.certDatePrefix.value || 'ให้ไว้ ณ วันที่';
+      el.pvDate.textContent = `${datePrefix} 31 สิงหาคม พ.ศ. 2569`;
+      el.pvDate.style.setProperty('--date-fs', el.dateFontSize.value);
+      el.pvDate.style.color = el.dateColor.value;
+      el.pvRow7.style.marginTop = (el.dateMarginTop.value * 0.1) + 'cqw';
+
+      // 10. Row 8
+      el.pvDirectorName.textContent = el.directorName.value || 'นายประวิตร ประธรรมโย';
+      el.pvDirectorName.style.color = el.sigColor.value;
+      el.pvDirectorTitle.textContent = el.directorTitle.value || 'ผู้อำนวยการ สกร.ระดับอำเภอพร้าว';
+      el.pvDirectorName.style.setProperty('--sig-fs', el.sigFontSize.value);
+      el.pvDirectorTitle.style.setProperty('--sig-fs', el.sigFontSize.value);
+      el.pvSigBlock.style.marginTop = (el.sigMarginTop.value * 0.1) + 'cqw';
+
+      const sigImg = document.getElementById('pvSigImg');
+      const sigSvg = document.getElementById('pvSigSvg');
+      if (sigImg && sigSvg) {
+        if (currentSigUrl) {
+          sigImg.src = currentSigUrl;
+          sigImg.style.display = 'block';
+          sigSvg.style.display = 'none';
+        } else {
+          sigImg.src = '';
+          sigImg.style.display = 'none';
+          sigSvg.style.display = 'block';
+        }
+      }
+    }
+
+    // Attach input listeners
+    const inputList = [
+      el.certHeader, el.headerFontSize, el.headerColor, el.headerMarginTop,
+      el.certHeaderSub, el.headerSubFontSize, el.headerSubColor, el.headerSubMarginTop,
+      el.certSubtitle, el.subtitleFontSize, el.subtitleColor, el.subtitleMarginTop,
+      el.testName, el.nameFontSize, el.nameColor, el.nameMarginTop,
+      el.certDesc, el.descFontSize, el.descColor, el.descMarginTop,
+      el.testSubject, el.subjectFontSize, el.subjectColor, el.subjectMarginTop,
+      el.certDatePrefix, el.dateFontSize, el.dateColor, el.dateMarginTop,
+      el.directorName, el.directorTitle, el.sigFontSize, el.sigColor, el.sigMarginTop
+    ];
+    inputList.forEach(input => {
+      input.addEventListener('input', updateLivePreview);
+      input.addEventListener('change', updateLivePreview);
+    });
+
+    function showToast(msg, isSuccess = true) {
+      el.toastAlert.textContent = msg;
+      el.toastAlert.className = `fixed bottom-6 right-6 z-50 p-4 rounded-2xl text-xs font-bold transition transform duration-300 translate-y-0 opacity-100 shadow-2xl flex items-center gap-2 ${
+        isSuccess ? 'bg-emerald-600 text-white border border-emerald-500' : 'bg-rose-600 text-white border border-rose-500'
+      }`;
+      setTimeout(() => {
+        el.toastAlert.classList.add('opacity-0', 'translate-y-4');
+      }, 3500);
+    }
+
+    function triggerBgUpload() {
+      el.inputBgFile.click();
+    }
+
+    function handleBgFileSelected(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+          showToast('⏳ กำลังอัปโหลดภาพพื้นหลัง...', true);
+          const uploadRes = await apiPost('uploadImage', withAuthParams({
+            imageData: base64Data,
+            filename: 'cert_bg_' + Date.now() + '.jpg'
+          }));
+
+          if (uploadRes && uploadRes.status === 'success' && uploadRes.url) {
+            currentBgUrl = uploadRes.url;
+            updateLivePreview();
+            showToast('✅ อัปโหลดภาพพื้นหลังสำเร็จ!', true);
+          } else {
+            currentBgUrl = base64Data;
+            updateLivePreview();
+            showToast('✅ โหลดภาพตัวอย่างเรียบร้อย', true);
+          }
+        } catch(err) {
+          currentBgUrl = base64Data;
+          updateLivePreview();
+          showToast('✅ โหลดภาพตัวอย่างเรียบร้อย', true);
+        }
+      };
+      reader.readAsDataURL(file);
+      input.value = '';
+    }
+
+    function removeBackground() {
+      currentBgUrl = '';
+      updateLivePreview();
+      showToast('🗑️ นำภาพพื้นหลังออกแล้ว (ใช้พื้นขาว)', true);
+    }
+
+    async function loadSourcesList() {
+      try {
+        const res = await apiGet('getCertEditorSources', withAuthParams({}));
+        if (res && res.status === 'success') {
+          sourcesList = res.sources || [];
+          activitiesList = res.activities || [];
+          institutionsList = res.institutions || [];
+
+          populateAmphoeFilter();
+          populateTambonFilter();
+          applySourceFilters();
+        }
+      } catch(err) {
+        console.error('Load sources list error:', err);
+      }
+    }
+
+    function populateAmphoeFilter() {
+      if (!el.filterAmphoe) return;
+      const prevVal = el.filterAmphoe.value || 'ALL';
+      el.filterAmphoe.innerHTML = '<option value="ALL">🏢 ทุกอำเภอ (ทั้งหมด)</option>';
+
+      const instMap = new Map();
+      if (institutionsList && institutionsList.length > 0) {
+        institutionsList.forEach(inst => {
+          instMap.set(inst.id, inst.name || inst.id);
+        });
+      }
+
+      if (!instMap.has('INS_PHRAO')) instMap.set('INS_PHRAO', 'สกร.ระดับอำเภอพร้าว');
+      if (!instMap.has('INS_MAERIM')) instMap.set('INS_MAERIM', 'สกร.ระดับอำเภอแม่ริม');
+
+      sourcesList.forEach(s => {
+        const instId = s.institution_id || 'INS_PHRAO';
+        if (!instMap.has(instId)) {
+          instMap.set(instId, instId);
+        }
+      });
+
+      activitiesList.forEach(a => {
+        const instId = a.institution_id || 'INS_PHRAO';
+        if (!instMap.has(instId)) {
+          instMap.set(instId, instId);
+        }
+      });
+
+      instMap.forEach((name, id) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = name;
+        el.filterAmphoe.appendChild(opt);
+      });
+
+      if (Array.from(el.filterAmphoe.options).some(o => o.value === prevVal)) {
+        el.filterAmphoe.value = prevVal;
+      } else {
+        el.filterAmphoe.value = 'ALL';
+      }
+    }
+
+    function populateTambonFilter() {
+      if (!el.filterTambon) return;
+      const selectedAmphoe = el.filterAmphoe ? el.filterAmphoe.value : 'ALL';
+      const prevVal = el.filterTambon.value || 'ALL';
+
+      el.filterTambon.innerHTML = '<option value="ALL">📍 ทุกตำบล (ทั้งหมด)</option>';
+
+      const relevantSources = (selectedAmphoe === 'ALL')
+        ? sourcesList
+        : sourcesList.filter(s => (s.institution_id || 'INS_PHRAO') === selectedAmphoe);
+
+      const relevantActivities = (selectedAmphoe === 'ALL')
+        ? activitiesList
+        : activitiesList.filter(a => (a.institution_id || 'INS_PHRAO') === selectedAmphoe);
+
+      const tambonSet = new Set();
+      relevantSources.forEach(s => {
+        if (s.tambon && s.tambon.trim()) {
+          tambonSet.add(s.tambon.trim());
+        }
+      });
+      relevantActivities.forEach(a => {
+        if (a.tambon && a.tambon.trim()) {
+          tambonSet.add(a.tambon.trim());
+        }
+      });
+
+      Array.from(tambonSet).sort().forEach(tb => {
+        const opt = document.createElement('option');
+        opt.value = tb;
+        opt.textContent = tb;
+        el.filterTambon.appendChild(opt);
+      });
+
+      if (Array.from(el.filterTambon.options).some(o => o.value === prevVal)) {
+        el.filterTambon.value = prevVal;
+      } else {
+        el.filterTambon.value = 'ALL';
+      }
+    }
+
+    function onFilterAmphoeChanged() {
+      populateTambonFilter();
+      applySourceFilters();
+    }
+
+    function onFilterTambonChanged() {
+      applySourceFilters();
+    }
+
+    function normalizeSearchStr(str) {
+      if (!str) return '';
+      return String(str).toLowerCase()
+        .replace(/ศกร\.ระดับตำบล/g, '')
+        .replace(/ตำบล/g, '')
+        .replace(/ศศช\./g, '')
+        .replace(/สกร\.ระดับอำเภอ/g, '')
+        .replace(/อำเภอ/g, '')
+        .trim();
+    }
+
+    function applySourceFilters() {
+      const selectedAmphoe = el.filterAmphoe ? el.filterAmphoe.value : 'ALL';
+      const selectedTambon = el.filterTambon ? el.filterTambon.value : 'ALL';
+      const searchKeyword = (el.filterSearchSource ? el.filterSearchSource.value : '').trim().toLowerCase();
+      const normSearch = normalizeSearchStr(searchKeyword);
+
+      // 1. Filter Activities
+      const filteredActs = activitiesList.filter(a => {
+        const instId = a.institution_id || 'INS_PHRAO';
+        const matchAmphoe = (selectedAmphoe === 'ALL' || instId === selectedAmphoe);
+        
+        let matchTambon = (selectedTambon === 'ALL');
+        if (!matchTambon && a.tambon) {
+          matchTambon = (a.tambon.trim() === selectedTambon) || (normalizeSearchStr(a.tambon) === normalizeSearchStr(selectedTambon));
+        }
+
+        let matchSearch = !searchKeyword;
+        if (!matchSearch) {
+          const aName = (a.name || '').toLowerCase();
+          const aTambon = (a.tambon || '').toLowerCase();
+          const aId = (a.id || '').toLowerCase();
+          matchSearch = aName.includes(searchKeyword) || 
+                        aTambon.includes(searchKeyword) ||
+                        aId.includes(searchKeyword) ||
+                        (normSearch && normalizeSearchStr(aName).includes(normSearch)) ||
+                        (normSearch && normalizeSearchStr(aTambon).includes(normSearch));
+        }
+
+        return matchAmphoe && matchTambon && matchSearch;
+      });
+
+      if (el.optgroupActivities) {
+        el.optgroupActivities.innerHTML = '';
+        if (filteredActs.length === 0) {
+          const emptyOpt = document.createElement('option');
+          emptyOpt.disabled = true;
+          emptyOpt.textContent = '── ไม่มีกิจกรรมตามเงื่อนไขที่เลือก ──';
+          el.optgroupActivities.appendChild(emptyOpt);
+        } else {
+          filteredActs.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = 'activity:' + a.id;
+            opt.textContent = (a.hasCustom ? '★ ' : '') + a.name + (a.tambon ? ` (${a.tambon})` : '') + (a.hasCustom ? ' [กำหนดแม่แบบแล้ว]' : '');
+            el.optgroupActivities.appendChild(opt);
+          });
+        }
+      }
+
+      // 2. Filter Sources
+      const filteredSources = sourcesList.filter(s => {
+        const instId = s.institution_id || 'INS_PHRAO';
+        const matchAmphoe = (selectedAmphoe === 'ALL' || instId === selectedAmphoe);
+        
+        let matchTambon = (selectedTambon === 'ALL');
+        if (!matchTambon && s.tambon) {
+          matchTambon = (s.tambon.trim() === selectedTambon) || (normalizeSearchStr(s.tambon) === normalizeSearchStr(selectedTambon));
+        }
+
+        let matchSearch = !searchKeyword;
+        if (!matchSearch) {
+          const sName = (s.name || '').toLowerCase();
+          const sTambon = (s.tambon || '').toLowerCase();
+          const sId = (s.id || '').toLowerCase();
+          matchSearch = sName.includes(searchKeyword) || 
+                        sTambon.includes(searchKeyword) ||
+                        sId.includes(searchKeyword) ||
+                        (normSearch && normalizeSearchStr(sName).includes(normSearch)) ||
+                        (normSearch && normalizeSearchStr(sTambon).includes(normSearch));
+        }
+
+        return matchAmphoe && matchTambon && matchSearch;
+      });
+
+      if (el.optgroupSources) {
+        el.optgroupSources.innerHTML = '';
+        if (filteredSources.length === 0) {
+          const emptyOpt = document.createElement('option');
+          emptyOpt.disabled = true;
+          emptyOpt.textContent = '── ไม่พบแหล่งเรียนรู้ตามเงื่อนไขที่เลือก ──';
+          el.optgroupSources.appendChild(emptyOpt);
+        } else {
+          filteredSources.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = 'source:' + s.id;
+            opt.textContent = (s.hasCustom ? '★ ' : '') + s.name + (s.tambon ? ` (${s.tambon})` : '') + (s.hasCustom ? ' [กำหนดแม่แบบแล้ว]' : '');
+            el.optgroupSources.appendChild(opt);
+          });
+        }
+      }
+
+      if (el.sourcesCountBadge) {
+        el.sourcesCountBadge.textContent = `${filteredActs.length} กิจกรรม • ${filteredSources.length} แหล่งเรียนรู้`;
+      }
+    }
+
+    async function onTargetChanged() {
+      currentTarget = el.selectTarget.value;
+      await loadTargetTemplate(currentTarget);
+    }
+
+    async function loadTargetTemplate(target) {
+      try {
+        const res = await apiGet('getCertTemplate', withAuthParams({ target }));
+        if (res && res.status === 'success') {
+          const t = res.template || {};
+          const isCustom = res.isCustom;
+          const targetName = res.targetName || 'ส่วนกลาง';
+
+          // Update Status Badge and Notice
+          if (target === 'global') {
+            el.targetStatusBadge.textContent = 'ส่วนกลาง (Global)';
+            el.targetStatusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-700/60';
+            el.targetDescText.innerHTML = '<i class="fas fa-globe text-emerald-400 mr-1"></i> แม่แบบเริ่มต้นของระบบทั้งหมด';
+            el.btnResetTarget.classList.add('hidden');
+          } else if (isCustom) {
+            el.targetStatusBadge.textContent = 'แม่แบบเฉพาะ';
+            el.targetStatusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-950 text-amber-400 border border-amber-700/60';
+            el.targetDescText.innerHTML = `<i class="fas fa-check-circle text-amber-400 mr-1"></i> ใช้แม่แบบเฉพาะของ: <strong>${targetName}</strong>`;
+            el.btnResetTarget.classList.remove('hidden');
+          } else {
+            el.targetStatusBadge.textContent = 'ยึดค่าเริ่มต้น';
+            el.targetStatusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700';
+            el.targetDescText.innerHTML = `<i class="fas fa-info-circle text-sky-400 mr-1"></i> ยึดตามค่าเริ่มต้น (บันทึกเพื่อกำหนดเฉพาะ)`;
+            el.btnResetTarget.classList.add('hidden');
+          }
+
+          // Populate Background & Signature
+          currentBgUrl = t.backgroundUrl || t.certificateTemplate || t.globalCertTemplate || '';
+          currentSigUrl = t.signatureUrl || (res.globalSettings && res.globalSettings.signatureUrl) || '';
+          
+          // Row 1
+          if (t.certHeader !== undefined) el.certHeader.value = t.certHeader;
+          if (t.certHeaderFontSize !== undefined) el.headerFontSize.value = t.certHeaderFontSize;
+          if (t.certHeaderColor !== undefined) el.headerColor.value = t.certHeaderColor;
+          if (t.certHeaderMarginTop !== undefined) el.headerMarginTop.value = t.certHeaderMarginTop;
+
+          // Row 2
+          if (t.certHeaderSub !== undefined) el.certHeaderSub.value = t.certHeaderSub;
+          if (t.certHeaderSubFontSize !== undefined) el.headerSubFontSize.value = t.certHeaderSubFontSize;
+          if (t.certHeaderSubColor !== undefined) el.headerSubColor.value = t.certHeaderSubColor;
+          if (t.certHeaderSubMarginTop !== undefined) el.headerSubMarginTop.value = t.certHeaderSubMarginTop;
+
+          // Row 3
+          if (t.certSubtitle !== undefined) el.certSubtitle.value = t.certSubtitle;
+          if (t.certSubtitleFontSize !== undefined) el.subtitleFontSize.value = t.certSubtitleFontSize;
+          if (t.certSubtitleColor !== undefined) el.subtitleColor.value = t.certSubtitleColor;
+          if (t.certSubtitleMarginTop !== undefined) el.subtitleMarginTop.value = t.certSubtitleMarginTop;
+
+          // Row 4
+          if (t.certNameFontSize !== undefined) el.nameFontSize.value = t.certNameFontSize;
+          if (t.certNameColor !== undefined) el.nameColor.value = t.certNameColor;
+          if (t.certNameMarginTop !== undefined) el.nameMarginTop.value = t.certNameMarginTop;
+
+          // Row 5
+          if (t.certDesc !== undefined) el.certDesc.value = t.certDesc;
+          if (t.certDescFontSize !== undefined) el.descFontSize.value = t.certDescFontSize;
+          if (t.certDescColor !== undefined) el.descColor.value = t.certDescColor;
+          if (t.certDescMarginTop !== undefined) el.descMarginTop.value = t.certDescMarginTop;
+
+          // Row 6
+          if (t.certSubjectFontSize !== undefined) el.subjectFontSize.value = t.certSubjectFontSize;
+          if (t.certSubjectColor !== undefined) el.subjectColor.value = t.certSubjectColor;
+          if (t.certSubjectMarginTop !== undefined) el.subjectMarginTop.value = t.certSubjectMarginTop;
+
+          // Row 7
+          if (t.certDatePrefix !== undefined) el.certDatePrefix.value = t.certDatePrefix;
+          if (t.certDateFontSize !== undefined) el.dateFontSize.value = t.certDateFontSize;
+          if (t.certDateColor !== undefined) el.dateColor.value = t.certDateColor;
+          if (t.certDateMarginTop !== undefined) el.dateMarginTop.value = t.certDateMarginTop;
+
+          // Row 8
+          if (t.directorName !== undefined) el.directorName.value = t.directorName;
+          if (t.directorTitle !== undefined) el.directorTitle.value = t.directorTitle;
+          if (t.certSigFontSize !== undefined) el.sigFontSize.value = t.certSigFontSize;
+          if (t.certSigColor !== undefined) el.sigColor.value = t.certSigColor;
+          if (t.certSigMarginTop !== undefined) el.sigMarginTop.value = t.certSigMarginTop;
+
+          // Set test subject name if targeting a specific source/base
+          if (target !== 'global' && targetName) {
+            el.testSubject.value = targetName;
+          }
+
+          updateLivePreview();
+        }
+      } catch(err) {
+        console.error('Load target template error:', err);
+      }
+    }
+
+    async function resetTargetToDefault() {
+      if (currentTarget === 'global') return;
+      if (!confirm('ยืนยันการคืนค่าแม่แบบนี้เป็นค่าเริ่มต้นของระบบ?')) return;
+
+      try {
+        const res = await apiPost('saveCertTemplate', withAuthParams({
+          target: currentTarget,
+          resetToDefault: 1
+        }));
+
+        if (res && res.status === 'success') {
+          showToast('✅ คืนค่าแม่แบบเป็นค่าเริ่มต้นเรียบร้อยแล้ว', true);
+          await loadSourcesList();
+          await loadTargetTemplate(currentTarget);
+        } else {
+          showToast('❌ ' + (res.message || 'คืนค่าไม่สำเร็จ'), false);
+        }
+      } catch(err) {
+        showToast('❌ เกิดข้อผิดพลาดในการคืนค่า', false);
+      }
+    }
+
+    function safeInt(val, def = 0) {
+      const n = parseInt(val, 10);
+      return isNaN(n) ? def : n;
+    }
+
+    function collectLiveSettings() {
+      return {
+        backgroundUrl: currentBgUrl,
+
+        // Row 1
+        certHeader: el.certHeader.value.trim(),
+        certHeaderFontSize: safeInt(el.headerFontSize.value, 42),
+        certHeaderColor: el.headerColor.value,
+        certHeaderMarginTop: safeInt(el.headerMarginTop.value, 154),
+
+        // Row 2
+        certHeaderSub: el.certHeaderSub.value.trim(),
+        certHeaderSubFontSize: safeInt(el.headerSubFontSize.value, 23),
+        certHeaderSubColor: el.headerSubColor.value,
+        certHeaderSubMarginTop: safeInt(el.headerSubMarginTop.value, 19),
+
+        // Row 3
+        certSubtitle: el.certSubtitle.value.trim(),
+        certSubtitleFontSize: safeInt(el.subtitleFontSize.value, 20),
+        certSubtitleColor: el.subtitleColor.value,
+        certSubtitleMarginTop: safeInt(el.subtitleMarginTop.value, 19),
+
+        // Row 4
+        certNameFontSize: safeInt(el.nameFontSize.value, 33),
+        certNameColor: el.nameColor.value,
+        certNameMarginTop: safeInt(el.nameMarginTop.value, -10),
+
+        // Row 5
+        certDesc: el.certDesc.value.trim(),
+        certDescFontSize: safeInt(el.descFontSize.value, 20),
+        certDescColor: el.descColor.value,
+        certDescMarginTop: safeInt(el.descMarginTop.value, 18),
+
+        // Row 6
+        certSubjectFontSize: safeInt(el.subjectFontSize.value, 25),
+        certSubjectColor: el.subjectColor.value,
+        certSubjectMarginTop: safeInt(el.subjectMarginTop.value, 12),
+
+        // Row 7
+        certDatePrefix: el.certDatePrefix.value.trim(),
+        certDateFontSize: safeInt(el.dateFontSize.value, 19),
+        certDateColor: el.dateColor.value,
+        certDateMarginTop: safeInt(el.dateMarginTop.value, 19),
+
+        // Row 8
+        directorName: el.directorName.value.trim(),
+        directorTitle: el.directorTitle.value.trim(),
+        certSigFontSize: safeInt(el.sigFontSize.value, 16),
+        certSigColor: el.sigColor.value,
+        certSigMarginTop: safeInt(el.sigMarginTop.value, -21)
+      };
+    }
+
+    async function saveCertSettings() {
+      const liveSettings = collectLiveSettings();
+      el.btnSave.disabled = true;
+      el.btnSave.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      try {
+        const res = await apiPost('saveCertTemplate', withAuthParams({
+          target: currentTarget,
+          template: liveSettings
+        }));
+
+        el.btnSave.disabled = false;
+        el.btnSave.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>บันทึกลงระบบ</span>';
+
+        if (res && res.status === 'success') {
+          showToast('✅ ' + (res.message || 'บันทึกแม่แบบสำเร็จ!'), true);
+          await loadSourcesList();
+          await loadTargetTemplate(currentTarget);
+        } else {
+          showToast('❌ ' + (res.message || 'บันทึกไม่สำเร็จ'), false);
+        }
+      } catch(err) {
+        el.btnSave.disabled = false;
+        el.btnSave.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>บันทึกลงระบบ</span>';
+        showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', false);
+      }
+    }
+
+    async function exportPngTest() {
+      const btn = document.getElementById('btnPngTest');
+      let orig = '';
+      if (btn) {
+        btn.disabled = true;
+        orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังสร้างรูปภาพ...';
+      }
+
+      showToast('🖼️ กำลังเรนเดอร์รูปภาพเกียรติบัตร PNG 300 DPI...', true);
+
+      try {
+        const card = document.getElementById('certCanvas');
+        if (!card) throw new Error('ไม่พบการ์ดเกียรติบัตร');
+
+        // Wait for background and signature images to fully decode
+        const bgImg = document.getElementById('pvBgImg');
+        const sigImg = document.getElementById('pvSigImg');
+        const imgPromises = [];
+        if (bgImg && bgImg.src && !bgImg.complete) {
+          imgPromises.push(new Promise(res => { bgImg.onload = bgImg.onerror = res; }));
+        }
+        if (sigImg && sigImg.src && !sigImg.complete) {
+          imgPromises.push(new Promise(res => { sigImg.onload = sigImg.onerror = res; }));
+        }
+        if (imgPromises.length > 0) {
+          await Promise.all(imgPromises);
+        }
+
+        await new Promise(r => setTimeout(r, 100));
+
+        const canvas = await html2canvas(card, {
+          scale: 3, // High-resolution print-ready quality (300 DPI)
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        const imageUri = canvas.toDataURL('image/png');
+        const testSub = (el.testSubject?.value || 'เกียรติบัตร').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+        const testNm = (el.testName?.value || 'ทดสอบ').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+
+        const link = document.createElement('a');
+        link.download = `ทดสอบเกียรติบัตร_${testSub}_${testNm}.png`;
+        link.href = imageUri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast('✅ ดาวน์โหลดรูปภาพ PNG 300 DPI สำเร็จเรียบร้อย!', true);
+      } catch (err) {
+        console.error('PNG export error:', err);
+        showToast('❌ เกิดข้อผิดพลาด: ' + (err.message || ''), false);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = orig;
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadSourcesList();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlActId = urlParams.get('activityId') || urlParams.get('activity') || urlParams.get('act');
+      const urlSourceId = urlParams.get('sourceId') || urlParams.get('source');
+
+      if (urlActId) {
+        const actTarget = 'activity:' + urlActId;
+        el.selectTarget.value = actTarget;
+        if (el.selectTarget.value !== actTarget) {
+          const opt = document.createElement('option');
+          opt.value = actTarget;
+          opt.textContent = `🎯 กิจกรรม: ${urlActId}`;
+          opt.selected = true;
+          if (el.optgroupActivities) el.optgroupActivities.appendChild(opt);
+          else el.selectTarget.appendChild(opt);
+          el.selectTarget.value = actTarget;
+        }
+        await loadTargetTemplate(actTarget);
+      } else if (urlSourceId) {
+        const srcTarget = 'source:' + urlSourceId;
+        el.selectTarget.value = srcTarget;
+        await loadTargetTemplate(srcTarget);
+      } else {
+        await loadTargetTemplate('global');
+      }
+
+      updateLivePreview();
+    });
+  </script>
+  <!-- Global Responsive Navigation Engine & Page Guard -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

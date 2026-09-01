@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" role="img" aria-labelledby="title description">
+  <title id="title">ไม่มีรูปภาพ</title>
+  <desc id="description">รูปสำรองของระบบ LOFT LEARN</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef7f2"/>
+      <stop offset="1" stop-color="#d8eee2"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" rx="24" fill="url(#background)"/>
+  <g fill="none" stroke="#125939" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="228" y="92" width="144" height="112" rx="16" stroke-width="10" opacity=".75"/>
+    <circle cx="272" cy="132" r="14" stroke-width="9" opacity=".75"/>
+    <path d="m244 184 42-40 28 26 20-18 22 32" stroke-width="10" opacity=".75"/>
+  </g>
+  <text x="300" y="252" text-anchor="middle" fill="#125939" font-family="Arial, sans-serif" font-size="25" font-weight="700">ไม่มีรูปภาพ</text>
+  <text x="300" y="284" text-anchor="middle" fill="#69786f" font-family="Arial, sans-serif" font-size="16">LOFT LEARN</text>
+</svg>

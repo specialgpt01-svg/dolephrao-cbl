@@ -1,0 +1,36 @@
+{
+    "thsarabunnew": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/thsarabunnew_normal_73ac3dc14a4a44303c26130cc2fd4091",
+        "bold": "thsarabunnew_bold_f9bec3291dbfe6ef01c9b06a13f50b3e"
+    },
+    "sarabun": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/sarabun_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "sarabun_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "prompt": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/prompt_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "prompt_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "mitr": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/mitr_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "mitr_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "kanit": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/kanit_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "kanit_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "noto sans thai": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/noto_sans_thai_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "noto_sans_thai_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "arial": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/arial_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "arial_bold_420e6ff940d88fe49befd682bb52f159"
+    },
+    "sans-serif": {
+        "normal": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\storage\\fonts\/sans_serif_normal_0aa1ad10af6148ce69d1ba3cf7629fbe",
+        "bold": "sans_serif_bold_420e6ff940d88fe49befd682bb52f159",
+        "italic": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\vendor\\dompdf\\dompdf\/lib\/fonts\/Helvetica-Oblique",
+        "bold_italic": "C:\\Users\\Captan America\\Desktop\\\u0e23\u0e30\u0e1a\u0e1a\\01-Loft-Laravel+mysql-backup\\vendor\\dompdf\\dompdf\/lib\/fonts\/Helvetica-BoldOblique"
+    }
+}

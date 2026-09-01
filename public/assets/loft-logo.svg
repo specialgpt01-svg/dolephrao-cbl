@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">LOFT LEARN</title>
+  <desc id="desc">Premium dimensional learning logo</desc>
+  <defs>
+    <linearGradient id="bg" x1="36" y1="28" x2="222" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#063a31"/>
+      <stop offset=".48" stop-color="#0f7a59"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="72" y1="47" x2="188" y2="183" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff7b2"/>
+      <stop offset=".34" stop-color="#fbbf24"/>
+      <stop offset=".7" stop-color="#d97706"/>
+      <stop offset="1" stop-color="#7c3f08"/>
+    </linearGradient>
+    <linearGradient id="page" x1="80" y1="72" x2="164" y2="182" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".62" stop-color="#d1fae5"/>
+      <stop offset="1" stop-color="#6ee7b7"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="35%" cy="22%" r="68%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".65"/>
+      <stop offset=".38" stop-color="#ffffff" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#001510" flood-opacity=".38"/>
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#fbbf24" flood-opacity=".2"/>
+    </filter>
+  </defs>
+
+  <rect width="256" height="256" rx="58" fill="url(#bg)"/>
+  <rect x="14" y="14" width="228" height="228" rx="48" fill="url(#shine)"/>
+  <path d="M42 205c35 21 80 28 127 20 23-4 42-12 57-23" fill="none" stroke="#052e27" stroke-opacity=".34" stroke-width="18" stroke-linecap="round"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M128 74c-21-18-48-25-79-20v111c31-7 58 2 79 26 21-24 48-33 79-26V54c-31-5-58 2-79 20z" fill="url(#gold)"/>
+    <path d="M128 82c-18-16-41-22-68-18v92c27-4 50 5 68 24V82z" fill="url(#page)"/>
+    <path d="M128 82c18-16 41-22 68-18v92c-27-4-50 5-68 24V82z" fill="#ecfdf5"/>
+    <path d="M128 79v105" fill="none" stroke="#065f46" stroke-width="4" stroke-linecap="round" opacity=".62"/>
+    <path d="M78 88c18-2 32 2 43 11M78 109c18-1 32 3 43 12M78 130c18-1 32 4 43 13" fill="none" stroke="#047857" stroke-width="5" stroke-linecap="round" opacity=".34"/>
+    <path d="M178 88c-18-2-32 2-43 11M178 109c-18-1-32 3-43 12M178 130c-18-1-32 4-43 13" fill="none" stroke="#047857" stroke-width="5" stroke-linecap="round" opacity=".34"/>
+
+    <circle cx="128" cy="73" r="26" fill="#052e27" opacity=".32"/>
+    <path d="M128 42l10 22 24 3-18 17 5 24-21-12-21 12 5-24-18-17 24-3 10-22z" fill="url(#gold)" stroke="#fff7b2" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+
+  <path d="M61 45c27-9 55-2 67 19 12-21 40-28 67-19" fill="none" stroke="#ffffff" stroke-opacity=".26" stroke-width="4" stroke-linecap="round"/>
+  <text x="128" y="226" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="2" fill="#ecfdf5">PRAO</text>
+</svg>

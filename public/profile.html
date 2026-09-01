@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="assets/loft-logo.svg">
+  <title>โปรไฟล์และแฟ้มสะสมงาน | PHRAO LEARNING DISTRICT</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css?v=20260831-cosmetics">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- HTML2Canvas for Pixel-Perfect High-Res PNG Certificate Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      font-family: 'Prompt', sans-serif;
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+      overflow-x: hidden;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 10px;
+    }
+
+    /* Certificate Live Canvas Stage */
+    /* Certificate Live Canvas Stage */
+    .cert-live-canvas {
+      container-type: inline-size;
+      aspect-ratio: 297 / 210;
+      width: 100%;
+      max-width: 840px;
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      color: #0f172a;
+      margin: auto;
+      flex-shrink: 0;
+      font-family: 'Sarabun', 'Prompt', sans-serif;
+    }
+    .cert-live-canvas .cert-header-text {
+      font-size: calc(var(--header-fs, 38) * 0.095cqw);
+    }
+    .cert-live-canvas .cert-headersub-text {
+      font-size: calc(var(--headersub-fs, 23) * 0.095cqw);
+    }
+    .cert-live-canvas .cert-subtitle-text {
+      font-size: calc(var(--subtitle-fs, 20) * 0.095cqw);
+    }
+    .cert-live-canvas .cert-name-text {
+      font-size: calc(var(--name-fs, 38) * 0.105cqw);
+    }
+    .cert-live-canvas .cert-desc-text {
+      font-size: calc(var(--desc-fs, 20) * 0.095cqw);
+    }
+    .cert-live-canvas .cert-subject-text {
+      font-size: calc(var(--subject-fs, 28) * 0.1cqw);
+    }
+    .cert-live-canvas .cert-date-text {
+      font-size: calc(var(--date-fs, 19) * 0.092cqw);
+    }
+    .cert-live-canvas .cert-director-name {
+      font-size: calc(var(--sig-fs, 18) * 0.125cqw);
+    }
+    .cert-live-canvas .cert-director-title {
+      font-size: calc(var(--sig-fs, 18) * 0.088cqw);
+    }
+    .cert-live-canvas .cert-ref-text {
+      font-size: 1.2cqw;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- ═══════════════════ Top Header Bar ═══════════════════ -->
+  <header class="w-full sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <a href="index.html" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition active:scale-95">
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
+        <div>
+          <h1 class="text-xs sm:text-sm font-black text-white m-0 flex items-center gap-1.5">
+            <i class="fas fa-user-circle text-amber-400"></i> บัญชีผู้เรียน & แฟ้มสะสมงาน
+          </h1>
+          <p class="text-[10px] text-slate-400 m-0 hidden sm:block">จัดการข้อมูลส่วนตัว ใบประกาศนียบัตร และ ID Plan</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div id="header-auth-action">
+          <!-- Logged in / Logged out buttons rendered via JS -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ Guest Login Screen (When Not Logged In) ═══════════════════ -->
+  <div id="guest-login-section" class="max-w-md mx-auto px-4 py-8 sm:py-12 space-y-6" style="display:none;">
+    <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-2xl text-center space-y-5">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 p-1 mx-auto shadow-xl shadow-orange-500/20 flex items-center justify-center text-3xl text-slate-950">
+        <i class="fas fa-user-lock"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-black text-white m-0">เข้าสู่ระบบเพื่อดูโปรไฟล์</h3>
+        <p class="text-xs text-slate-400 m-0 mt-1">เข้าถึงใบประกาศนียบัตร, แฟ้มสะสมงาน ID Plan และชั่วโมง กพช.</p>
+      </div>
+
+      <form onsubmit="handleInlineLogin(event)" class="space-y-3.5 text-left text-xs">
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">ชื่อผู้ใช้ / เบอร์โทรศัพท์ / รหัสประจำตัว</label>
+          <input type="text" id="inline-login-username" placeholder="เช่น 1 หรือ 0812345678" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-slate-400 font-bold">รหัสผ่าน</label>
+            <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] text-amber-400 hover:underline">ลืมรหัสผ่าน?</button>
+          </div>
+          <input type="password" id="inline-login-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+
+        <div id="inline-login-error" class="p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hidden flex items-center gap-1.5">
+          <i class="fas fa-circle-exclamation text-rose-400 shrink-0"></i> <span id="inline-login-error-text">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+        </div>
+
+        <button type="submit" id="btn-inline-login" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/25 transition active:scale-95 cursor-pointer">
+          <i class="fas fa-sign-in-alt mr-1"></i> เข้าสู่ระบบทันที
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-800 space-y-2.5">
+        <div class="text-[11px] text-slate-400">ยังไม่มีบัญชีผู้ใช้งาน?</div>
+        <button type="button" onclick="openRegisterModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fas fa-user-plus"></i> สมัครสมาชิกใหม่ (ลงทะเบียน)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Register Modal ═══════════════════ -->
+  <div id="register-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar animate-pop">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-black text-white m-0">สมัครสมาชิกใหม่</h4>
+            <p class="text-[10px] text-slate-400 m-0">ลงทะเบียนเพื่อสะสมแต้มและรับใบประกาศนียบัตร</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeRegisterModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="inline-register-form" onsubmit="handleInlineRegister(event)" class="space-y-3 text-xs text-left">
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">ชื่อ - นามสกุล <span class="text-rose-400">*</span></label>
+          <input type="text" id="reg-fullname" placeholder="เช่น นายสมชาย ใจดี" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">เบอร์โทรศัพท์ (ใช้เข้าสู่ระบบ) <span class="text-rose-400">*</span></label>
+            <input type="tel" id="reg-phone" placeholder="เช่น 0812345678" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" required>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ประเภทผู้เรียน</label>
+            <select id="reg-user-category" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="ประชาชนทั่วไป" selected>ประชาชนทั่วไป</option>
+              <option value="นักศึกษา สกร.">นักศึกษา สกร.</option>
+              <option value="นักเรียน / นักศึกษา">นักเรียน / นักศึกษา</option>
+              <option value="ผู้สูงอายุ">ผู้สูงอายุ</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">สถานศึกษา <span class="text-rose-400">*</span></label>
+            <select id="reg-institution" onchange="onProfileRegInstChange(this.value)" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer">
+              <option value="INS_PHRAO" selected>สกร.ระดับอำเภอพร้าว</option>
+              <option value="INS_MAERIM">สกร.ระดับอำเภอแม่ริม</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ศกร.ระดับตำบล / ศศช. <span class="text-rose-400">*</span></label>
+            <select id="reg-tambon" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500 cursor-pointer" required>
+              <option value="">— เลือกตำบลในสังกัด —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">รหัสผ่าน (อย่างน้อย 6 ตัว) <span class="text-rose-400">*</span></label>
+            <input type="password" id="reg-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" minlength="6" required>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-bold mb-1">ยืนยันรหัสผ่าน <span class="text-rose-400">*</span></label>
+            <input type="password" id="reg-confirm-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500" minlength="6" required>
+          </div>
+        </div>
+
+        <div id="inline-reg-error" class="p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hidden flex items-center gap-1.5">
+          <i class="fas fa-circle-exclamation text-rose-400 shrink-0"></i> <span id="inline-reg-error-text">ข้อมูลไม่ถูกต้อง</span>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" id="btn-submit-register" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black text-xs shadow-xl shadow-emerald-500/25 transition active:scale-95 cursor-pointer">
+            <i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Forgot Password Modal ═══════════════════ -->
+  <div id="forgot-password-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl text-center space-y-4 animate-pop">
+      <div class="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mx-auto border border-amber-500/30">
+        <i class="fas fa-key"></i>
+      </div>
+      <div>
+        <h4 class="text-base font-black text-white m-0">ลืมรหัสผ่าน</h4>
+        <p class="text-xs text-slate-300 m-0 mt-2 leading-relaxed">
+          หากท่านลืมรหัสผ่านเข้าใช้งาน สามารถแจ้ง **ครูประจำตำบล** หรือ **ผู้ดูแลระบบ สกร.** เพื่อขอรับการรีเซ็ตรหัสผ่านชั่วคราวได้ทันที
+        </p>
+      </div>
+      <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700 text-left text-xs space-y-1.5 text-slate-300">
+        <div class="font-bold text-amber-400">💡 ขั้นตอนการรีเซ็ต:</div>
+        <div>1. ติดต่อครูผู้สอนประจำตำบลของคุณ</div>
+        <div>2. ครูจะตั้งรหัสผ่านใหม่ (เช่น 123456) ให้ในระบบ</div>
+        <div>3. เข้าสู่ระบบแล้วตั้งรหัสผ่านใหม่ของตนเอง</div>
+      </div>
+      <button type="button" onclick="closeForgotPasswordModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+        เข้าใจแล้ว / ปิดหน้าต่าง
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Main Profile Body (When Logged In) ═══════════════════ -->
+  <main id="user-profile-section" class="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 md:pb-10 space-y-6" style="display:none;">
+
+    <!-- Profile Header Card -->
+    <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+        <!-- Avatar Container with Upload Trigger -->
+        <div class="relative group cursor-pointer" onclick="triggerProfileImageUpload()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+          <div id="profile-avatar-wrap" class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 p-1 shadow-xl shadow-orange-500/20 overflow-hidden relative avatar-frame-wrap">
+            <div id="profile-avatar-box" class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center text-2xl font-black text-white overflow-hidden">
+              <span class="text-2xl font-black text-amber-400">U</span>
+            </div>
+            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+          <input type="file" id="profile-avatar-file-input" accept="image/*" onchange="handleProfileAvatarSelected(this)" class="hidden">
+          <span class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-amber-500 border-2 border-slate-900 flex items-center justify-center text-[10px] text-slate-950 font-bold shadow" title="เปลี่ยนรูปโปรไฟล์">
+            <i class="fas fa-camera"></i>
+          </span>
+        </div>
+
+        <!-- User Info -->
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 justify-center sm:justify-start">
+            <h2 id="profile-fullname" class="text-lg font-black text-white m-0">ผู้ใช้งาน</h2>
+            <span id="profile-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              ผู้เรียน
+            </span>
+          </div>
+          <p id="profile-meta" class="text-xs text-slate-400 m-0">🏫 สกร.อำเภอพร้าว • 📍 ตำบลเวียง</p>
+          <p id="profile-phone" class="text-xs text-slate-500 m-0">📱 08xxxxxxxx</p>
+        </div>
+      </div>
+
+      <!-- Stats Summary Pills -->
+      <div class="grid grid-cols-3 gap-3 w-full md:w-auto">
+        <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block font-bold">🪙 แต้มสะสม</span>
+          <strong id="profile-points-count" class="text-base font-black text-amber-400">0</strong>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block font-bold">📜 เกียรติบัตร</span>
+          <strong id="profile-certs-count" class="text-base font-black text-sky-400">0</strong>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block font-bold">⏱️ ชม. กพช.</span>
+          <strong id="profile-hours-count" class="text-base font-black text-emerald-400">0</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ Tab Navigation ═══════════════════ -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar text-xs font-bold">
+      <button type="button" onclick="openStudentLearningDossier()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 shadow-md font-black whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 shrink-0">
+        <i class="fas fa-graduation-cap"></i> สมุดประวัติการเรียนรู้สะสม (Dossier)
+      </button>
+      <button type="button" onclick="switchProfileTab('certs')" id="tab-btn-certs" class="px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 shadow-md whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-certificate mr-1.5"></i> ใบประกาศนียบัตรของฉัน
+      </button>
+      <button type="button" onclick="switchProfileTab('idplan')" id="tab-btn-idplan" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-id-card-clip mr-1.5"></i> แฟ้มสะสมงาน (ID Plan)
+      </button>
+      <button type="button" onclick="switchProfileTab('hours')" id="tab-btn-hours" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-clock mr-1.5"></i> บันทึกชั่วโมง กพช.
+      </button>
+      <button type="button" onclick="switchProfileTab('cosmetics')" id="tab-btn-cosmetics" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-palette mr-1.5"></i> ตกแต่งโปรไฟล์
+      </button>
+      <button type="button" onclick="switchProfileTab('settings')" id="tab-btn-settings" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer shrink-0">
+        <i class="fas fa-lock mr-1.5"></i> เปลี่ยนรหัสผ่าน
+      </button>
+    </div>
+
+    <!-- ═══════════════════ Tab 1: Certificates ═══════════════════ -->
+    <div id="tab-content-certs" class="space-y-5">
+      
+      <!-- Top Control Bar (Search, Filter, View Mode Toggle) -->
+      <div class="p-4 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">
+            <i class="fas fa-award"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white m-0 flex items-center gap-2">
+              คลังใบประกาศนียบัตร & ประวัติผลการเรียนรู้
+              <span id="certs-count-pill" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">0 ใบ</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 m-0">เกียรติบัตรรับรองการศึกษาดูงานและการผ่านการทดสอบ</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="relative flex-1 sm:w-64">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="cert-search-input" onkeyup="filterUserCertificates()" placeholder="ค้นหาชื่อหลักสูตร หรือเลขที่..." class="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+            <button type="button" onclick="setCertViewMode('grid')" id="cert-view-grid-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition" title="มุมมองการ์ด">
+              <i class="fas fa-th-large mr-1"></i> การ์ด
+            </button>
+            <button type="button" onclick="setCertViewMode('table')" id="cert-view-table-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition" title="มุมมองตารางประวัติ">
+              <i class="fas fa-list mr-1"></i> ตารางประวัติ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 1: Grid Cards -->
+      <div id="user-certificates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- View 2: Detailed History Table -->
+      <div id="user-certificates-table-container" class="rounded-3xl bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-xl" style="display:none;">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+          <span class="text-xs font-black text-white"><i class="fas fa-history text-amber-400 mr-1.5"></i> ตารางบันทึกประวัติการรับเกียรติบัตรทั้งหมด</span>
+          <span class="text-[11px] text-slate-400">บันทึกอัตโนมัติเมื่อสอบผ่านเกณฑ์</span>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950/80 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">หลักสูตร / แหล่งเรียนรู้</th>
+                <th class="py-3 px-4">สังกัดตำบล / สถานศึกษา</th>
+                <th class="py-3 px-4 text-center">คะแนนสอบ</th>
+                <th class="py-3 px-4">วันที่ออกให้</th>
+                <th class="py-3 px-4">เลขที่อ้างอิง</th>
+                <th class="py-3 px-4 text-right">ดาวน์โหลด / ดู</th>
+              </tr>
+            </thead>
+            <tbody id="user-certificates-table-body" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ Tab 2: ID Plan & Portfolio ═══════════════════ -->
+    <div id="tab-content-idplan" class="space-y-4" style="display:none;">
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-700/80 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-black text-white m-0">📁 แผนการพัฒนาตนเองรายบุคคล (Individual Development Plan)</h3>
+            <p class="text-xs text-slate-400 m-0">บันทึกเป้าหมายการเรียนรู้ตลอดชีวิต ผลงาน และทักษะที่ได้รับการพัฒนา</p>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs" id="idplan-items-container">
+          <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-2">
+            <h5 class="text-xs font-bold text-amber-400 m-0">🎯 เป้าหมายการเรียนรู้ที่กำลังพัฒนา</h5>
+            <p class="text-slate-300 m-0 leading-relaxed">พัฒนาทักษะด้านเกษตรอินทรีย์และการแปรรูปผลผลิตชุมชน เพื่อสร้างอาชีพเสริม</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-2">
+            <h5 class="text-xs font-bold text-sky-400 m-0">🌟 กิจกรรมและผลงานที่ภาคภูมิใจ</h5>
+            <p class="text-slate-300 m-0 leading-relaxed">ผ่านการอบรมเชิงปฏิบัติการและศึกษาดูงาน ณ แหล่งเรียนรู้ชุมชน ได้รับใบประกาศนียบัตรรับรอง</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Tab 3: NFE Hours ═══════════════════ -->
+    <div id="tab-content-hours" class="space-y-4" style="display:none;">
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-700/80 space-y-4">
+        <h3 class="text-sm font-black text-white m-0">⏰ ประวัติบันทึกชั่วโมงกิจกรรมพัฒนาคุณภาพชีวิต (กพช.)</h3>
+        <div id="user-hours-list" class="space-y-2.5 text-xs">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Tab 4: Cosmetics Shop & Wardrobe ═══════════════════ -->
+    <div id="tab-content-cosmetics" class="space-y-5" style="display:none;">
+      
+      <!-- Top Banner (Free for Teachers & Admins / Exchange for Students) -->
+      <div id="cosmetics-role-banner" class="p-4 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-teal-950/80 to-slate-900 border border-emerald-500/40 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/30 shrink-0">
+            <i class="fas fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-black text-white m-0">ห้องแต่งตัวและคลังตกแต่งโปรไฟล์</h3>
+              <span id="cosmetics-role-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                สิทธิ์ครู: ใช้ฟรี 100%
+              </span>
+            </div>
+            <p id="cosmetics-role-desc" class="text-xs text-slate-300 m-0 mt-0.5">
+              คุณครูสามารถเลือกสวมใส่กรอบรูปโปรไฟล์, ออร่าชื่อเรืองแสง และตราประดับได้ฟรีทั้งหมดโดยไม่ต้องใช้แต้มสะสม
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-950/80 px-3.5 py-2 rounded-2xl border border-slate-800 shrink-0">
+          <span class="text-xs text-slate-400">🪙 แต้มของคุณ:</span>
+          <strong id="cosmetics-current-score" class="text-sm font-black text-amber-400">0</strong>
+          <span class="text-xs text-slate-400">แต้ม</span>
+        </div>
+      </div>
+
+      <!-- Live Profile Mirror / Dressing Room Widget -->
+      <div class="p-5 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-xl space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <span class="text-xs font-black text-white flex items-center gap-2">
+            <i class="fas fa-eye text-amber-400"></i> ตัวอย่างการแสดงผลโปรไฟล์ของคุณ (Live Preview)
+          </span>
+          <span class="text-[11px] text-slate-400">อัปเดตแบบเรียลไทม์เมื่อเปลี่ยนไอเทม</span>
+        </div>
+        
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div id="cosmetics-preview-avatar-wrap" class="w-16 h-16 rounded-full relative flex items-center justify-center avatar-frame-wrap shrink-0">
+              <div id="cosmetics-preview-avatar" class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-slate-800">
+                <i class="fas fa-user text-2xl text-slate-400"></i>
+              </div>
+            </div>
+            <div class="text-center sm:text-left space-y-1">
+              <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                <span id="cosmetics-preview-name" class="text-sm font-black text-white">ผู้เรียน</span>
+                <span id="cosmetics-preview-badge" class="cosmetics-badge-tag" style="display:none;"></span>
+              </div>
+              <p id="cosmetics-preview-meta" class="text-[11px] text-slate-400 m-0">สถานะการติดตั้ง: กรอบรูป / ออร่าชื่อ / ตราประจำตัว</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="handleUnequipAllCosmetics()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fas fa-rotate-left"></i> ถอดการตกแต่งทั้งหมด
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cosmetics Category Navigation -->
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar text-xs font-bold">
+        <button type="button" onclick="switchCosmeticsSubCategory('frames')" id="btn-cosm-cat-frames" class="px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 shadow transition cursor-pointer whitespace-nowrap">
+          👑 กรอบรูปโปรไฟล์ (<span id="cosm-count-frames">0</span>)
+        </button>
+        <button type="button" onclick="switchCosmeticsSubCategory('name_glows')" id="btn-cosm-cat-name_glows" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer whitespace-nowrap">
+          ✨ ออร่าชื่อเรืองแสง (<span id="cosm-count-name_glows">0</span>)
+        </button>
+        <button type="button" onclick="switchCosmeticsSubCategory('badges')" id="btn-cosm-cat-badges" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer whitespace-nowrap">
+          🏷️ ตราประดับยศ (<span id="cosm-count-badges">0</span>)
+        </button>
+      </div>
+
+      <!-- Items Grid -->
+      <div id="cosmetics-items-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Tab 5: Password Change ═══════════════════ -->
+    <div id="tab-content-settings" class="space-y-4" style="display:none;">
+      <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-700/80 max-w-xl space-y-5 shadow-2xl">
+        <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30 shrink-0">
+            <i class="fas fa-key"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white m-0">เปลี่ยนรหัสผ่านบัญชีผู้ใช้</h3>
+            <p class="text-xs text-slate-400 m-0 mt-0.5">กำหนดรหัสผ่านใหม่เพื่อความปลอดภัยในการเข้าใช้งานระบบ</p>
+          </div>
+        </div>
+
+        <div id="change-pass-alert" class="hidden p-3.5 rounded-2xl text-xs font-bold transition"></div>
+
+        <form onsubmit="handlePasswordChange(event)" id="form-change-password" class="space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-300 font-bold mb-1.5 flex items-center justify-between">
+              <span><i class="fas fa-lock text-slate-400 mr-1"></i> รหัสผ่านปัจจุบัน <span class="text-rose-400">*</span></span>
+              <span class="text-[10px] text-slate-500 font-normal">(รหัสผ่านเดิมที่ใช้อยู่)</span>
+            </label>
+            <div class="relative">
+              <input type="password" id="pass-current" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition text-xs" placeholder="กรอกรหัสผ่านปัจจุบัน" required autocomplete="current-password">
+              <button type="button" onclick="togglePasswordVisibility('pass-current', 'toggle-icon-current')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition cursor-pointer" tabindex="-1" title="แสดง/ซ่อนรหัสผ่าน">
+                <i id="toggle-icon-current" class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-bold mb-1.5 flex items-center justify-between">
+              <span><i class="fas fa-key text-amber-400 mr-1"></i> รหัสผ่านใหม่ <span class="text-rose-400">*</span></span>
+              <span class="text-[10px] text-slate-500 font-normal">(อย่างน้อย 6 ตัวอักษร)</span>
+            </label>
+            <div class="relative">
+              <input type="password" id="pass-new" minlength="6" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition text-xs" placeholder="กรอกรหัสผ่านใหม่อย่างน้อย 6 ตัวอักษร" required autocomplete="new-password">
+              <button type="button" onclick="togglePasswordVisibility('pass-new', 'toggle-icon-new')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition cursor-pointer" tabindex="-1" title="แสดง/ซ่อนรหัสผ่าน">
+                <i id="toggle-icon-new" class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-bold mb-1.5 flex items-center justify-between">
+              <span><i class="fas fa-shield-check text-emerald-400 mr-1"></i> ยืนยันรหัสผ่านใหม่อีกครั้ง <span class="text-rose-400">*</span></span>
+              <span class="text-[10px] text-slate-500 font-normal">(ต้องตรงกับรหัสผ่านใหม่)</span>
+            </label>
+            <div class="relative">
+              <input type="password" id="pass-confirm" minlength="6" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition text-xs" placeholder="กรอกรหัสผ่านใหม่อีกครั้งเพื่อยืนยัน" required autocomplete="new-password">
+              <button type="button" onclick="togglePasswordVisibility('pass-confirm', 'toggle-icon-confirm')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition cursor-pointer" tabindex="-1" title="แสดง/ซ่อนรหัสผ่าน">
+                <i id="toggle-icon-confirm" class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btn-change-password-submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-xs">
+              <i class="fas fa-save"></i> บันทึกการเปลี่ยนรหัสผ่านใหม่
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════ Certificate Live Preview Modal ═══════════════════ -->
+  <div id="cert-preview-modal" class="fixed inset-0 z-[100000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[94vh] flex flex-col animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base border border-amber-500/30">
+            <i class="fas fa-award"></i>
+          </div>
+          <div>
+            <h3 id="cert-preview-title" class="text-sm font-black text-white m-0 truncate max-w-xs sm:max-w-md">ใบประกาศนียบัตร</h3>
+            <p id="cert-preview-subtitle" class="text-[10px] text-slate-400 m-0 font-mono">เลขที่อ้างอิง: CERT-XXXX</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap justify-end">
+          <button type="button" id="cert-preview-png-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer active:scale-95" title="ดาวน์โหลดรูปภาพความละเอียดสูง (PNG 300 DPI) ตรงตามตัวอย่าง 100%">
+            <i class="fas fa-image"></i> <span>ดาวน์โหลดรูปภาพ (PNG 300 DPI)</span>
+          </button>
+          <button type="button" id="cert-preview-regen-btn" class="px-3 py-2 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer active:scale-95" title="สร้างใหม่ตามแม่แบบล่าสุดของแอดมิน">
+            <i class="fas fa-rotate text-purple-300"></i> สร้างใหม่
+          </button>
+          <button type="button" onclick="closeCertPreviewModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Stage Certificate Container -->
+      <div class="flex-1 w-full bg-slate-950 rounded-2xl overflow-y-auto custom-scrollbar relative border border-slate-800 p-2 sm:p-4 flex items-center justify-center min-h-[320px] sm:min-h-[460px]">
+        
+        <!-- Interactive Canvas Stage -->
+        <div id="cert-live-stage" class="w-full flex items-center justify-center" style="display: none;">
+          <div class="cert-live-canvas select-none shadow-2xl relative overflow-hidden bg-white" id="cert-live-card">
+            
+            <!-- Full Stretch Background Layer -->
+            <img id="cert-live-bg-img" src="" alt="Certificate Background" class="absolute inset-0 w-full h-full object-fill z-0 hidden">
+
+            <!-- Certificate Dynamic Content Container -->
+            <div id="cert-live-content" class="w-full h-full flex flex-col items-center justify-between text-center p-[3.2%_6%_5%_6%] relative z-10 box-border">
+              
+              <!-- ── TOP SECTION (แถว 1, 2, 3) ── -->
+              <div class="w-full flex flex-col items-center">
+                <h2 id="cert-live-header" class="cert-header-text font-black text-emerald-900 tracking-tight leading-tight m-0">ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว</h2>
+                <p id="cert-live-headersub" class="cert-headersub-text font-bold text-slate-600 m-0 mt-[0.2cqw]">กรมส่งเสริมการเรียนรู้ กระทรวงศึกษาธิการ</p>
+                <p id="cert-live-subtitle" class="cert-subtitle-text font-semibold text-slate-700 m-0 mt-[0.4cqw]">ขอมอบไว้เพื่อแสดงว่า</p>
+              </div>
+
+              <!-- ── MIDDLE SECTION (แถว 4, 5, 6, 7) ── -->
+              <div class="w-full flex flex-col items-center my-[0.2cqw]">
+                <h3 id="cert-live-name" class="cert-name-text font-black text-slate-900 m-0 leading-tight">นายสมชาย รักดี</h3>
+                <p id="cert-live-desc" class="cert-desc-text font-medium text-slate-600 m-0 mt-[0.3cqw]">ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง</p>
+                <h4 id="cert-live-subject" class="cert-subject-text font-black text-sky-700 m-0 mt-[0.3cqw] leading-tight">สถานศึกษาสีขาว</h4>
+                
+                <!-- แถวที่ 7: วันที่ (Date) อยู่ในโซนกลาง ไม่ไปเบียดติดกับลายเซ็นด้านล่าง -->
+                <p id="cert-live-date" class="cert-date-text font-bold text-slate-700 m-0 mt-[0.9cqw]">ให้ไว้ ณ วันที่ 31 สิงหาคม พ.ศ. 2569</p>
+              </div>
+
+              <!-- ── BOTTOM SECTION (แถว 8: ลายเซ็น + ผู้ลงนาม) ── -->
+              <div class="w-full flex flex-col items-center">
+                <div id="cert-live-sig-block" class="flex flex-col items-center text-center">
+                  <img id="cert-live-sig-img" src="" class="h-[8.5cqw] w-auto max-w-[28cqw] object-contain block mx-auto mb-[0.2cqw] transition-all" style="display:none;">
+                  <p id="cert-live-director-name" class="cert-director-name font-black text-slate-900 m-0 leading-none">นายประวิตร ประธรรมโย</p>
+                  <p id="cert-live-director-title" class="cert-director-title font-bold text-slate-600 m-0 mt-[0.25cqw]">ผู้อำนวยการศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว</p>
+                </div>
+              </div>
+
+              <!-- Ref Number in Bottom Corner -->
+              <div id="cert-live-ref" class="cert-ref-text font-mono text-slate-500 absolute bottom-[1.8cqw] left-[2.2cqw]">
+                เลขที่อ้างอิง: CERT-2026-XXXX
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Fallback Iframe (For custom background PDFs) -->
+        <iframe id="cert-preview-iframe" class="w-full h-full border-0 rounded-xl" src="about:blank" style="display:none;"></iframe>
+
+        <!-- Loading Indicator -->
+        <div id="cert-preview-loader" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center space-y-2 text-slate-400 z-10">
+          <i class="fas fa-circle-notch fa-spin text-3xl text-amber-400"></i>
+          <span class="text-xs font-bold">กำลังโหลดตัวอย่างใบประกาศนียบัตร...</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260830-fix-v1"></script>
+  <script src="js/core/auth.js?v=20260830-fix-v1"></script>
+
+  <script>
+    let userProfileData = null;
+    let userCertsList = [];
+
+    function openAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-100 border border-slate-700');
+      t.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold pointer-events-auto transition duration-300 ${bg}`;
+      t.innerHTML = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function switchProfileTab(tabName) {
+      ['certs', 'idplan', 'hours', 'cosmetics', 'settings'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (t === tabName) {
+          if (btn) {
+            btn.className = 'px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 shadow-md whitespace-nowrap transition cursor-pointer font-black';
+          }
+          if (content) content.style.display = 'block';
+        } else {
+          if (btn) {
+            btn.className = 'px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white whitespace-nowrap transition cursor-pointer font-bold';
+          }
+          if (content) content.style.display = 'none';
+        }
+      });
+
+      if (tabName === 'cosmetics') {
+        loadCosmeticsStudio();
+      }
+    }
+
+    function loadUserProfile() {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token');
+      const authHeader = document.getElementById('header-auth-action');
+
+      if (!token) {
+        showGuestLogin();
+        return;
+      }
+
+      if (authHeader) {
+        authHeader.innerHTML = `
+          <button type="button" onclick="handleUserLogout()" class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">ออกจากระบบ</span>
+          </button>
+        `;
+      }
+
+      // Optimistically show user profile if cached in localStorage
+      try {
+        const cachedUser = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('nfe_user') || 'null');
+        if (cachedUser) {
+          userProfileData = cachedUser;
+          document.getElementById('guest-login-section').style.display = 'none';
+          document.getElementById('user-profile-section').style.display = 'block';
+          renderProfileHeader();
+        }
+      } catch (e) {}
+
+      apiGet('getProfile', withAuthParams({}))
+        .then(res => {
+          if (res && (res.status === 'success' || res.user || res.profile)) {
+            userProfileData = res.user || res.profile || res;
+            try {
+              localStorage.setItem('userData', JSON.stringify(userProfileData));
+              localStorage.setItem('nfe_user', JSON.stringify(userProfileData));
+              const uName = userProfileData.fullName || userProfileData.full_name || userProfileData.name || '';
+              if (uName) localStorage.setItem('userName', uName);
+            } catch(e) {}
+
+            document.getElementById('guest-login-section').style.display = 'none';
+            document.getElementById('user-profile-section').style.display = 'block';
+            renderProfileHeader();
+            if (typeof loadUserCertificates === 'function') loadUserCertificates();
+            if (typeof loadUserHours === 'function') loadUserHours();
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialTab = urlParams.get('tab');
+            if (initialTab) switchProfileTab(initialTab);
+          } else {
+            showGuestLogin();
+          }
+        })
+        .catch(err => {
+          console.error('getProfile catch:', err);
+          if (err && err.status === 401) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('nfe_auth_token');
+            showGuestLogin();
+          }
+        });
+    }
+
+    function showGuestLogin() {
+      document.getElementById('guest-login-section').style.display = 'block';
+      document.getElementById('user-profile-section').style.display = 'none';
+      const authHeader = document.getElementById('header-auth-action');
+      if (authHeader) {
+        authHeader.innerHTML = `
+          <a href="index.html" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5">
+            <i class="fas fa-home"></i> หน้าแรก
+          </a>
+        `;
+      }
+    }
+
+    function handleInlineLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('inline-login-username').value.trim();
+      const p = document.getElementById('inline-login-password').value;
+      const errBox = document.getElementById('inline-login-error');
+      const errText = document.getElementById('inline-login-error-text');
+
+      if (errBox) errBox.classList.add('hidden');
+
+      const btn = document.getElementById('btn-inline-login');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังตรวจสอบ...';
+
+      apiPost('login', { username: u, phone: u, password: p })
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i> เข้าสู่ระบบทันที';
+          if (res && res.status === 'success' && res.token) {
+            const token = res.token || "";
+            const userObj = res.user || res.profile || { username: u };
+            const uPhone = userObj.phone || userObj.username || u;
+            const uName = userObj.fullName || userObj.name || userObj.full_name || "";
+            const uRole = String(userObj.role || "user").trim().toLowerCase();
+            const uTambon = userObj.tambon || "";
+            const userInstVal = userObj.institutionId || userObj.institution_id || "INS_PHRAO";
+            const uScore = String(userObj.score || "0");
+
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('nfe_auth_token', token);
+            localStorage.setItem('userPhone', uPhone);
+            localStorage.setItem('userName', uName);
+            localStorage.setItem('userRole', uRole);
+            localStorage.setItem('userTambon', uTambon);
+            localStorage.setItem('userInstitution', userInstVal);
+            localStorage.setItem('userInstitutionId', userInstVal);
+            localStorage.setItem('nfe_selected_institution', userInstVal);
+            localStorage.setItem('nfe_user', JSON.stringify(userObj));
+            localStorage.setItem('userData', JSON.stringify(userObj));
+            localStorage.setItem('userScore', uScore);
+
+            if (typeof initResponsiveNav === 'function') initResponsiveNav();
+            if (typeof applyRoleNavAdaptation === 'function') applyRoleNavAdaptation();
+            showToast('🎉 เข้าสู่ระบบสำเร็จ ยินดีต้อนรับครับ!', 'success');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect');
+            if (redirectUrl && !redirectUrl.includes('profile.html')) {
+              setTimeout(() => {
+                window.location.href = redirectUrl;
+              }, 400);
+            } else {
+              loadUserProfile();
+            }
+          } else {
+            const msg = (res && res.message) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+            showToast(msg, 'error');
+            if (errBox) {
+              if (errText) errText.innerText = msg;
+              errBox.classList.remove('hidden');
+            }
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i> เข้าสู่ระบบทันที';
+          const msg = (err && err.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+          showToast(msg, 'error');
+          if (errBox) {
+            if (errText) errText.innerText = msg;
+            errBox.classList.remove('hidden');
+          }
+        });
+    }
+
+    function openRegisterModal() {
+      const m = document.getElementById('register-modal');
+      if (m) {
+        m.style.display = 'flex';
+        const errBox = document.getElementById('inline-reg-error');
+        if (errBox) errBox.classList.add('hidden');
+        onProfileRegInstChange(document.getElementById('reg-institution')?.value || 'INS_PHRAO');
+      }
+    }
+
+    function closeRegisterModal() {
+      const m = document.getElementById('register-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function openForgotPasswordModal() {
+      const m = document.getElementById('forgot-password-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeForgotPasswordModal() {
+      const m = document.getElementById('forgot-password-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function onProfileRegInstChange(instId) {
+      const tambonEl = document.getElementById('reg-tambon');
+      if (!tambonEl) return;
+
+      const subUnits = (window.INSTITUTION_SUB_UNITS_MAP && window.INSTITUTION_SUB_UNITS_MAP[instId]) || [
+        'ศกร.ระดับตำบลเวียง', 'ศกร.ระดับตำบลทุ่งหลวง', 'ศกร.ระดับตำบลป่าตุ้ม', 'ศกร.ระดับตำบลป่าไหน่',
+        'ศกร.ระดับตำบลสันทราย', 'ศกร.ระดับตำบลบ้านโป่ง', 'ศกร.ระดับตำบลน้ำแพร่', 'ศกร.ระดับตำบลเขื่อนผาก',
+        'ศกร.ระดับตำบลแม่แวน', 'ศกร.ระดับตำบลแม่ปั๋ง', 'ศกร.ระดับตำบลโหล่งขอด', 'ศศช.บ้านอาบอลาชา',
+        'ศศช.บ้านอาบอเน', 'ศศช.บ้านอาแย', 'ศศช.บ้านป่าหญ้าไทร', 'ศศช.บ้านขอนม่วง',
+        'ศศช.บ้านแม่งัดน้อย', 'ศศช.บ้านห้วยทรายขาว', 'ศศช.บ้านห้วยกันใจ', 'ศศช.บ้านปางตอย', 'ศศช.บ้านปางฟาน'
+      ];
+
+      let html = '<option value="">— เลือกตำบลในสังกัด —</option>';
+      subUnits.forEach(u => {
+        html += `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`;
+      });
+      tambonEl.innerHTML = html;
+    }
+
+    function handleInlineRegister(e) {
+      e.preventDefault();
+      const fullName = (document.getElementById('reg-fullname').value || '').trim();
+      const phone = (document.getElementById('reg-phone').value || '').trim();
+      const tambon = (document.getElementById('reg-tambon').value || '').trim();
+      const userCategory = (document.getElementById('reg-user-category').value || 'ประชาชนทั่วไป').trim();
+      const instId = (document.getElementById('reg-institution').value || 'INS_PHRAO').trim();
+      const password = document.getElementById('reg-password').value || '';
+      const confirmPassword = document.getElementById('reg-confirm-password').value || '';
+      const errBox = document.getElementById('inline-reg-error');
+      const errText = document.getElementById('inline-reg-error-text');
+
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!fullName || !phone || !tambon || !password) {
+        const msg = 'กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+      if (password.length < 6) {
+        const msg = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+      if (password !== confirmPassword) {
+        const msg = 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน';
+        showToast(msg, 'warning');
+        if (errBox) { if (errText) errText.innerText = msg; errBox.classList.remove('hidden'); }
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-register');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังลงทะเบียน...';
+
+      apiPost('register', {
+        fullName: fullName,
+        phone: phone,
+        username: phone,
+        tambon: tambon,
+        userCategory: userCategory,
+        institutionId: instId,
+        password: password
+      })
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก';
+          if (res && res.status === 'success') {
+            closeRegisterModal();
+
+            if (res.token) {
+              const token = res.token || "";
+              const userObj = res.user || res.profile || { username: phone, fullName: fullName };
+              const uPhone = userObj.phone || userObj.username || phone;
+              const uName = userObj.fullName || userObj.name || fullName;
+              const uRole = String(userObj.role || "user").trim().toLowerCase();
+              const uTambon = userObj.tambon || tambon;
+              const userInstVal = userObj.institutionId || instId;
+              const uScore = String(userObj.score || "0");
+
+              localStorage.setItem('authToken', token);
+              localStorage.setItem('nfe_auth_token', token);
+              localStorage.setItem('userPhone', uPhone);
+              localStorage.setItem('userName', uName);
+              localStorage.setItem('userRole', uRole);
+              localStorage.setItem('userTambon', uTambon);
+              localStorage.setItem('userInstitution', userInstVal);
+              localStorage.setItem('userInstitutionId', userInstVal);
+              localStorage.setItem('nfe_selected_institution', userInstVal);
+              localStorage.setItem('nfe_user', JSON.stringify(userObj));
+              localStorage.setItem('userData', JSON.stringify(userObj));
+              localStorage.setItem('userScore', uScore);
+
+              if (typeof initResponsiveNav === 'function') initResponsiveNav();
+              if (typeof applyRoleNavAdaptation === 'function') applyRoleNavAdaptation();
+
+              showSuccessModal(
+                '🎉 สมัครสมาชิกสำเร็จ!',
+                `ยินดีต้อนรับคุณ ${uName} เข้าสู่ระบบ Phrao Learning District ระบบได้เข้าสู่ระบบให้ท่านเรียบร้อยแล้ว`,
+                () => { loadUserProfile(); }
+              );
+              showToast('🎉 สมัครสมาชิกสำเร็จ! ยินดีต้อนรับครับ', 'success');
+              loadUserProfile();
+            } else {
+              document.getElementById('inline-login-username').value = phone;
+              showToast('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ', 'success');
+            }
+          } else {
+            const msg = (res && res.message) || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+            showToast(msg, 'error');
+            if (errBox) {
+              if (errText) errText.innerText = msg;
+              errBox.classList.remove('hidden');
+            }
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ยืนยันการสมัครสมาชิก';
+          const msg = (err && err.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+          showToast(msg, 'error');
+          if (errBox) {
+            if (errText) errText.innerText = msg;
+            errBox.classList.remove('hidden');
+          }
+        });
+    }
+
+    function renderProfileHeader() {
+      const u = userProfileData;
+      if (!u) return;
+
+      const name = u.fullName || u.fullname || u.full_name || u.displayName || u.name || u.username || 'ผู้เรียน';
+      const phone = u.phone || u.username || '-';
+      const role = String(u.role || 'user').toLowerCase();
+      const isAdmin = role === 'admin' || role === 'teacher';
+      const roleLabel = role === 'admin' ? 'ผู้ดูแลระบบ' : (role === 'teacher' ? 'ครูผู้สอน' : 'ผู้เรียน');
+      const tambon = u.tambon || 'เวียง';
+      const instName = (u.institutionId === 'INS_MAERIM' || u.institution_id === 'INS_MAERIM') ? 'สกร.อำเภอแม่ริม' : 'สกร.อำเภอพร้าว';
+      const score = u.score != null ? u.score : (u.points != null ? u.points : 0);
+      const hours = u.nfeHours || u.nfe_hours || u.totalNFEHours || 0;
+      const avatar = u.profileImage || u.profile_image || u.image || u.avatar || u.photoURL || '';
+
+      // Apply equipped cosmetics
+      const cosmetics = (u && u.cosmetics) || { equipped: {} };
+      const eq = cosmetics.equipped || {};
+
+      const nameEl = document.getElementById('profile-fullname');
+      if (nameEl) {
+        const glowClass = getCosmeticCss(eq.name_glow) || '';
+        const badgeTag = getCosmeticCss(eq.badge);
+        nameEl.className = 'text-lg font-black text-white m-0 ' + glowClass;
+        nameEl.innerHTML = escapeHtml(name) + (badgeTag ? `<span class="cosmetics-badge-tag">${escapeHtml(badgeTag)}</span>` : '');
+      }
+
+      const roleBadge = document.getElementById('profile-role-badge');
+      if (roleBadge) {
+        if (role === 'admin') {
+          roleBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1';
+          roleBadge.innerHTML = '<i class="fas fa-shield-halved"></i> ผู้ดูแลระบบ (Admin)';
+        } else if (role === 'teacher') {
+          roleBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1';
+          roleBadge.innerHTML = '<i class="fas fa-chalkboard-user"></i> คุณครู (Teacher)';
+        } else {
+          roleBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1';
+          roleBadge.innerHTML = '<i class="fas fa-user-graduate"></i> ผู้เรียน';
+        }
+      }
+
+      const metaEl = document.getElementById('profile-meta');
+      if (metaEl) metaEl.innerText = `🏫 ${instName} • 📍 ตำบล${tambon}`;
+
+      const phoneEl = document.getElementById('profile-phone');
+      if (phoneEl) phoneEl.innerText = `📱 ${phone}`;
+
+      const pointsEl = document.getElementById('profile-points-count');
+      if (pointsEl) pointsEl.innerText = score;
+
+      const hoursEl = document.getElementById('profile-hours-count');
+      if (hoursEl) hoursEl.innerText = hours;
+
+      const avatarWrap = document.getElementById('profile-avatar-wrap');
+      if (avatarWrap) {
+        const frameClass = getCosmeticCss(eq.frame) || '';
+        avatarWrap.className = 'w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 p-1 shadow-xl shadow-orange-500/20 overflow-hidden relative avatar-frame-wrap ' + frameClass;
+      }
+
+      const avatarBox = document.getElementById('profile-avatar-box');
+      if (avatarBox) {
+        if (avatar && avatar.trim()) {
+          avatarBox.innerHTML = `<img src="${avatar.trim()}" class="w-full h-full object-cover rounded-full" alt="${escapeHtml(name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-2xl font-black text-amber-400\\'>${escapeHtml(name.charAt(0).toUpperCase())}</span>'">`;
+        } else {
+          avatarBox.innerHTML = `<span class="text-2xl font-black text-amber-400">${escapeHtml(name.charAt(0).toUpperCase())}</span>`;
+        }
+      }
+    }
+
+    // ═══════════════════ Profile Cosmetics Module ═══════════════════
+    let currentCosmeticsData = null;
+    let activeCosmeticsCategory = 'frames';
+
+    function getCosmeticCss(itemId) {
+      const map = {
+        'frame_gold': 'frame-gold',
+        'frame_cyber': 'frame-cyber',
+        'frame_fire': 'frame-fire',
+        'frame_emerald': 'frame-emerald',
+        'frame_rainbow': 'frame-rainbow',
+        'frame_admin': 'frame-admin',
+        'frame_teacher': 'frame-teacher',
+
+        'glow_gold': 'glow-gold',
+        'glow_neon': 'glow-neon',
+        'glow_rainbow': 'glow-rainbow',
+        'glow_fire': 'glow-fire',
+        'glow_purple': 'glow-purple',
+        'glow_admin': 'glow-admin',
+        'glow_teacher': 'glow-teacher',
+
+        'badge_crown': '👑 มกุฎราชกุมาร',
+        'badge_lightning': '⚡️ สายฟ้าแห่งปัญญา',
+        'badge_fire': '🔥 ผู้เรียนไฟแรง',
+        'badge_diamond': '💎 ปราชญ์เพชรพร้าว',
+        'badge_rocket': '🚀 นักเรียนติดเทอร์โบ',
+        'badge_admin': '🛡️ ผู้ดูแลระบบ',
+        'badge_teacher': '🎓 ครูผู้สอน',
+      };
+      return map[itemId] || '';
+    }
+
+    function switchCosmeticsSubCategory(cat) {
+      activeCosmeticsCategory = cat;
+      ['frames', 'name_glows', 'badges'].forEach(c => {
+        const btn = document.getElementById(`btn-cosm-cat-${c}`);
+        if (btn) {
+          if (c === cat) {
+            btn.className = 'px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 shadow transition cursor-pointer whitespace-nowrap font-black';
+          } else {
+            btn.className = 'px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer whitespace-nowrap font-bold';
+          }
+        }
+      });
+      renderCosmeticsStudio();
+    }
+
+    function loadCosmeticsStudio() {
+      apiGet('getCosmeticsCatalog', withAuthParams({}))
+        .then(res => {
+          if (res && res.status === 'success') {
+            currentCosmeticsData = res;
+            if (userProfileData) {
+              userProfileData.cosmetics = res.cosmetics;
+              if (res.userScore !== undefined) userProfileData.score = res.userScore;
+            }
+            renderCosmeticsStudio();
+            renderProfileHeader();
+          }
+        })
+        .catch(err => {
+          console.error('Load cosmetics catalog error:', err);
+        });
+    }
+
+    function renderCosmeticsStudio() {
+      if (!currentCosmeticsData) return;
+      const data = currentCosmeticsData;
+      const catalog = data.catalog || {};
+      const cosmetics = data.cosmetics || { equipped: {}, owned: [] };
+      const eq = cosmetics.equipped || {};
+      const owned = cosmetics.owned || [];
+      const userRole = String((userProfileData && userProfileData.role) || data.userRole || 'user').toLowerCase();
+      const isStaff = Boolean(data.isStaff || userRole === 'admin' || userRole === 'teacher' || userRole === 'sage');
+      const score = Number(data.userScore != null ? data.userScore : (userProfileData && userProfileData.score) || 0);
+
+      // 1. Role Banner
+      const rolePill = document.getElementById('cosmetics-role-pill');
+      const roleDesc = document.getElementById('cosmetics-role-desc');
+      const scoreEl = document.getElementById('cosmetics-current-score');
+      if (scoreEl) scoreEl.innerText = score.toLocaleString();
+
+      if (isStaff) {
+        if (rolePill) {
+          rolePill.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          rolePill.innerHTML = '<i class="fas fa-crown mr-1 text-amber-400"></i> สิทธิ์ครู/ผู้ดูแลระบบ: ใช้ฟรี 100%';
+        }
+        if (roleDesc) {
+          roleDesc.innerHTML = '✨ ท่านมีสิทธิพิเศษครูผู้สอน/ผู้ดูแลระบบ: สามารถเลือกสวมใส่และเปลี่ยนกรอบรูป, ออร่าชื่อ, และตราประดับได้ <strong>ฟรีทั้งหมดโดยไม่ต้องใช้แต้ม</strong>';
+        }
+      } else {
+        if (rolePill) {
+          rolePill.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40';
+          rolePill.innerHTML = '<i class="fas fa-coins mr-1 text-amber-400"></i> แลกซื้อด้วยแต้มสะสม';
+        }
+        if (roleDesc) {
+          roleDesc.innerText = 'ทำแบบทดสอบ เข้าร่วมกิจกรรม และศึกษาแหล่งเรียนรู้เพื่อสะสมแต้มนำมาปลดล็อกไอเทมตกแต่งสุดพรีเมียม';
+        }
+      }
+
+      // 2. Live Preview Dressing Room
+      const previewAvatarWrap = document.getElementById('cosmetics-preview-avatar-wrap');
+      const previewAvatar = document.getElementById('cosmetics-preview-avatar');
+      const previewName = document.getElementById('cosmetics-preview-name');
+      const previewBadge = document.getElementById('cosmetics-preview-badge');
+      const previewMeta = document.getElementById('cosmetics-preview-meta');
+
+      const uName = (userProfileData && (userProfileData.fullName || userProfileData.name || userProfileData.username)) || 'ผู้เรียน';
+      const uAvatar = (userProfileData && (userProfileData.profileImage || userProfileData.profile_image || userProfileData.avatar)) || '';
+
+      if (previewAvatarWrap) {
+        const frameClass = getCosmeticCss(eq.frame) || '';
+        previewAvatarWrap.className = 'w-16 h-16 rounded-full relative flex items-center justify-center avatar-frame-wrap shrink-0 ' + frameClass;
+      }
+      if (previewAvatar) {
+        if (uAvatar && uAvatar.trim()) {
+          previewAvatar.innerHTML = `<img src="${uAvatar.trim()}" class="w-full h-full object-cover rounded-full" alt="Avatar">`;
+        } else {
+          previewAvatar.innerHTML = `<span class="text-xl font-black text-amber-400">${escapeHtml(uName.charAt(0).toUpperCase())}</span>`;
+        }
+      }
+      if (previewName) {
+        previewName.className = 'text-sm font-black ' + (getCosmeticCss(eq.name_glow) || 'text-white');
+        previewName.innerText = uName;
+      }
+      if (previewBadge) {
+        const bText = getCosmeticCss(eq.badge);
+        if (bText) {
+          previewBadge.style.display = 'inline-flex';
+          previewBadge.innerText = bText;
+        } else {
+          previewBadge.style.display = 'none';
+        }
+      }
+      if (previewMeta) {
+        const frameName = eq.frame ? 'ติดตั้งกรอบแล้ว' : 'ไม่มีกรอบ';
+        const glowName = eq.name_glow ? 'ติดตั้งออร่าแล้ว' : 'ไม่มีออร่า';
+        const badgeName = eq.badge ? 'ติดตั้งตราแล้ว' : 'ไม่มีตรา';
+        previewMeta.innerText = `สถานะการสวมใส่: ${frameName} • ${glowName} • ${badgeName}`;
+      }
+
+      // 3. Category Counts
+      const fCount = (catalog.frames || []).length;
+      const gCount = (catalog.name_glows || []).length;
+      const bCount = (catalog.badges || []).length;
+      const fEl = document.getElementById('cosm-count-frames');
+      const gEl = document.getElementById('cosm-count-name_glows');
+      const bEl = document.getElementById('cosm-count-badges');
+      if (fEl) fEl.innerText = fCount;
+      if (gEl) gEl.innerText = gCount;
+      if (bEl) bEl.innerText = bCount;
+
+      // 4. Render Items Grid
+      const grid = document.getElementById('cosmetics-items-grid');
+      if (!grid) return;
+
+      const items = catalog[activeCosmeticsCategory] || [];
+      const catKey = activeCosmeticsCategory === 'frames' ? 'frame' : (activeCosmeticsCategory === 'name_glows' ? 'name_glow' : 'badge');
+
+      if (items.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500">ไม่มีไอเทมในหมวดนี้</div>';
+        return;
+      }
+
+      grid.innerHTML = items.map(it => {
+        const isEquipped = eq[catKey] === it.id;
+        const isOwned = isStaff || owned.includes(it.id);
+        const price = isStaff ? 0 : (it.price || 0);
+
+        let previewHtml = '';
+        if (catKey === 'frame') {
+          previewHtml = `
+            <div class="avatar-frame-wrap ${it.cssClass || ''} w-14 h-14 rounded-full flex items-center justify-center mx-auto my-2">
+              <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center text-xl overflow-hidden">
+                ${it.icon || '👑'}
+              </div>
+            </div>
+          `;
+        } else if (catKey === 'name_glow') {
+          previewHtml = `
+            <div class="my-3 py-1 flex items-center justify-center">
+              <span class="${it.cssClass || ''} text-xs font-black px-3 py-1 rounded-xl">
+                ${it.icon || '✨'} ${escapeHtml(it.name)}
+              </span>
+            </div>
+          `;
+        } else {
+          previewHtml = `
+            <div class="my-3 flex items-center justify-center">
+              <span class="cosmetics-badge-tag text-xs font-black">
+                ${escapeHtml(it.symbol || it.name)}
+              </span>
+            </div>
+          `;
+        }
+
+        let actionBtn = '';
+        if (isEquipped) {
+          actionBtn = `
+            <div class="flex items-center gap-1.5 w-full">
+              <button type="button" class="flex-1 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black cursor-default flex items-center justify-center gap-1">
+                <i class="fas fa-check"></i> กำลังสวมใส่
+              </button>
+              <button type="button" onclick="handleEquipCosmetic('', '${catKey}')" class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition cursor-pointer" title="ถอดไอเทมนี้">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          `;
+        } else if (isStaff) {
+          actionBtn = `
+            <button type="button" onclick="handleEquipCosmetic('${it.id}', '${catKey}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 text-xs font-black shadow-md shadow-emerald-500/20 transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fas fa-wand-magic-sparkles"></i> สวมใส่ใช้งาน (ฟรี)
+            </button>
+          `;
+        } else if (isOwned) {
+          actionBtn = `
+            <button type="button" onclick="handleEquipCosmetic('${it.id}', '${catKey}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 text-white text-xs font-black shadow-md shadow-sky-500/20 transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fas fa-tshirt"></i> สวมใส่ไอเทม
+            </button>
+          `;
+        } else {
+          actionBtn = `
+            <button type="button" onclick="handleBuyCosmetic('${it.id}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 text-xs font-black shadow-md shadow-amber-500/20 transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fas fa-coins"></i> แลกซื้อ (${price} แต้ม)
+            </button>
+          `;
+        }
+
+        let exclusivePill = '';
+        if (it.exclusiveRole) {
+          const rText = it.exclusiveRole === 'admin' ? 'เฉพาะผู้ดูแลระบบ' : 'เฉพาะคุณครู';
+          exclusivePill = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/30">${rText}</span>`;
+        }
+
+        return `
+          <div class="p-4 rounded-3xl bg-slate-900/90 border ${isEquipped ? 'border-amber-500/60 shadow-lg shadow-amber-500/10' : 'border-slate-800 hover:border-slate-700'} flex flex-col justify-between space-y-3 transition">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-black text-white truncate">${escapeHtml(it.name)}</span>
+                ${exclusivePill}
+              </div>
+              ${previewHtml}
+              <p class="text-[11px] text-slate-400 line-clamp-2 min-h-[32px] m-0 text-center">${escapeHtml(it.description || '')}</p>
+            </div>
+            <div>
+              ${actionBtn}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleEquipCosmetic(itemId, category) {
+      apiPost('equipCosmetic', withAuthParams({ itemId: itemId, category: category }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast(res.message || 'บันทึกการสวมใส่เรียบร้อยแล้ว', 'success');
+            if (currentCosmeticsData) {
+              currentCosmeticsData.cosmetics = res.cosmetics;
+            }
+            if (userProfileData) {
+              userProfileData.cosmetics = res.cosmetics;
+            }
+            renderCosmeticsStudio();
+            renderProfileHeader();
+          } else {
+            showToast((res && res.message) || 'ไม่สามารถสวมใส่ไอเทมได้', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Equip cosmetic error:', err);
+          showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+        });
+    }
+
+    function handleBuyCosmetic(itemId) {
+      apiPost('buyCosmetic', withAuthParams({ itemId: itemId }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast(res.message || 'แลกซื้อไอเทมสำเร็จเรียบร้อย!', 'success');
+            if (currentCosmeticsData) {
+              currentCosmeticsData.cosmetics = res.cosmetics;
+              currentCosmeticsData.userScore = res.newScore;
+            }
+            if (userProfileData) {
+              userProfileData.cosmetics = res.cosmetics;
+              userProfileData.score = res.newScore;
+            }
+            renderCosmeticsStudio();
+            renderProfileHeader();
+          } else {
+            showToast((res && res.message) || 'ไม่สามารถแลกซื้อไอเทมได้', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Buy cosmetic error:', err);
+          showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+        });
+    }
+
+    function handleUnequipAllCosmetics() {
+      ['frame', 'name_glow', 'badge'].forEach(cat => {
+        apiPost('equipCosmetic', withAuthParams({ itemId: '', category: cat }));
+      });
+      setTimeout(() => {
+        loadCosmeticsStudio();
+        showToast('ถอดการตกแต่งโปรไฟล์ทั้งหมดแล้ว', 'info');
+      }, 300);
+    }
+
+    // ═══════════════════ Password Change Module ═══════════════════
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash text-amber-400';
+      } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye text-slate-400';
+      }
+    }
+
+    function handlePasswordChange(event) {
+      if (event) event.preventDefault();
+
+      const oldPassEl = document.getElementById('pass-current');
+      const newPassEl = document.getElementById('pass-new');
+      const confPassEl = document.getElementById('pass-confirm');
+      const alertBox = document.getElementById('change-pass-alert');
+      const btn = document.getElementById('btn-change-password-submit');
+
+      const oldPassword = oldPassEl ? oldPassEl.value.trim() : '';
+      const newPassword = newPassEl ? newPassEl.value.trim() : '';
+      const confirmPassword = confPassEl ? confPassEl.value.trim() : '';
+
+      const showAlert = (msg, type) => {
+        if (alertBox) {
+          alertBox.className = type === 'success'
+            ? 'p-3.5 rounded-2xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-2'
+            : 'p-3.5 rounded-2xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-2';
+          alertBox.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-triangle-exclamation'}"></i> <span>${msg}</span>`;
+          alertBox.classList.remove('hidden');
+        }
+        showToast(msg, type);
+      };
+
+      if (!oldPassword) {
+        showAlert('กรุณากรอกรหัสผ่านปัจจุบัน', 'error');
+        if (oldPassEl) oldPassEl.focus();
+        return;
+      }
+
+      if (!newPassword || newPassword.length < 6) {
+        showAlert('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร', 'error');
+        if (newPassEl) newPassEl.focus();
+        return;
+      }
+
+      if (confirmPassword && newPassword !== confirmPassword) {
+        showAlert('รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง', 'error');
+        if (confPassEl) confPassEl.focus();
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึกรหัสผ่านใหม่...';
+      }
+
+      const userPhone = localStorage.getItem('userPhone') || (userProfileData && userProfileData.username) || '';
+
+      apiPost('changePassword', withAuthParams({
+        username: userPhone,
+        phone: userPhone,
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword || newPassword
+      }))
+        .then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> บันทึกการเปลี่ยนรหัสผ่านใหม่';
+          }
+
+          if (res && res.status === 'success') {
+            if (res.token) {
+              localStorage.setItem('authToken', res.token);
+              localStorage.setItem('nfe_auth_token', res.token);
+            }
+            if (res.user || res.profile) {
+              const uData = res.user || res.profile;
+              localStorage.setItem('nfe_user', JSON.stringify(uData));
+              localStorage.setItem('userData', JSON.stringify(uData));
+            }
+            showAlert(res.message || 'เปลี่ยนรหัสผ่านใหม่สำเร็จแล้ว! สามารถใช้รหัสผ่านใหม่ในการเข้าสู่ระบบครั้งถัดไปได้ทันที', 'success');
+            if (oldPassEl) oldPassEl.value = '';
+            if (newPassEl) newPassEl.value = '';
+            if (confPassEl) confPassEl.value = '';
+          } else {
+            showAlert((res && res.message) || 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาตรวจสอบรหัสผ่านปัจจุบันอีกครั้ง', 'error');
+          }
+        })
+        .catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> บันทึกการเปลี่ยนรหัสผ่านใหม่';
+          }
+          const msg = (err && err.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+          showAlert(msg, 'error');
+        });
+    }
+
+    function loadUserHours() {
+      const hoursList = document.getElementById('user-hours-list');
+      if (!hoursList) return;
+
+      apiGet('getNFEHistory', withAuthParams({}))
+        .then(res => {
+          const items = (res && (res.history || res.items || res.data)) || [];
+          if (!items || items.length === 0) {
+            hoursList.innerHTML = `
+              <div class="py-8 text-center text-slate-500">
+                <i class="fas fa-clock text-2xl block mb-2 text-slate-600"></i>
+                ยังไม่มีประวัติการบันทึกชั่วโมง กพช.
+              </div>
+            `;
+            return;
+          }
+
+          hoursList.innerHTML = items.map(h => {
+            const title = escapeHtml(h.activityName || h.title || h.description || 'กิจกรรม กพช.');
+            const hrs = h.hours || h.amount || 0;
+            const date = escapeHtml(h.date || h.created_at || '-');
+            const status = h.status === 'Approved' ? '<span class="text-emerald-400 font-bold">อนุมัติแล้ว</span>' : '<span class="text-amber-400 font-bold">รอดำเนินการ</span>';
+            return `
+              <div class="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 flex items-center justify-between gap-3">
+                <div>
+                  <strong class="text-white block">${title}</strong>
+                  <span class="text-[11px] text-slate-400">🗓️ ${date} • ${status}</span>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-sm font-black text-emerald-400">+${hrs} ชม.</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          hoursList.innerHTML = `
+            <div class="py-8 text-center text-slate-500">
+              <i class="fas fa-clock text-2xl block mb-2 text-slate-600"></i>
+              ยังไม่มีประวัติการบันทึกชั่วโมง กพช.
+            </div>
+          `;
+        });
+    }
+
+    function triggerProfileImageUpload() {
+      const fileInput = document.getElementById('profile-avatar-file-input');
+      if (fileInput) fileInput.click();
+    }
+
+    function handleProfileAvatarSelected(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('ไฟล์รูปภาพมีขนาดใหญ่เกิน 5MB', 'warning');
+        return;
+      }
+
+      showToast('กำลังอัปโหลดรูปโปรไฟล์...', 'info');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        
+        // Optimistic UI update
+        const avatarBox = document.getElementById('profile-avatar-box');
+        if (avatarBox) {
+          avatarBox.innerHTML = `<img src="${base64}" class="w-full h-full object-cover rounded-full">`;
+        }
+
+        const currentPhone = (userProfileData && (userProfileData.username || userProfileData.phone)) || localStorage.getItem('userPhone') || '';
+        apiPost('updateUser', withAuthParams({
+          targetUserId: currentPhone,
+          profileImage: base64
+        }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast('อัปเดตรูปโปรไฟล์สำเร็จเรียบร้อย!', 'success');
+            if (userProfileData) {
+              userProfileData.profileImage = base64;
+              userProfileData.profile_image = base64;
+              userProfileData.avatar = base64;
+            }
+          } else {
+            showToast(res.message || 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Upload avatar error:', err);
+          showToast('เกิดข้อผิดพลาดในการอัปโหลดรูปโปรไฟล์', 'error');
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    let certViewMode = 'grid';
+
+    function setCertViewMode(mode) {
+      certViewMode = mode;
+      const gridBtn = document.getElementById('cert-view-grid-btn');
+      const tableBtn = document.getElementById('cert-view-table-btn');
+      const gridContainer = document.getElementById('user-certificates-grid');
+      const tableContainer = document.getElementById('user-certificates-table-container');
+
+      if (mode === 'table') {
+        if (gridBtn) gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+        if (tableBtn) tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition';
+        if (gridContainer) gridContainer.style.display = 'none';
+        if (tableContainer) tableContainer.style.display = 'block';
+      } else {
+        if (gridBtn) gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition';
+        if (tableBtn) tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+        if (gridContainer) gridContainer.style.display = 'grid';
+        if (tableContainer) tableContainer.style.display = 'none';
+      }
+      filterUserCertificates();
+    }
+
+    function loadUserCertificates() {
+      apiGet('getUserCertificates', withAuthParams({}))
+        .then(res => {
+          const list = Array.isArray(res) ? res : ((res && (res.certificates || res.data || res.history)) || []);
+          userCertsList = list;
+          const countPill = document.getElementById('certs-count-pill');
+          if (countPill) countPill.innerText = `${userCertsList.length} ใบ`;
+          const profileCount = document.getElementById('profile-certs-count');
+          if (profileCount) profileCount.innerText = userCertsList.length;
+          filterUserCertificates();
+        })
+        .catch(err => {
+          console.error('Load user certs error:', err);
+          userCertsList = [];
+          filterUserCertificates();
+        });
+    }
+
+    function filterUserCertificates() {
+      const q = (document.getElementById('cert-search-input')?.value || '').trim().toLowerCase();
+      let list = userCertsList;
+      if (q) {
+        list = list.filter(c => {
+          const title = (c.title || c.sourceName || c.source_name || c.name || '').toLowerCase();
+          const certNo = (c.certNo || c.cert_no || '').toLowerCase();
+          const tambon = (c.tambon || '').toLowerCase();
+          const inst = (c.institution || '').toLowerCase();
+          return title.includes(q) || certNo.includes(q) || tambon.includes(q) || inst.includes(q);
+        });
+      }
+      renderCertificatesGrid(list);
+      renderCertificatesTable(list);
+    }
+
+    function renderCertificatesGrid(list) {
+      const grid = document.getElementById('user-certificates-grid');
+      if (!grid) return;
+
+      if (!list || list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center space-y-3 bg-slate-900/40 rounded-3xl border border-slate-800/80">
+            <div class="w-16 h-16 rounded-full bg-slate-800/80 text-slate-500 flex items-center justify-center text-2xl mx-auto">
+              <i class="fas fa-award"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-300 m-0">ยังไม่พบใบประกาศนียบัตร</h4>
+            <p class="text-xs text-slate-500 m-0">คุณสามารถเข้าศึกษาดูงานและทำแบบทดสอบเพื่อรับใบประกาศนียบัตรได้</p>
+            <a href="learning.html" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition">
+              <i class="fas fa-book-open"></i> ไปยังคลังแหล่งเรียนรู้
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map((c, idx) => {
+        const title = escapeHtml(c.title || c.sourceName || c.source_name || c.name || 'หลักสูตรแหล่งเรียนรู้');
+        const certNo = escapeHtml(c.certNo || c.cert_no || 'CERT-NFE-2026');
+        const date = escapeHtml(c.issuedAt || c.issued_at || c.issue_date || '2026');
+        const score = escapeHtml(c.score || c.score_text || '100%');
+        const tambon = c.tambon ? escapeHtml(c.tambon.replace(/ศกร\.ระดับตำบล/g, '')) : '';
+        const inst = escapeHtml(c.institution || 'สกร.อำเภอพร้าว');
+        const locationText = tambon ? `📍 ตำบล${tambon} • ${inst}` : `🏫 ${inst}`;
+        const typeBadge = c.type || 'แหล่งเรียนรู้';
+        const certId = c.id || '';
+        const srcId = c.sourceId || c.source_id || '';
+        const actId = c.activityId || c.activity_id || '';
+
+        return `
+          <div class="relative group rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/80 hover:border-amber-500/60 p-5 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between overflow-hidden">
+            <!-- Glow background effect -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/10 transition"></div>
+
+            <!-- Top Header & Badges -->
+            <div class="space-y-3 relative z-10">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                  <i class="fas fa-crown text-[9px]"></i> ${typeBadge}
+                </span>
+                <span class="text-[11px] font-mono text-slate-400 font-bold">
+                  🗓️ ${date}
+                </span>
+              </div>
+
+              <!-- Certificate Title -->
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-amber-300 transition line-clamp-2 m-0 leading-snug">
+                  ${title}
+                </h4>
+                <p class="text-[11px] text-slate-400 m-0 mt-1 flex items-center gap-1 truncate">
+                  ${locationText}
+                </p>
+              </div>
+
+              <!-- Score & Reference Code Box -->
+              <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between gap-2 text-xs">
+                <div>
+                  <span class="text-[10px] text-slate-400 block">ผลการทดสอบ</span>
+                  <strong class="text-emerald-400 font-black flex items-center gap-1">
+                    <i class="fas fa-check-circle text-[10px]"></i> ผ่านเกณฑ์ (${score})
+                  </strong>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 block">รหัสอ้างอิง</span>
+                  <button type="button" onclick="copyCertRefNumber('${certNo}')" class="text-[10px] font-mono font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1 ml-auto" title="คลิกเพื่อคัดลอกรหัส">
+                    ${certNo} <i class="fas fa-copy text-[9px]"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="pt-4 border-t border-slate-800/80 mt-4 space-y-2 relative z-10">
+              <button type="button" id="btn-cert-png-${certId || idx}" onclick="downloadCertificatePNG('${certId}', '${srcId}', '${actId}', 'btn-cert-png-${certId || idx}')" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fas fa-image text-sm"></i> <span>ดาวน์โหลดรูปภาพเกียรติบัตร (PNG 300 DPI)</span>
+              </button>
+
+              <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+                <button type="button" onclick="previewCertificateModal('${certId}', '${escapeJS(c.title || c.sourceName || '')}', '${certNo}', '${srcId}', '${actId}')" class="py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold rounded-xl border border-slate-700 transition flex items-center justify-center gap-1 cursor-pointer" title="เปิดดูตัวอย่าง">
+                  <i class="fas fa-eye text-sky-400"></i> ตัวอย่าง
+                </button>
+                <button type="button" id="btn-cert-regen-${certId || idx}" onclick="reGenerateCertificate('${certId}', '${srcId}', '${actId}', 'btn-cert-regen-${certId || idx}')" class="py-2 bg-slate-800 hover:bg-purple-950/80 text-purple-300 hover:text-purple-200 font-bold rounded-xl border border-slate-700 hover:border-purple-500/50 transition flex items-center justify-center gap-1 cursor-pointer" title="สร้างเกียรติบัตรใหม่ตามรูปแบบล่าสุดที่ Admin แก้ไข">
+                  <i class="fas fa-rotate text-purple-400"></i> สร้างใหม่
+                </button>
+                <button type="button" onclick="copyCertRefNumber('${certNo}')" class="py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition flex items-center justify-center gap-1 cursor-pointer" title="คัดลอกรหัสอ้างอิง">
+                  <i class="fas fa-copy text-slate-400"></i> คัดลอก
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCertificatesTable(list) {
+      const tbody = document.getElementById('user-certificates-table-body');
+      if (!tbody) return;
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">ไม่พบประวัติใบประกาศนียบัตร</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((c, idx) => {
+        const title = escapeHtml(c.title || c.sourceName || c.source_name || c.name || 'หลักสูตรแหล่งเรียนรู้');
+        const certNo = escapeHtml(c.certNo || c.cert_no || 'CERT-NFE-2026');
+        const date = escapeHtml(c.issuedAt || c.issued_at || c.issue_date || '2026');
+        const score = escapeHtml(c.score || c.score_text || '100%');
+        const tambon = c.tambon ? escapeHtml(c.tambon.replace(/ศกร\.ระดับตำบล/g, '')) : '';
+        const inst = escapeHtml(c.institution || 'สกร.อำเภอพร้าว');
+        const locationText = tambon ? `ศกร.ตำบล${tambon} (${inst})` : inst;
+        const certId = c.id || '';
+        const srcId = c.sourceId || c.source_id || '';
+        const actId = c.activityId || c.activity_id || '';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 text-slate-400 font-bold">${idx + 1}</td>
+            <td class="py-3 px-4 font-bold text-white max-w-xs truncate">${title}</td>
+            <td class="py-3 px-4 text-slate-400">${locationText}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ${score}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-300 font-mono text-[11px]">${date}</td>
+            <td class="py-3 px-4 font-mono text-[11px] text-amber-400">${certNo}</td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                <button type="button" onclick="downloadCertificatePNG('${certId}', '${srcId}', '${actId}')" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black text-[11px] transition flex items-center gap-1.5 shadow-sm" title="ดาวน์โหลดรูปภาพ PNG 300 DPI คมชัดตรงตามตัวอย่าง 100%">
+                  <i class="fas fa-image"></i> โหลดรูปภาพ
+                </button>
+                <button type="button" onclick="previewCertificateModal('${certId}', '${escapeJS(c.title || c.sourceName || '')}', '${certNo}', '${srcId}', '${actId}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 transition" title="ดูตัวอย่าง">
+                  <i class="fas fa-eye text-xs"></i>
+                </button>
+                <button type="button" onclick="reGenerateCertificate('${certId}', '${srcId}', '${actId}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-purple-950 text-purple-300 border border-slate-700 transition" title="สร้างเกียรติบัตรใหม่ตามรูปแบบล่าสุดของแอดมิน">
+                  <i class="fas fa-rotate text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function downloadCertificatePDF(certId, sourceId = '', activityId = '', btnId = '') {
+      const btn = btnId ? document.getElementById(btnId) : null;
+      let originalContent = '';
+      if (btn) {
+        btn.disabled = true;
+        originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังสร้างไฟล์ PDF...';
+      }
+
+      showToast('📄 กำลังสร้างและดาวน์โหลดไฟล์ PDF ใบประกาศนียบัตร...', 'info');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token') || '';
+
+      const payload = {
+        certId: certId || undefined,
+        sourceId: sourceId || undefined,
+        activityId: activityId || undefined,
+        token: token
+      };
+
+      apiPost('generateCert', withAuthParams(payload))
+        .then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+          }
+          if (res && res.status === 'success' && res.url) {
+            window.open(res.url, '_blank');
+            showToast('✅ สร้างไฟล์ PDF สำเร็จ! กำลังเปิดไฟล์เกียรติบัตร...', 'success');
+          } else {
+            // Fallback direct stream endpoint
+            window.open(`/api/downloadCertificate?certId=${certId}&sourceId=${sourceId}&activityId=${activityId}&token=${encodeURIComponent(token)}`, '_blank');
+          }
+        })
+        .catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+          }
+          console.warn('GenerateCert fallback:', err);
+          window.open(`/api/downloadCertificate?certId=${certId}&sourceId=${sourceId}&activityId=${activityId}&token=${encodeURIComponent(token)}`, '_blank');
+        });
+    }
+
+    async function downloadCertificatePNG(certId, sourceId = '', activityId = '', btnId = '') {
+      const btn = btnId ? document.getElementById(btnId) : null;
+      let originalContent = '';
+      if (btn) {
+        btn.disabled = true;
+        originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังสร้างรูปภาพ...';
+      }
+
+      showToast('🖼️ กำลังประมวลผลรูปภาพเกียรติบัตรความละเอียดสูง (PNG 300 DPI)...', 'info');
+
+      const modal = document.getElementById('cert-preview-modal');
+      const liveStage = document.getElementById('cert-live-stage');
+      const loader = document.getElementById('cert-preview-loader');
+      const wasModalHidden = !modal || modal.style.display === 'none' || (window.getComputedStyle && window.getComputedStyle(modal).display === 'none');
+
+      try {
+        if (wasModalHidden && modal) {
+          modal.style.visibility = 'hidden';
+          modal.style.display = 'flex';
+          modal.style.opacity = '0';
+          modal.style.pointerEvents = 'none';
+        }
+        if (loader) loader.style.display = 'none';
+        if (liveStage) liveStage.style.display = 'flex';
+
+        // Prepare stage with latest cert & template data
+        const stageData = await prepareCertLiveStage(certId, sourceId, activityId);
+
+        // Wait for background image and signature images to fully decode
+        const bgImg = document.getElementById('cert-live-bg-img');
+        const sigImg = document.getElementById('cert-live-sig-img');
+        const imgPromises = [];
+        if (bgImg && bgImg.src && !bgImg.complete) {
+          imgPromises.push(new Promise(res => { bgImg.onload = bgImg.onerror = res; }));
+        }
+        if (sigImg && sigImg.src && !sigImg.complete) {
+          imgPromises.push(new Promise(res => { sigImg.onload = sigImg.onerror = res; }));
+        }
+        if (imgPromises.length > 0) {
+          await Promise.all(imgPromises);
+        }
+
+        // Allow micro-layout calculation
+        await new Promise(r => setTimeout(r, 200));
+
+        const card = document.getElementById('cert-live-card');
+        if (!card) throw new Error('ไม่พบองค์ประกอบใบเกียรติบัตร');
+
+        // Capture live stage at 3x scale (300 DPI print quality)
+        const canvas = await html2canvas(card, {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        const imageUri = canvas.toDataURL('image/png');
+        if (!imageUri || imageUri === 'data:,' || imageUri.length < 100) {
+          throw new Error('รูปภาพที่ได้มีขนาดว่างเปล่า กรุณาลองใหม่อีกครั้ง');
+        }
+
+        const safeTitle = (stageData.courseTitle || 'เกียรติบัตร').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+        const safeName = (userProfileData?.name || userProfileData?.fullName || userProfileData?.full_name || 'ผู้เรียน').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+        const safeCertNo = (stageData.referenceNo || 'CERT').replace(/[^a-zA-Z0-9_-]/g, '');
+
+        const link = document.createElement('a');
+        link.download = `เกียรติบัตร_${safeTitle}_${safeName}_${safeCertNo}.png`;
+        link.href = imageUri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast('✅ ดาวน์โหลดรูปภาพเกียรติบัตร (PNG 300 DPI) สำเร็จเรียบร้อย!', 'success');
+      } catch (err) {
+        console.error('PNG download error:', err);
+        showToast('❌ เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ: ' + (err.message || ''), 'error');
+      } finally {
+        if (wasModalHidden && modal) {
+          modal.style.display = 'none';
+          modal.style.visibility = '';
+          modal.style.opacity = '';
+          modal.style.pointerEvents = '';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+      }
+    }
+
+    async function reGenerateCertificate(certId, sourceId = '', activityId = '', btnId = '') {
+      const btn = btnId ? document.getElementById(btnId) : null;
+      let originalContent = '';
+      if (btn) {
+        btn.disabled = true;
+        originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังสร้างใหม่...';
+      }
+
+      showToast('🔄 กำลังดึงรูปแบบล่าสุดจากระบบและสร้างใบเกียรติบัตรใหม่...', 'info');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token') || '';
+
+      try {
+        const payload = {
+          certId: certId || undefined,
+          sourceId: sourceId || undefined,
+          activityId: activityId || undefined,
+          token: token,
+          forceNew: true,
+          clearCache: true
+        };
+
+        const res = await apiPost('generateCert', withAuthParams(payload));
+        if (res && res.status === 'success') {
+          showToast('🎉 ปรับปรุงเกียรติบัตรตามรูปแบบล่าสุดของแอดมินเรียบร้อยแล้ว!', 'success');
+          // Reload cert list to get updated links & templates
+          await loadUserCertificates();
+          // If preview modal is currently open, refresh it
+          const modal = document.getElementById('cert-preview-modal');
+          if (modal && modal.style.display !== 'none') {
+            await previewCertificateModal(certId, '', res.certNo || '', sourceId, activityId);
+          }
+        } else {
+          showToast(res.message || 'ไม่สามารถสร้างเกียรติบัตรใหม่ได้', 'error');
+        }
+      } catch (err) {
+        console.error('Re-generate cert error:', err);
+        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+      }
+    }
+
+    let cachedGlobalSettings = null;
+
+    async function getGlobalSettingsCache() {
+      if (cachedGlobalSettings) return cachedGlobalSettings;
+      try {
+        const res = await apiGet('getGlobalSettings', withAuthParams({}));
+        if (res && res.status === 'success' && res.settings) {
+          cachedGlobalSettings = res.settings;
+        }
+      } catch(e) {}
+      return cachedGlobalSettings || {};
+    }
+
+    async function prepareCertLiveStage(certId, sourceId = '', activityId = '') {
+      const foundCert = userCertsList.find(c => String(c.id || c.certId) === String(certId)) || {};
+      const courseTitle = foundCert.title || foundCert.sourceName || foundCert.name || 'หลักสูตรสถานศึกษา';
+      const referenceNo = foundCert.certNo || foundCert.cert_no || ('CERT-' + Date.now());
+
+      let settings = await getGlobalSettingsCache();
+      const targetQuery = sourceId ? ('source:' + sourceId) : (activityId ? ('activity:' + activityId) : 'global');
+      try {
+        const tRes = await apiGet('getCertTemplate', withAuthParams({ target: targetQuery }));
+        if (tRes && tRes.status === 'success' && tRes.template) {
+          settings = tRes.template;
+        }
+      } catch(e) {
+        console.warn('Load cert template:', e);
+      }
+
+      const bgImg = document.getElementById('cert-live-bg-img');
+      const headerEl = document.getElementById('cert-live-header');
+      const headerSubEl = document.getElementById('cert-live-headersub');
+      const subtitleTextEl = document.getElementById('cert-live-subtitle');
+      const nameEl = document.getElementById('cert-live-name');
+      const descEl = document.getElementById('cert-live-desc');
+      const subjectEl = document.getElementById('cert-live-subject');
+      const dateEl = document.getElementById('cert-live-date');
+      const refEl = document.getElementById('cert-live-ref');
+      const sigBlock = document.getElementById('cert-live-sig-block');
+      const sigImg = document.getElementById('cert-live-sig-img');
+      const directorNameEl = document.getElementById('cert-live-director-name');
+      const directorTitleEl = document.getElementById('cert-live-director-title');
+
+      if (bgImg) {
+        const bgSrc = settings.backgroundUrl || settings.certificateTemplate || settings.globalCertTemplate || '';
+        if (bgSrc) {
+          bgImg.src = bgSrc;
+          bgImg.crossOrigin = 'anonymous';
+          bgImg.classList.remove('hidden');
+          bgImg.style.display = 'block';
+        } else {
+          bgImg.src = '';
+          bgImg.classList.add('hidden');
+          bgImg.style.display = 'none';
+        }
+      }
+
+      if (headerEl) {
+        headerEl.innerText = settings.certHeader || 'ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว';
+        headerEl.style.color = settings.certHeaderColor || '#064e3b';
+        headerEl.style.setProperty('--header-fs', settings.certHeaderFontSize || 40);
+        headerEl.style.marginTop = ((parseInt(settings.certHeaderMarginTop) ?? 61) * 0.1) + 'cqw';
+      }
+
+      if (headerSubEl) {
+        headerSubEl.innerText = settings.certHeaderSub || 'กรมส่งเสริมการเรียนรู้ กระทรวงศึกษาธิการ';
+        headerSubEl.style.color = settings.certHeaderSubColor || '#475569';
+        headerSubEl.style.setProperty('--headersub-fs', settings.certHeaderSubFontSize || 23);
+        headerSubEl.style.marginTop = ((parseInt(settings.certHeaderSubMarginTop) ?? 31) * 0.1) + 'cqw';
+      }
+
+      if (subtitleTextEl) {
+        subtitleTextEl.innerText = settings.certSubtitle || 'ขอมอบไว้เพื่อแสดงว่า';
+        subtitleTextEl.style.color = settings.certSubtitleColor || '#334155';
+        subtitleTextEl.style.setProperty('--subtitle-fs', settings.certSubtitleFontSize || 20);
+        subtitleTextEl.style.marginTop = ((parseInt(settings.certSubtitleMarginTop) ?? 19) * 0.1) + 'cqw';
+      }
+
+      const userName = (userProfileData?.name || userProfileData?.fullName || userProfileData?.full_name || userProfileData?.username || 'ผู้เรียน').trim();
+      if (nameEl) {
+        nameEl.innerText = userName;
+        nameEl.style.color = settings.certNameColor || '#064e3b';
+        nameEl.style.setProperty('--name-fs', settings.certNameFontSize || 38);
+        nameEl.style.marginTop = ((parseInt(settings.certNameMarginTop) ?? -30) * 0.1) + 'cqw';
+      }
+
+      if (descEl) {
+        descEl.innerText = settings.certDesc || 'ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง';
+        descEl.style.color = settings.certDescColor || '#334155';
+        descEl.style.setProperty('--desc-fs', settings.certDescFontSize || 20);
+        descEl.style.marginTop = ((parseInt(settings.certDescMarginTop) ?? 20) * 0.1) + 'cqw';
+      }
+
+      if (subjectEl) {
+        subjectEl.innerText = courseTitle;
+        subjectEl.style.color = settings.certSubjectColor || '#064e3b';
+        subjectEl.style.setProperty('--subject-fs', settings.certSubjectFontSize || 39);
+        subjectEl.style.marginTop = ((parseInt(settings.certSubjectMarginTop) ?? 9) * 0.1) + 'cqw';
+      }
+
+      const thaiMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+      const now = new Date();
+      const defaultThaiDate = `${now.getDate()} ${thaiMonths[now.getMonth() + 1]} พ.ศ. ${now.getFullYear() + 543}`;
+      
+      const rawDate = foundCert.issuedAt || foundCert.issued_at || defaultThaiDate;
+      let displayDateText = defaultThaiDate;
+      if (rawDate) {
+        if (typeof rawDate === 'string' && (rawDate.includes('พ.ศ.') || rawDate.includes('สิงหาคม') || rawDate.includes('มกราคม') || rawDate.includes('กุมภาพันธ์'))) {
+          displayDateText = rawDate;
+        } else {
+          const d = new Date(rawDate);
+          if (!isNaN(d.getTime())) {
+            displayDateText = `${d.getDate()} ${thaiMonths[d.getMonth() + 1]} พ.ศ. ${d.getFullYear() + 543}`;
+          } else if (typeof rawDate === 'string' && rawDate.includes('/')) {
+            const parts = rawDate.split('/');
+            if (parts.length === 3) {
+              const day = parseInt(parts[0]);
+              const month = parseInt(parts[1]);
+              let year = parseInt(parts[2]);
+              if (year < 2500) year += 543;
+              if (month >= 1 && month <= 12) {
+                displayDateText = `${day} ${thaiMonths[month]} พ.ศ. ${year}`;
+              }
+            }
+          }
+        }
+      }
+
+      const datePrefix = settings.certDatePrefix || 'ให้ไว้ ณ วันที่';
+      if (dateEl) {
+        dateEl.innerText = `${datePrefix} ${displayDateText}`;
+        dateEl.style.color = settings.certDateColor || '#334155';
+        dateEl.style.setProperty('--date-fs', settings.certDateFontSize || 19);
+        dateEl.style.marginTop = ((parseInt(settings.certDateMarginTop) ?? 12) * 0.08) + 'cqw';
+      }
+      if (refEl) refEl.innerText = `เลขที่อ้างอิง: ${referenceNo}`;
+
+      if (sigBlock) {
+        sigBlock.style.marginTop = ((parseInt(settings.certSigMarginTop) ?? -8) * 0.08) + 'cqw';
+      }
+      if (directorNameEl) {
+        directorNameEl.innerText = settings.directorName || 'นายประวิตร ประธรรมโย';
+        directorNameEl.style.color = settings.certSigColor || '#0f172a';
+        directorNameEl.style.setProperty('--sig-fs', settings.certSigFontSize || 18);
+      }
+      if (directorTitleEl) {
+        directorTitleEl.innerText = settings.directorTitle || 'ผู้อำนวยการ สกร.ระดับอำเภอพร้าว';
+        directorTitleEl.style.setProperty('--sig-fs', settings.certSigFontSize || 18);
+      }
+
+      if (sigImg) {
+        const sigSrc = settings.signatureUrl || (cachedGlobalSettings && cachedGlobalSettings.signatureUrl) || '';
+        if (sigSrc) {
+          sigImg.src = sigSrc;
+          sigImg.crossOrigin = 'anonymous';
+          sigImg.style.display = 'block';
+        } else {
+          sigImg.style.display = 'none';
+        }
+      }
+
+      return { foundCert, courseTitle, referenceNo, settings };
+    }
+
+    async function previewCertificateModal(certId, title, certNo, sourceId = '', activityId = '') {
+      const modal = document.getElementById('cert-preview-modal');
+      const liveStage = document.getElementById('cert-live-stage');
+      const loader = document.getElementById('cert-preview-loader');
+      const titleEl = document.getElementById('cert-preview-title');
+      const subtitleEl = document.getElementById('cert-preview-subtitle');
+      const dlBtn = document.getElementById('cert-preview-download-btn');
+      const pngBtn = document.getElementById('cert-preview-png-btn');
+      const regenBtn = document.getElementById('cert-preview-regen-btn');
+
+      if (modal) modal.style.display = 'flex';
+      if (loader) loader.style.display = 'flex';
+      if (liveStage) liveStage.style.display = 'none';
+
+      const stageData = await prepareCertLiveStage(certId, sourceId, activityId);
+
+      if (titleEl) titleEl.innerText = title || stageData.courseTitle;
+      if (subtitleEl) subtitleEl.innerText = `เลขที่อ้างอิง: ${certNo || stageData.referenceNo}`;
+
+      if (pngBtn) {
+        pngBtn.onclick = () => downloadCertificatePNG(certId, sourceId, activityId);
+      }
+      if (regenBtn) {
+        regenBtn.onclick = () => reGenerateCertificate(certId, sourceId, activityId);
+      }
+
+      if (loader) loader.style.display = 'none';
+      if (liveStage) liveStage.style.display = 'flex';
+    }
+
+    function closeCertPreviewModal() {
+      const modal = document.getElementById('cert-preview-modal');
+      const iframe = document.getElementById('cert-preview-iframe');
+      if (iframe) iframe.src = 'about:blank';
+      if (modal) modal.style.display = 'none';
+    }
+
+    function copyCertRefNumber(code) {
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`📋 คัดลอกรหัสอ้างอิง ${code} เรียบร้อยแล้ว`, 'success');
+      }).catch(() => {
+        showToast(`รหัสอ้างอิง: ${code}`, 'info');
+      });
+    }
+
+    function escapeJS(str) {
+      if (!str) return '';
+      return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function handleUserLogout() {
+      if (typeof logout === 'function') {
+        logout();
+      } else if (typeof showCustomConfirm === 'function') {
+        showCustomConfirm({
+          title: 'ออกจากระบบ',
+          message: 'คุณต้องการออกจากระบบ ใช่หรือไม่?',
+          type: 'logout',
+          icon: 'fa-sign-out-alt',
+          confirmText: 'ออกจากระบบ',
+          cancelText: 'ยกเลิก'
+        }, () => {
+          if (typeof clearAllAuthData === 'function') clearAllAuthData();
+          userProfileData = null;
+          loadUserProfile();
+          showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+        });
+      } else if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        if (typeof clearAllAuthData === 'function') clearAllAuthData();
+        userProfileData = null;
+        loadUserProfile();
+        showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get('tab');
+      if (t) switchProfileTab(t);
+      loadUserProfile();
+    });
+  </script>
+  <script src="js/core/dossier.js?v=20260830-dossier"></script>
+  <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

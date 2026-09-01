@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👥 จัดการสมาชิกและอนุมัติรูปโปรไฟล์ — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .custom-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-xl shadow-md shadow-blue-500/20 shrink-0">
+          <i class="fas fa-users-gear"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการสมาชิกและอนุมัติรูปโปรไฟล์ (Members & Approvals)
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Users & Certs
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            ตรวจสอบรายชื่อ ปรับแก้สิทธิ์บทบาท อนุมัติรูปโปรไฟล์ผู้เรียน และคลังประวัติใบเกียรติบัตร
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="openAddUserModal()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/30 transition-all active:scale-95">
+          <i class="fas fa-user-plus"></i> เพิ่มสมาชิกใหม่
+        </button>
+        <button type="button" onclick="loadUsersList(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Summary Row -->
+    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-6">
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+          <i class="fas fa-users"></i>
+        </div>
+        <div>
+          <span class="text-[11px] text-slate-400 font-bold block">สมาชิกทั้งหมด</span>
+          <span class="text-lg font-black text-white" id="stat-total-users">0</span>
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div>
+          <span class="text-[11px] text-slate-400 font-bold block">รออนุมัติรูป</span>
+          <span class="text-lg font-black text-amber-400" id="stat-pending-avatars">0</span>
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+          <span class="text-[11px] text-slate-400 font-bold block">อนุมัติรูปแล้ว</span>
+          <span class="text-lg font-black text-emerald-400" id="stat-approved-avatars">0</span>
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <div>
+          <span class="text-[11px] text-slate-400 font-bold block">ใบประกาศทั้งหมด</span>
+          <span class="text-lg font-black text-purple-400" id="stat-total-certs">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters & Workspace Navigation -->
+    <section class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md space-y-4">
+      
+      <!-- Top: Main Tabs -->
+      <div class="flex items-center gap-2 border-b border-slate-700/60 pb-3 flex-wrap">
+        <button type="button" onclick="switchMainTab('members')" id="tab-btn-members" class="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md shadow-blue-600/30 transition flex items-center gap-1.5">
+          <i class="fas fa-users"></i> สมาชิกทั้งหมด (<span id="tab-count-members">0</span>)
+        </button>
+        <button type="button" onclick="switchMainTab('approvals')" id="tab-btn-approvals" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5">
+          <i class="fas fa-user-check text-amber-400"></i> รออนุมัติรูปโปรไฟล์ (<span id="tab-count-pending" class="text-amber-400">0</span>)
+        </button>
+        <button type="button" onclick="switchMainTab('certs')" id="tab-btn-certs" class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5">
+          <i class="fas fa-award text-purple-400"></i> คลังประวัติใบประกาศนียบัตร
+        </button>
+      </div>
+
+      <!-- Bottom: Search & Selectors -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        <!-- Institution Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-university mr-1 text-blue-400"></i>สถานศึกษาหลัก</label>
+          <select id="filter-institution" onchange="onInstitutionChange()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-medium">
+            <option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>
+          </select>
+        </div>
+
+        <!-- Tambon Selector -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-map-pin mr-1 text-teal-400"></i>สังกัดตำบล / ศศช.</label>
+          <select id="filter-tambon" onchange="onTambonFilterChange()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-medium">
+            <option value="ทั้งหมด">🌍 ทุกตำบลในสังกัด (ทั้งหมด)</option>
+          </select>
+        </div>
+
+        <!-- Role Filter -->
+        <div id="role-filter-container">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-id-badge mr-1 text-amber-400"></i>สิทธิ์การใช้งาน (Role)</label>
+          <select id="filter-role" onchange="onFilterChange()" class="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-medium">
+            <option value="ALL">👥 ทุกสิทธิ์ (ผู้เรียน, ครู, แอดมิน)</option>
+            <option value="user">👤 ผู้เรียนทั่วไป (User)</option>
+            <option value="teacher">👨‍🏫 ครูประจำตำบล (Teacher)</option>
+            <option value="admin">🛡️ ผู้ดูแลระบบ (Admin)</option>
+          </select>
+        </div>
+
+        <!-- Search Bar -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1"><i class="fas fa-search mr-1 text-sky-400"></i>ค้นหาชื่อ หรือ เบอร์โทร</label>
+          <div class="relative">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="filter-search" oninput="onSearchInput()" placeholder="พิมพ์ชื่อผู้เรียน หรือ เบอร์โทรศัพท์..." class="w-full pl-9 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ═══════════════════ Tab 1 & Tab 2: Users Cards Grid ═══════════════════ -->
+    <main id="users-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="col-span-full text-center py-16 px-4 bg-slate-800/40 rounded-3xl border border-slate-700/60 shadow-lg space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-3xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl shadow-inner">
+          <i class="fas fa-filter"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white m-0">กรุณาเลือกตัวกรองหรือพิมพ์ค้นหา</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+            เลือกสังกัดตำบล/ศศช., เลือกสิทธิ์บทบาท, หรือพิมพ์ชื่อ/เบอร์โทรศัพท์ในช่องค้นหาด้านบน เพื่อเริ่มแสดงรายชื่อสมาชิก
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-2 flex-wrap pt-2">
+          <button type="button" onclick="loadUsersList(true)" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 transition flex items-center gap-2 active:scale-95 cursor-pointer">
+            <i class="fas fa-users"></i> <span>แสดงรายชื่อสมาชิกทั้งหมด</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══════════════════ Tab 3: Certificates Table ═══════════════════ -->
+    <div id="certs-container" class="space-y-4" style="display: none;">
+      <div class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 overflow-hidden shadow-lg">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-400 bg-slate-900/40">
+                <th class="py-3 px-3.5 font-bold">เลขอ้างอิง (Ref No.)</th>
+                <th class="py-3 px-3.5 font-bold">ชื่อผู้เรียน</th>
+                <th class="py-3 px-3.5 font-bold">หลักสูตร / แหล่งเรียนรู้</th>
+                <th class="py-3 px-3.5 font-bold text-center">คะแนน</th>
+                <th class="py-3 px-3.5 font-bold text-center">วันที่ออก</th>
+                <th class="py-3 px-3.5 font-bold text-right">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="certs-table-body" class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td colspan="6" class="text-center py-12 text-slate-500">กำลังโหลดประวัติใบประกาศ...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End Container -->
+
+  <!-- ═══════════════════ Modal: Add New User ═══════════════════ -->
+  <div id="modal-add-user" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">เพิ่มสมาชิกใหม่</h3>
+            <p class="text-[11px] text-slate-400 m-0">สร้างบัญชีผู้เรียน ครูประจำตำบล หรือผู้ดูแลระบบ</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAddUserModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="add-user-form" onsubmit="submitAddUser(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อ - นามสกุล <span class="text-rose-400">*</span></label>
+          <input type="text" id="add-user-name" required placeholder="เช่น นายสมชาย ใจดี" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">เบอร์โทรศัพท์ (ใช้เป็น Username) <span class="text-rose-400">*</span></label>
+          <input type="tel" id="add-user-phone" required pattern="[0-9]{9,10}" placeholder="เช่น 0812345678" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 font-mono">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รหัสผ่าน <span class="text-rose-400">*</span></label>
+          <input type="password" id="add-user-pass" required minlength="4" placeholder="กำหนดรหัสผ่าน (อย่างน้อย 4 ตัวอักษร)" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สิทธิ์การใช้งาน (Role)</label>
+            <select id="add-user-role" class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+              <option value="user" selected>👤 ผู้เรียน (User)</option>
+              <option value="teacher">👨‍🏫 ครูประจำตำบล</option>
+              <option value="admin">🛡️ แอดมิน (Admin)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สังกัดตำบล</label>
+            <select id="add-user-tambon" required class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="add-user-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-md shadow-emerald-600/30 transition">
+            💾 สร้างบัญชีสมาชิก
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Adjust User Score ═══════════════════ -->
+  <div id="modal-adjust-score" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/30 to-yellow-600/30 border border-amber-500/40 text-amber-400 flex items-center justify-center text-lg shadow-inner">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white m-0 flex items-center gap-2">
+              เพิ่ม / ลด / ปรับคะแนนสะสมผู้เรียน
+            </h3>
+            <p class="text-[11px] text-slate-400 m-0">จัดการแต้มสะสมรายบุคคล (Super Admin / Admin)</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdjustScoreModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Target User Info Banner -->
+      <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 mb-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-12 h-12 rounded-2xl bg-slate-700 overflow-hidden shrink-0 border border-slate-600 flex items-center justify-center relative">
+            <img id="adjust-score-avatar" src="" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="w-full h-full items-center justify-center text-slate-400 text-base hidden"><i class="fas fa-user"></i></div>
+          </div>
+          <div class="min-w-0">
+            <h4 id="adjust-score-user-name" class="text-xs sm:text-sm font-bold text-white truncate m-0">-</h4>
+            <p id="adjust-score-user-phone" class="text-[11px] text-slate-400 font-mono m-0 mt-0.5"><i class="fas fa-id-card mr-1 text-slate-500"></i>-</p>
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="text-[10px] text-slate-400 font-medium">คะแนนปัจจุบัน</div>
+          <div class="text-sm sm:text-base font-black text-amber-400 font-mono flex items-center justify-end gap-1">
+            <i class="fas fa-star text-amber-400 text-xs"></i>
+            <span id="adjust-score-current-score">0</span>
+            <span class="text-[10px] text-slate-400 font-normal">แต้ม</span>
+          </div>
+          <span id="adjust-score-current-level" class="inline-block px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30">LV. 1</span>
+        </div>
+      </div>
+
+      <form id="adjust-score-form" onsubmit="submitAdjustScore(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="adjust-score-target-username">
+        <input type="hidden" id="adjust-score-raw-current-score" value="0">
+        <input type="hidden" id="adjust-score-mode" value="add">
+
+        <!-- Mode Selector Tabs -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">รูปแบบการปรับคะแนน <span class="text-rose-400">*</span></label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="setScoreAdjustMode('add')" id="btn-mode-add" class="p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm">
+              <i class="fas fa-plus-circle text-base"></i>
+              <span>เพิ่มแต้ม (+)</span>
+            </button>
+            <button type="button" onclick="setScoreAdjustMode('deduct')" id="btn-mode-deduct" class="p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200">
+              <i class="fas fa-minus-circle text-base"></i>
+              <span>หัก/ลดแต้ม (-)</span>
+            </button>
+            <button type="button" onclick="setScoreAdjustMode('set')" id="btn-mode-set" class="p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200">
+              <i class="fas fa-equals text-base"></i>
+              <span>กำหนดแต้มตรง</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Points Input & Quick Chips -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label id="adjust-score-input-label" class="font-bold text-slate-300">จำนวนแต้มที่ต้องการเพิ่ม <span class="text-rose-400">*</span></label>
+            <span class="text-[10px] text-slate-400">ปุ่มเลือกจำนวนด่วน</span>
+          </div>
+          <div class="relative">
+            <input type="number" id="adjust-score-amount" required min="1" step="1" placeholder="ระบุจำนวนแต้ม เช่น 50" oninput="updateScorePreview()" class="w-full px-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white font-mono text-sm font-bold focus:outline-none focus:border-amber-500 pr-16">
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold">แต้ม</span>
+          </div>
+
+          <!-- Quick Chips -->
+          <div class="flex items-center gap-1.5 mt-2 flex-wrap" id="adjust-quick-chips">
+            <button type="button" onclick="quickSetPoints(10)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+10</button>
+            <button type="button" onclick="quickSetPoints(50)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+50</button>
+            <button type="button" onclick="quickSetPoints(100)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+100</button>
+            <button type="button" onclick="quickSetPoints(200)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+200</button>
+            <button type="button" onclick="quickSetPoints(500)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+500</button>
+            <button type="button" onclick="quickSetPoints(1000)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition">+1000</button>
+          </div>
+        </div>
+
+        <!-- Reason / Description -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">เหตุผลในการปรับคะแนน <span class="text-rose-400">*</span></label>
+          <input type="text" id="adjust-score-reason" required placeholder="เช่น โอนย้ายคะแนนจากระบบเดิม, คะแนนกิจกรรมพิเศษ" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-500">
+          
+          <!-- Preset Reasons -->
+          <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+            <button type="button" onclick="quickSetReason('โอนย้ายคะแนนสะสมจากระบบเดิม')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">📋 โอนจากระบบเดิม</button>
+            <button type="button" onclick="quickSetReason('คะแนนกิจกรรมพิเศษสถานศึกษา')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">🎖️ กิจกรรมพิเศษ</button>
+            <button type="button" onclick="quickSetReason('ปรับปรุงแก้ไขคะแนนความถูกต้อง')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">⚙️ ปรับปรุงแก้ไข</button>
+            <button type="button" onclick="quickSetReason('หักคะแนนเนื่องจากยกเลิกผลงาน/กิจกรรม')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 text-[10px] font-medium transition">⚠️ หักคะแนนยกเลิก</button>
+          </div>
+        </div>
+
+        <!-- Real-Time Calculation Preview Box -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-700/80 shadow-inner flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ผลลัพธ์หลังการบันทึก (Preview)</div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-xs text-slate-400 line-through font-mono" id="preview-old-score">0</span>
+              <i class="fas fa-arrow-right text-xs text-slate-500"></i>
+              <span class="text-base font-black text-emerald-400 font-mono" id="preview-new-score">0 แต้ม</span>
+              <span class="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300" id="preview-delta">+0</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-slate-400 font-bold">ระดับใหม่</div>
+            <span id="preview-new-level" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mt-0.5">LV. 1</span>
+          </div>
+        </div>
+
+        <!-- History Toggle / Mini Table -->
+        <div class="border-t border-slate-800 pt-3">
+          <button type="button" onclick="togglePointsHistory()" class="text-xs font-bold text-slate-400 hover:text-amber-400 flex items-center justify-between w-full transition">
+            <span class="flex items-center gap-1.5"><i class="fas fa-clock-rotate-left"></i> ประวัติรายการแต้มสะสม (<span id="history-items-count">0</span> รายการ)</span>
+            <i class="fas fa-chevron-down text-[10px] transition-transform" id="history-chevron"></i>
+          </button>
+          <div id="adjust-score-history-container" class="mt-2.5 space-y-1.5 max-h-40 overflow-y-auto custom-scrollbar" style="display: none;">
+            <div class="text-center py-4 text-slate-500 text-[11px]">กำลังโหลดประวัติแต้ม...</div>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeAdjustScoreModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="adjust-score-submit-btn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95">
+            <i class="fas fa-check-circle"></i> <span>บันทึกการปรับคะแนน</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Edit User Role & Tambon ═══════════════════ -->
+  <div id="modal-edit-user" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-base">
+            <i class="fas fa-user-pen"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0">แก้ไขข้อมูลและสิทธิ์สมาชิก</h3>
+            <p class="text-[11px] text-slate-400 m-0" id="edit-user-phone-label">เบอร์โทร: -</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditUserModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="edit-user-form" onsubmit="submitEditUser(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-user-phone">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อ - นามสกุล <span class="text-rose-400">*</span></label>
+          <input type="text" id="edit-user-fullname" required class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สิทธิ์การใช้งาน (Role)</label>
+            <select id="edit-user-role" class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+              <option value="user">👤 ผู้เรียน (User)</option>
+              <option value="teacher">👨‍🏫 ครูประจำตำบล</option>
+              <option value="admin">🛡️ แอดมิน (Admin)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สังกัดตำบล</label>
+            <select id="edit-user-tambon" required class="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Score Row in Edit Modal -->
+        <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold block">คะแนนสะสมปัจจุบัน</span>
+              <span class="text-xs font-black text-amber-400 font-mono" id="edit-user-score-display">0 แต้ม</span>
+            </div>
+          </div>
+          <button type="button" onclick="openAdjustScoreFromEditModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+            <i class="fas fa-coins"></i> ปรับคะแนน
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <label class="block font-bold text-slate-300 mb-1">รีเซ็ตรหัสผ่านใหม่ (หากไม่ต้องการเปลี่ยน ให้เว้นว่าง)</label>
+          <input type="password" id="edit-user-new-pass" minlength="4" placeholder="กรอกรหัสผ่านใหม่..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="edit-user-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-md shadow-blue-600/30 transition">
+            💾 บันทึกการแก้ไข
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Full Image Viewer ═══════════════════ -->
+  <div id="image-viewer" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;" onclick="this.style.display='none'">
+    <div class="relative max-w-lg max-h-[80vh] flex flex-col items-center">
+      <img id="full-image-display" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-700">
+      <p class="text-xs text-slate-400 mt-2 font-medium">คลิกพื้นที่ว่างเพื่อปิด</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260820-standalone-users-v1"></script>
+  <script src="js/core/auth.js?v=20260820-standalone-users-v1"></script>
+
+  <script>
+    let allInstitutions = [];
+    let currentUsersList = [];
+    let currentCertsList = [];
+    let activeMainTab = 'members'; // 'members' | 'approvals' | 'certs'
+    let hasLoadedUsers = false;
+    let searchDebounceTimer = null;
+
+    // Toast Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-blue-600 text-white border-blue-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && document.referrer.includes(window.location.host)) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Initialization ──────────────────────────────────────────
+    function initData() {
+      // Check query param for initial tab
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam === 'approve' || tabParam === 'approvals') {
+        activeMainTab = 'approvals';
+        loadInstitutions(true);
+      } else if (tabParam === 'cert' || tabParam === 'certs') {
+        activeMainTab = 'certs';
+        loadInstitutions(false);
+      } else {
+        activeMainTab = 'members';
+        loadInstitutions(false);
+        renderInitialPlaceholder();
+      }
+    }
+
+    function loadInstitutions(autoLoad = false) {
+      apiGet('getInstitutions', withAuthParams({}))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.institutions)) {
+            allInstitutions = res.institutions;
+            
+            let filterHtml = '<option value="ALL">🌍 ทุกสถานศึกษา (ทั้งหมด)</option>';
+            res.institutions.forEach(inst => {
+              filterHtml += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name)}</option>`;
+            });
+            document.getElementById('filter-institution').innerHTML = filterHtml;
+
+            // Set current institution
+            const userInst = localStorage.getItem('userInstitution') || 'INS_PHRAO';
+            document.getElementById('filter-institution').value = userInst;
+            onInstitutionChange(autoLoad);
+          } else {
+            if (autoLoad) loadUsersList(true);
+            else renderInitialPlaceholder();
+          }
+        })
+        .catch(err => {
+          console.error('Load institutions error:', err);
+          if (autoLoad) loadUsersList(true);
+          else renderInitialPlaceholder();
+        });
+    }
+
+    function onInstitutionChange(autoLoad = true) {
+      const instId = document.getElementById('filter-institution').value;
+      const tambonSelect = document.getElementById('filter-tambon');
+      const addTambonSelect = document.getElementById('add-user-tambon');
+      const editTambonSelect = document.getElementById('edit-user-tambon');
+
+      let subUnits = [];
+      if (instId === 'ALL') {
+        allInstitutions.forEach(inst => {
+          if (Array.isArray(inst.sub_units)) subUnits.push(...inst.sub_units);
+        });
+        subUnits = [...new Set(subUnits)];
+      } else {
+        const found = allInstitutions.find(i => i.id === instId);
+        if (found && Array.isArray(found.sub_units)) {
+          subUnits = found.sub_units;
+        }
+      }
+
+      let filterHtml = '<option value="ทั้งหมด">🌍 ทุกตำบลในสังกัด (ทั้งหมด)</option>';
+      let modalHtml = '';
+      subUnits.forEach(u => {
+        filterHtml += `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`;
+        modalHtml += `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`;
+      });
+
+      tambonSelect.innerHTML = filterHtml;
+      if (addTambonSelect) addTambonSelect.innerHTML = modalHtml;
+      if (editTambonSelect) editTambonSelect.innerHTML = modalHtml;
+
+      if (autoLoad) {
+        loadUsersList(true);
+      } else if (!hasLoadedUsers && activeMainTab === 'members') {
+        renderInitialPlaceholder();
+      }
+    }
+
+    function renderInitialPlaceholder() {
+      const container = document.getElementById('users-container');
+      if (!container) return;
+      container.innerHTML = `
+        <div class="col-span-full text-center py-16 px-4 bg-slate-800/40 rounded-3xl border border-slate-700/60 shadow-lg space-y-4">
+          <div class="w-16 h-16 mx-auto rounded-3xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl shadow-inner">
+            <i class="fas fa-filter"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white m-0">กรุณาเลือกตัวกรองหรือพิมพ์ค้นหา</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+              เลือกสังกัดตำบล/ศศช., เลือกสิทธิ์บทบาท, หรือพิมพ์ชื่อ/เบอร์โทรศัพท์ในช่องค้นหาด้านบน เพื่อเริ่มแสดงรายชื่อสมาชิก
+            </p>
+          </div>
+          <div class="flex items-center justify-center gap-2 flex-wrap pt-2">
+            <button type="button" onclick="loadUsersList(true)" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 transition flex items-center gap-2 active:scale-95 cursor-pointer">
+              <i class="fas fa-users"></i> <span>แสดงรายชื่อสมาชิกทั้งหมด</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchMainTab(tab) {
+      activeMainTab = tab;
+      const btnMembers = document.getElementById('tab-btn-members');
+      const btnApprovals = document.getElementById('tab-btn-approvals');
+      const btnCerts = document.getElementById('tab-btn-certs');
+
+      const usersContainer = document.getElementById('users-container');
+      const certsContainer = document.getElementById('certs-container');
+      const roleFilterContainer = document.getElementById('role-filter-container');
+
+      [btnMembers, btnApprovals, btnCerts].forEach(b => {
+        b.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5';
+      });
+
+      if (tab === 'members') {
+        btnMembers.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md shadow-blue-600/30 transition flex items-center gap-1.5';
+        usersContainer.style.display = 'grid';
+        certsContainer.style.display = 'none';
+        roleFilterContainer.style.display = 'block';
+        if (!hasLoadedUsers) {
+          renderInitialPlaceholder();
+        } else {
+          renderUsersList();
+        }
+      } else if (tab === 'approvals') {
+        btnApprovals.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white shadow-md shadow-amber-600/30 transition flex items-center gap-1.5';
+        usersContainer.style.display = 'grid';
+        certsContainer.style.display = 'none';
+        roleFilterContainer.style.display = 'none';
+        if (!hasLoadedUsers) {
+          loadUsersList(true);
+        } else {
+          renderUsersList();
+        }
+      } else if (tab === 'certs') {
+        btnCerts.className = 'px-4 py-2 text-xs font-bold rounded-xl bg-purple-600 text-white shadow-md shadow-purple-600/30 transition flex items-center gap-1.5';
+        usersContainer.style.display = 'none';
+        certsContainer.style.display = 'block';
+        roleFilterContainer.style.display = 'none';
+        loadCertificatesHistory();
+      }
+    }
+
+    // ─── Load Users ───────────────────────────────────────────────
+    function loadUsersList(forceRefresh = false) {
+      const instId = document.getElementById('filter-institution').value;
+      const tambon = document.getElementById('filter-tambon').value;
+      const refreshIcon = document.getElementById('refresh-icon');
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+      const container = document.getElementById('users-container');
+      if (container && !hasLoadedUsers) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-16 text-slate-400">
+            <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-blue-500"></i>
+            <p class="text-sm font-semibold">กำลังโหลดข้อมูลสมาชิก...</p>
+          </div>
+        `;
+      }
+
+      apiGet('getUsersByTambon', withAuthParams({
+        tambon: tambon,
+        institutionId: instId
+      }))
+        .then(users => {
+          if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+          hasLoadedUsers = true;
+          currentUsersList = Array.isArray(users) ? users : [];
+          updateStatsAndBadges();
+          if (activeMainTab !== 'certs') {
+            renderUsersList();
+          }
+        })
+        .catch(err => {
+          if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+          console.error('Load users error:', err);
+          showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลสมาชิก', 'error');
+        });
+    }
+
+    function updateStatsAndBadges() {
+      const total = currentUsersList.length;
+      const pending = currentUsersList.filter(u => u.imageStatus === 'Pending').length;
+      const approved = currentUsersList.filter(u => u.imageStatus === 'Approved').length;
+
+      document.getElementById('stat-total-users').innerText = total;
+      document.getElementById('stat-pending-avatars').innerText = pending;
+      document.getElementById('stat-approved-avatars').innerText = approved;
+
+      document.getElementById('tab-count-members').innerText = total;
+      document.getElementById('tab-count-pending').innerText = pending;
+    }
+
+    function onTambonFilterChange() {
+      loadUsersList(true);
+      if (activeMainTab === 'certs') {
+        loadCertificatesHistory();
+      }
+    }
+
+    function onFilterChange() {
+      if (activeMainTab === 'certs') {
+        renderCertsTable();
+      } else {
+        if (!hasLoadedUsers) {
+          loadUsersList(true);
+        } else {
+          renderUsersList();
+        }
+      }
+    }
+
+    function onSearchInput() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        const query = (document.getElementById('filter-search')?.value || '').trim();
+        if (activeMainTab === 'certs') {
+          renderCertsTable();
+        } else if (!hasLoadedUsers) {
+          if (query.length > 0) {
+            loadUsersList(true);
+          } else {
+            renderInitialPlaceholder();
+          }
+        } else {
+          renderUsersList();
+        }
+      }, 300);
+    }
+
+    // ─── Render Users Grid ─────────────────────────────────────────
+    function renderUsersList() {
+      const container = document.getElementById('users-container');
+      const search = (document.getElementById('filter-search').value || '').trim().toLowerCase();
+      const roleFilter = document.getElementById('filter-role').value;
+      const tambonFilter = (document.getElementById('filter-tambon')?.value || 'ทั้งหมด').trim();
+
+      let filtered = currentUsersList;
+
+      // Filter by Tambon
+      if (tambonFilter && tambonFilter !== 'ทั้งหมด' && tambonFilter !== 'ALL') {
+        filtered = filtered.filter(u => {
+          const uTambon = (u.tambon || '').trim();
+          return uTambon === tambonFilter || uTambon.includes(tambonFilter) || tambonFilter.includes(uTambon);
+        });
+      }
+
+      // Filter by Main Tab
+      if (activeMainTab === 'approvals') {
+        filtered = filtered.filter(u => u.imageStatus === 'Pending');
+      }
+
+      // Filter by Role
+      if (activeMainTab === 'members' && roleFilter !== 'ALL') {
+        filtered = filtered.filter(u => String(u.role || 'user').toLowerCase() === roleFilter.toLowerCase());
+      }
+
+      // Filter by Search
+      if (search) {
+        filtered = filtered.filter(u => {
+          const name = (u.fullName || '').toLowerCase();
+          const phone = (u.username || '').toLowerCase();
+          const tambon = (u.tambon || '').toLowerCase();
+          return name.includes(search) || phone.includes(search) || tambon.includes(search);
+        });
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-users-slash text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ไม่พบรายชื่อสมาชิก</h4>
+            <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนตัวกรองตำบลหรือค้นหาด้วยคำค้นอื่น</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(u => {
+        const name = u.fullName || 'ไม่ระบุชื่อ';
+        const phone = u.username || '-';
+        const tambon = u.tambon || 'ไม่ระบุ';
+        const role = String(u.role || 'user').toLowerCase();
+        const score = u.score != null ? u.score : 0;
+        const imgStatus = u.imageStatus || 'None';
+        const profileImg = u.profileImage ? (u.profileImage.startsWith('http') || u.profileImage.startsWith('/') ? u.profileImage : '/' + u.profileImage) : '';
+
+        const roleBadgeMap = {
+          admin: '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/30"><i class="fas fa-shield-halved mr-1"></i>Admin</span>',
+          teacher: '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30"><i class="fas fa-chalkboard-user mr-1"></i>Teacher</span>',
+          user: '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30"><i class="fas fa-user mr-1"></i>User</span>'
+        };
+
+        const statusBadgeMap = {
+          Pending: '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">รออนุมัติรูป</span>',
+          Approved: '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">อนุมัติแล้ว</span>',
+          Rejected: '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">ไม่อนุมัติ</span>'
+        };
+
+        const tambonDisplay = (tambon.startsWith('ศกร.') || tambon.startsWith('ศศช.') || tambon.startsWith('ตำบล')) ? tambon : ('ตำบล' + tambon);
+
+        html += `
+          <div class="custom-card p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start gap-3 mb-3">
+                <!-- Avatar Preview -->
+                <div class="relative shrink-0">
+                  ${profileImg 
+                    ? `<img src="${escapeHtml(profileImg)}" onclick="viewFullImage('${escapeJS(profileImg)}')" class="w-14 h-14 rounded-2xl object-cover border border-slate-700 shadow-md cursor-pointer hover:opacity-80 transition" title="คลิกดูรูปใหญ่">`
+                    : `<div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl text-slate-500"><i class="fas fa-user"></i></div>`
+                  }
+                </div>
+
+                <!-- User Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1 flex-wrap mb-1">
+                    <h3 class="text-sm font-bold text-white m-0 truncate" title="${escapeHtml(name)}">${escapeHtml(name)}</h3>
+                  </div>
+                  <p class="text-xs text-slate-400 font-mono m-0"><i class="fas fa-id-card mr-1 text-slate-500"></i>${escapeHtml(phone)}</p>
+                  <p class="text-[11px] text-sky-400 m-0 mt-0.5"><i class="fas fa-map-pin mr-1"></i>${escapeHtml(tambonDisplay)}</p>
+                </div>
+              </div>
+
+              <!-- Badges & Score -->
+              <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-700/50 flex-wrap">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${roleBadgeMap[role] || roleBadgeMap.user}
+                  ${statusBadgeMap[imgStatus] || ''}
+                </div>
+                <div class="text-xs font-mono font-bold text-amber-400">
+                  <i class="fas fa-star text-amber-400 mr-1"></i>${score} แต้ม
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-3 border-t border-slate-700/50 mt-3 flex items-center justify-between gap-2 flex-wrap">
+              ${imgStatus === 'Pending' ? `
+                <div class="flex items-center gap-1.5 w-full sm:w-auto">
+                  <button type="button" onclick="approveAvatarAction('${escapeJS(phone)}')" class="flex-1 sm:flex-initial px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <i class="fas fa-check"></i> อนุมัติรูป
+                  </button>
+                  <button type="button" onclick="rejectAvatarAction('${escapeJS(phone)}')" class="flex-1 sm:flex-initial px-3 py-1.5 bg-rose-600/30 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <i class="fas fa-times"></i> ปฏิเสธ
+                  </button>
+                </div>
+              ` : `<div></div>`}
+
+              <div class="flex items-center gap-1.5 ml-auto flex-wrap">
+                <button type="button" onclick="openAdjustScoreModal('${escapeJS(phone)}', '${escapeJS(name)}', ${score}, '${escapeJS(role)}', '${escapeJS(profileImg)}')" class="px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-sm" title="เพิ่ม / ลด / กำหนดคะแนนสะสม">
+                  <i class="fas fa-coins text-amber-400"></i> ปรับแต้ม
+                </button>
+                <button type="button" onclick="openStudentLearningDossier('${escapeJS(phone)}')" class="px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 hover:from-blue-500/30 text-blue-300 border border-blue-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="ดูประวัติการเรียนรู้สะสมและผลสอบ">
+                  <i class="fas fa-graduation-cap"></i> ประวัติเรียนรู้
+                </button>
+                <button type="button" onclick="openEditUserModal('${escapeJS(phone)}', '${escapeJS(name)}', '${escapeJS(role)}', '${escapeJS(tambon)}', ${score})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1" title="แก้ไขสิทธิ์และข้อมูล">
+                  <i class="fas fa-pen-to-square"></i> แก้ไข
+                </button>
+                <button type="button" onclick="deleteUserAction('${escapeJS(phone)}', '${escapeJS(name)}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-400 border border-slate-700 flex items-center justify-center text-xs transition" title="ลบผู้ใช้">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Image Actions ───────────────────────────────────────────
+    function viewFullImage(src) {
+      document.getElementById('full-image-display').src = src;
+      document.getElementById('image-viewer').style.display = 'flex';
+    }
+
+    function approveAvatarAction(phone) {
+      apiPost('approveAvatar', withAuthParams({ targetUserId: phone, phone: phone, username: phone, status: 'Approved' }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast('อนุมัติรูปโปรไฟล์เรียบร้อยแล้ว', 'success');
+            loadUsersList(true);
+          } else {
+            showToast(res.message || 'อนุมัติไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Approve error:', err);
+          showToast('เกิดข้อผิดพลาดในการอนุมัติรูป', 'error');
+        });
+    }
+
+    function rejectAvatarAction(phone) {
+      showCustomConfirm({
+        title: 'ยืนยันปฏิเสธรูปโปรไฟล์',
+        message: 'ต้องการปฏิเสธรูปโปรไฟล์นี้ใช่หรือไม่?',
+        type: 'danger',
+        confirmText: 'ยืนยันปฏิเสธ'
+      }, () => {
+        apiPost('rejectAvatar', withAuthParams({ targetUserId: phone, phone: phone, username: phone, status: 'Rejected' }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast('ปฏิเสธรูปโปรไฟล์เรียบร้อยแล้ว', 'info');
+              loadUsersList(true);
+            } else {
+              showToast(res.message || 'ปฏิเสธไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Reject error:', err);
+            showToast('เกิดข้อผิดพลาดในการปฏิเสธรูป', 'error');
+          });
+      });
+    }
+
+    // ─── Add User Modal ──────────────────────────────────────────
+    function openAddUserModal() {
+      document.getElementById('add-user-form').reset();
+      document.getElementById('modal-add-user').style.display = 'flex';
+    }
+    function closeAddUserModal() {
+      document.getElementById('modal-add-user').style.display = 'none';
+    }
+
+    function submitAddUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('add-user-name').value.trim();
+      const phone = document.getElementById('add-user-phone').value.trim();
+      const pass = document.getElementById('add-user-pass').value.trim();
+      const role = document.getElementById('add-user-role').value;
+      const tambon = document.getElementById('add-user-tambon').value;
+      const instId = document.getElementById('filter-institution').value || 'INS_PHRAO';
+
+      const btn = document.getElementById('add-user-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังสร้าง...';
+
+      apiPost('createUserByAdmin', withAuthParams({
+        fullName: name,
+        phone: phone,
+        password: pass,
+        role: role,
+        tambon: tambon,
+        institutionId: instId
+      }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '💾 สร้างบัญชีสมาชิก';
+          if (res && res.status === 'success') {
+            showToast(`สร้างบัญชีสมาชิก "${name}" สำเร็จ`, 'success');
+            closeAddUserModal();
+            loadUsersList(true);
+          } else {
+            showToast(res.message || 'สร้างสมาชิกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '💾 สร้างบัญชีสมาชิก';
+          console.error('Create user error:', err);
+          showToast('เกิดข้อผิดพลาดในการสร้างสมาชิก', 'error');
+        });
+    }
+
+    // ─── Edit User Modal ─────────────────────────────────────────
+    let currentEditUserContext = null;
+
+    function openEditUserModal(phone, name, role, tambon, score = 0) {
+      currentEditUserContext = { phone, name, role, tambon, score: parseInt(score, 10) || 0 };
+      document.getElementById('edit-user-phone').value = phone;
+      document.getElementById('edit-user-phone-label').innerText = 'เบอร์โทร: ' + phone;
+      document.getElementById('edit-user-fullname').value = name;
+      document.getElementById('edit-user-role').value = role;
+      document.getElementById('edit-user-tambon').value = tambon;
+      document.getElementById('edit-user-new-pass').value = '';
+      
+      const scoreElem = document.getElementById('edit-user-score-display');
+      if (scoreElem) scoreElem.innerText = (currentEditUserContext.score).toLocaleString() + ' แต้ม';
+
+      document.getElementById('modal-edit-user').style.display = 'flex';
+    }
+
+    function openAdjustScoreFromEditModal() {
+      if (!currentEditUserContext) return;
+      closeEditUserModal();
+      openAdjustScoreModal(
+        currentEditUserContext.phone,
+        currentEditUserContext.name,
+        currentEditUserContext.score,
+        currentEditUserContext.role,
+        ''
+      );
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('modal-edit-user').style.display = 'none';
+    }
+
+    function submitEditUser(e) {
+      e.preventDefault();
+      const phone = document.getElementById('edit-user-phone').value;
+      const name = document.getElementById('edit-user-fullname').value.trim();
+      const role = document.getElementById('edit-user-role').value;
+      const tambon = document.getElementById('edit-user-tambon').value;
+      const newPass = document.getElementById('edit-user-new-pass').value.trim();
+
+      const btn = document.getElementById('edit-user-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('updateUserDetails', withAuthParams({
+        targetUserId: phone,
+        phone: phone,
+        username: phone,
+        fullName: name,
+        role: role,
+        tambon: tambon,
+        newPassword: newPass
+      }))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '💾 บันทึกการแก้ไข';
+          if (res && res.status === 'success') {
+            showToast(`แก้ไขข้อมูล "${name}" เรียบร้อยแล้ว`, 'success');
+            closeEditUserModal();
+            loadUsersList(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '💾 บันทึกการแก้ไข';
+          console.error('Edit user error:', err);
+          showToast('เกิดข้อผิดพลาดในการแก้ไขข้อมูล', 'error');
+        });
+    }
+
+    function deleteUserAction(phone, name) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบบัญชีผู้ใช้',
+        message: `ต้องการลบบัญชีผู้ใช้ "${name}" (${phone}) ใช่หรือไม่?\n⚠️ การกระทำนี้ไม่สามารถย้อนกลับได้`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบถาวร'
+      }, () => {
+        apiPost('deleteUser', withAuthParams({ targetUserId: phone, phone: phone, username: phone }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`ลบบัญชี "${name}" เรียบร้อยแล้ว`, 'success');
+              loadUsersList(true);
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Delete user error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบบัญชี', 'error');
+          });
+      });
+    }
+
+    // ─── Adjust User Score Modal & Functions ──────────────────────
+    let adjustScoreUserObj = null;
+
+    function openAdjustScoreModal(phone, name, score, role, avatar) {
+      adjustScoreUserObj = { phone, name, score: parseInt(score, 10) || 0, role, avatar };
+      
+      document.getElementById('adjust-score-target-username').value = phone;
+      document.getElementById('adjust-score-raw-current-score').value = adjustScoreUserObj.score;
+      document.getElementById('adjust-score-user-name').innerText = name || phone;
+      document.getElementById('adjust-score-user-phone').innerHTML = `<i class="fas fa-id-card mr-1 text-slate-500"></i>${phone}`;
+      document.getElementById('adjust-score-current-score').innerText = (adjustScoreUserObj.score).toLocaleString();
+      
+      const level = calculateLevel(adjustScoreUserObj.score);
+      document.getElementById('adjust-score-current-level').innerText = `LV. ${level}`;
+      
+      const avatarImg = document.getElementById('adjust-score-avatar');
+      if (avatar && (avatar.startsWith('http') || avatar.startsWith('/'))) {
+        avatarImg.src = avatar;
+        avatarImg.style.display = 'block';
+        if (avatarImg.nextElementSibling) avatarImg.nextElementSibling.style.display = 'none';
+      } else {
+        avatarImg.style.display = 'none';
+        if (avatarImg.nextElementSibling) avatarImg.nextElementSibling.style.display = 'flex';
+      }
+
+      // Reset form fields
+      document.getElementById('adjust-score-amount').value = '';
+      document.getElementById('adjust-score-reason').value = '';
+      setScoreAdjustMode('add');
+      
+      // Load history
+      document.getElementById('adjust-score-history-container').style.display = 'none';
+      document.getElementById('history-chevron').style.transform = 'rotate(0deg)';
+      loadUserPointsHistory(phone);
+
+      document.getElementById('modal-adjust-score').style.display = 'flex';
+    }
+
+    function closeAdjustScoreModal() {
+      document.getElementById('modal-adjust-score').style.display = 'none';
+    }
+
+    function setScoreAdjustMode(mode) {
+      document.getElementById('adjust-score-mode').value = mode;
+      
+      const btnAdd = document.getElementById('btn-mode-add');
+      const btnDeduct = document.getElementById('btn-mode-deduct');
+      const btnSet = document.getElementById('btn-mode-set');
+      const inputLabel = document.getElementById('adjust-score-input-label');
+      const submitBtn = document.getElementById('adjust-score-submit-btn');
+
+      [btnAdd, btnDeduct, btnSet].forEach(b => {
+        b.className = 'p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200';
+      });
+
+      if (mode === 'add') {
+        btnAdd.className = 'p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm';
+        inputLabel.innerHTML = 'จำนวนแต้มที่ต้องการเพิ่ม <span class="text-rose-400">*</span>';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 active:scale-95';
+        submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> <span>ยืนยันเพิ่มคะแนน</span>';
+      } else if (mode === 'deduct') {
+        btnDeduct.className = 'p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-sm';
+        inputLabel.innerHTML = 'จำนวนแต้มที่ต้องการหักออก <span class="text-rose-400">*</span>';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-black shadow-md shadow-rose-600/30 transition flex items-center gap-1.5 active:scale-95';
+        submitBtn.innerHTML = '<i class="fas fa-minus-circle"></i> <span>ยืนยันหักคะแนน</span>';
+      } else if (mode === 'set') {
+        btnSet.className = 'p-2.5 rounded-xl border font-bold text-xs flex flex-col items-center gap-1 transition bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm';
+        inputLabel.innerHTML = 'ระบุคะแนนสะสมสุทธิใหม่ <span class="text-rose-400">*</span>';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95';
+        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> <span>ยืนยันกำหนดคะแนน</span>';
+      }
+
+      updateScorePreview();
+    }
+
+    function quickSetPoints(pts) {
+      document.getElementById('adjust-score-amount').value = pts;
+      updateScorePreview();
+    }
+
+    function quickSetReason(text) {
+      document.getElementById('adjust-score-reason').value = text;
+    }
+
+    function calculateLevel(score) {
+      score = parseInt(score, 10) || 0;
+      if (score >= 5000) return 5;
+      if (score >= 2000) return 4;
+      if (score >= 1000) return 3;
+      if (score >= 300) return 2;
+      return 1;
+    }
+
+    function updateScorePreview() {
+      const rawCurrent = parseInt(document.getElementById('adjust-score-raw-current-score').value, 10) || 0;
+      const mode = document.getElementById('adjust-score-mode').value || 'add';
+      const amountVal = parseInt(document.getElementById('adjust-score-amount').value, 10);
+      const amount = isNaN(amountVal) ? 0 : Math.max(0, amountVal);
+
+      let newScore = rawCurrent;
+      let delta = 0;
+
+      if (mode === 'set') {
+        newScore = amount;
+        delta = newScore - rawCurrent;
+      } else if (mode === 'deduct') {
+        newScore = Math.max(0, rawCurrent - amount);
+        delta = newScore - rawCurrent;
+      } else { // 'add'
+        newScore = rawCurrent + amount;
+        delta = amount;
+      }
+
+      const newLevel = calculateLevel(newScore);
+
+      document.getElementById('preview-old-score').innerText = rawCurrent.toLocaleString();
+      document.getElementById('preview-new-score').innerText = newScore.toLocaleString() + ' แต้ม';
+      
+      const deltaElem = document.getElementById('preview-delta');
+      if (delta > 0) {
+        deltaElem.innerText = `+${delta.toLocaleString()}`;
+        deltaElem.className = 'text-[11px] font-bold font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else if (delta < 0) {
+        deltaElem.innerText = `${delta.toLocaleString()}`;
+        deltaElem.className = 'text-[11px] font-bold font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      } else {
+        deltaElem.innerText = '+0';
+        deltaElem.className = 'text-[11px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+      }
+
+      document.getElementById('preview-new-level').innerText = `LV. ${newLevel}`;
+    }
+
+    function submitAdjustScore(e) {
+      e.preventDefault();
+      const phone = document.getElementById('adjust-score-target-username').value;
+      const mode = document.getElementById('adjust-score-mode').value || 'add';
+      const amount = parseInt(document.getElementById('adjust-score-amount').value, 10);
+      const reason = document.getElementById('adjust-score-reason').value.trim();
+
+      if (isNaN(amount) || (mode !== 'set' && amount <= 0)) {
+        showToast('กรุณาระบุจำนวนแต้มให้ถูกต้อง', 'warning');
+        return;
+      }
+      if (!reason) {
+        showToast('กรุณาระบุเหตุผลในการปรับคะแนน', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('adjust-score-submit-btn');
+      submitBtn.disabled = true;
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+
+      apiPost('adjustUserScore', withAuthParams({
+        targetUserId: phone,
+        username: phone,
+        phone: phone,
+        mode: mode,
+        points: amount,
+        amount: amount,
+        reason: reason,
+        description: reason
+      }))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+          if (res && res.status === 'success') {
+            showToast(res.message || 'บันทึกการปรับคะแนนสำเร็จ', 'success');
+            closeAdjustScoreModal();
+            loadUsersList(true);
+          } else {
+            showToast(res.message || 'ปรับคะแนนไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+          console.error('Adjust score error:', err);
+          showToast('เกิดข้อผิดพลาดในการปรับคะแนน', 'error');
+        });
+    }
+
+    function togglePointsHistory() {
+      const container = document.getElementById('adjust-score-history-container');
+      const chevron = document.getElementById('history-chevron');
+      if (container.style.display === 'none') {
+        container.style.display = 'block';
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        container.style.display = 'none';
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function loadUserPointsHistory(phone) {
+      const container = document.getElementById('adjust-score-history-container');
+      container.innerHTML = '<div class="text-center py-3 text-slate-500 text-[11px]"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังโหลดประวัติ...</div>';
+      
+      apiGet('getUserPointsHistory', withAuthParams({ targetUserId: phone }))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.transactions)) {
+            const list = res.transactions;
+            document.getElementById('history-items-count').innerText = list.length;
+            if (!list.length) {
+              container.innerHTML = '<div class="text-center py-3 text-slate-500 text-[11px]">ยังไม่มีประวัติรายการแต้มสะสม</div>';
+              return;
+            }
+            let hHtml = '';
+            list.forEach(t => {
+              const pts = parseInt(t.points, 10) || 0;
+              const ptsDisplay = pts > 0 ? `+${pts}` : `${pts}`;
+              const ptsColor = pts > 0 ? 'text-emerald-400' : (pts < 0 ? 'text-rose-400' : 'text-slate-400');
+              const icon = pts > 0 ? 'fa-arrow-trend-up text-emerald-400' : (pts < 0 ? 'fa-arrow-trend-down text-rose-400' : 'fa-circle-info text-slate-400');
+              
+              hHtml += `
+                <div class="p-2 rounded-xl bg-slate-800/90 border border-slate-700/60 flex items-center justify-between gap-2 text-[11px]">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <i class="fas ${icon} text-xs shrink-0"></i>
+                    <div class="min-w-0">
+                      <p class="text-slate-200 font-bold truncate m-0">${escapeHtml(t.description || t.type || 'รายการแต้ม')}</p>
+                      <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(t.date || '')}</span>
+                    </div>
+                  </div>
+                  <span class="font-mono font-black ${ptsColor} shrink-0 text-xs">${ptsDisplay}</span>
+                </div>
+              `;
+            });
+            container.innerHTML = hHtml;
+          } else {
+            container.innerHTML = '<div class="text-center py-3 text-slate-500 text-[11px]">ไม่มีข้อมูลประวัติ</div>';
+          }
+        })
+        .catch(err => {
+          console.error('Load points history error:', err);
+          container.innerHTML = '<div class="text-center py-3 text-rose-400 text-[11px]">โหลดประวัติไม่สำเร็จ</div>';
+        });
+    }
+
+
+    // ─── Tab 3: Certificates History ─────────────────────────────
+    function loadCertificatesHistory() {
+      const tambon = document.getElementById('filter-tambon').value;
+      const tbody = document.getElementById('certs-table-body');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500"><i class="fas fa-spinner fa-spin mr-2"></i>กำลังดึงข้อมูลใบประกาศ...</td></tr>';
+
+      apiGet('getCertIssuanceHistory', withAuthParams({ tambon: tambon }))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.items || res.data)) {
+            currentCertsList = res.items || res.data;
+            document.getElementById('stat-total-certs').innerText = currentCertsList.length;
+            renderCertsTable();
+          } else {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">ไม่พบประวัติการออกใบประกาศ</td></tr>';
+          }
+        })
+        .catch(err => {
+          console.error('Load certs error:', err);
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-rose-400">เกิดข้อผิดพลาดในการโหลดใบประกาศ</td></tr>';
+        });
+    }
+
+    function renderCertsTable() {
+      const tbody = document.getElementById('certs-table-body');
+      const search = (document.getElementById('filter-search').value || '').trim().toLowerCase();
+
+      let filtered = currentCertsList;
+      if (search) {
+        filtered = filtered.filter(c => {
+          const name = (c.fullName || c.name || '').toLowerCase();
+          const ref = (c.refNo || c.ref_no || '').toLowerCase();
+          const source = (c.sourceName || c.source_name || '').toLowerCase();
+          return name.includes(search) || ref.includes(search) || source.includes(search);
+        });
+      }
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">ไม่พบข้อมูลใบประกาศที่ค้นหา</td></tr>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(c => {
+        const certId = c.id || c.certId || '';
+        const refNo = c.refNo || c.ref_no || c.certNo || (c.id ? `CERT-${c.id}` : '-');
+        const name = c.fullName || c.name || 'ไม่ระบุชื่อ';
+        const sourceName = c.sourceName || c.source_name || 'แหล่งเรียนรู้';
+        const score = c.score != null ? c.score : 'ผ่านการประเมิน';
+        const date = c.issuedAt || c.date || c.issued_at || '-';
+        const username = c.username || c.userId || '';
+        const sourceId = c.sourceId || c.source_id || '';
+        const activityId = c.activityId || c.activity_id || '';
+        const baseId = c.baseId || c.base_id || '';
+        const certUrl = c.certUrl || c.cert_url || '';
+
+        html += `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-3.5 font-mono text-purple-400 font-bold">${escapeHtml(refNo)}</td>
+            <td class="py-3 px-3.5 font-bold text-white">${escapeHtml(name)}</td>
+            <td class="py-3 px-3.5 text-slate-300">${escapeHtml(sourceName)}</td>
+            <td class="py-3 px-3.5 text-center font-bold text-amber-400 font-mono">${escapeHtml(String(score))}</td>
+            <td class="py-3 px-3.5 text-center text-slate-400 font-mono">${escapeHtml(date)}</td>
+            <td class="py-3 px-3.5 text-right">
+              <button type="button" onclick="downloadCertPdf('${escapeJS(certId)}', '${escapeJS(username)}', '${escapeJS(sourceId)}', '${escapeJS(activityId)}', '${escapeJS(baseId)}', '${escapeJS(certUrl)}')" class="px-3 py-1.5 bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 text-purple-200 border border-purple-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ml-auto cursor-pointer shadow-sm">
+                <i class="fas fa-file-pdf text-purple-400"></i> ดูใบประกาศ
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function downloadCertPdf(certId, username, sourceId, activityId, baseId, certUrl) {
+      if (certUrl && (certUrl.startsWith('http') || certUrl.startsWith('/'))) {
+        window.open(certUrl, '_blank');
+        return;
+      }
+
+      showToast('กำลังเปิดใบประกาศนียบัตร...', 'info');
+
+      apiPost('generateCert', withAuthParams({
+        certId: certId,
+        username: username,
+        sourceId: sourceId,
+        activityId: activityId,
+        baseId: baseId
+      }))
+        .then(res => {
+          if (res && res.status === 'success' && res.url) {
+            window.open(res.url, '_blank');
+            showToast('เปิดใบประกาศนียบัตรเรียบร้อย', 'success');
+          } else if (res && res.url) {
+            window.open(res.url, '_blank');
+          } else {
+            const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token') || '';
+            const fallbackUrl = `/api/downloadCertificate?certId=${encodeURIComponent(certId)}&username=${encodeURIComponent(username)}&sourceId=${encodeURIComponent(sourceId)}&activityId=${encodeURIComponent(activityId)}&token=${encodeURIComponent(token)}`;
+            window.open(fallbackUrl, '_blank');
+          }
+        })
+        .catch(err => {
+          console.error('Cert generate error:', err);
+          const token = localStorage.getItem('authToken') || localStorage.getItem('nfe_auth_token') || '';
+          const fallbackUrl = `/api/downloadCertificate?certId=${encodeURIComponent(certId)}&username=${encodeURIComponent(username)}&sourceId=${encodeURIComponent(sourceId)}&activityId=${encodeURIComponent(activityId)}&token=${encodeURIComponent(token)}`;
+          window.open(fallbackUrl, '_blank');
+        });
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+  <script src="js/core/dossier.js?v=20260830-dossier"></script>
+  <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

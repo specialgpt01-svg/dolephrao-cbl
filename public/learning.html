@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="assets/loft-logo.svg">
+  <title>คลังแหล่งเรียนรู้และฐานย่อย | PHRAO LEARNING DISTRICT</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      font-family: 'Prompt', sans-serif;
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+      overflow-x: hidden;
+    }
+    /* Responsive Desktop Sidebar & Main Layout */
+    .desktop-sidebar {
+      width: 260px;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
+    }
+    .app-main-layout {
+      transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sidebar-collapsed .desktop-sidebar {
+      width: 76px;
+    }
+    body.sidebar-collapsed .desktop-sidebar .sidebar-label,
+    body.sidebar-collapsed .desktop-sidebar .sidebar-heading,
+    body.sidebar-collapsed .desktop-sidebar .sidebar-user-info,
+    body.sidebar-collapsed .desktop-sidebar .sidebar-badge {
+      display: none !important;
+    }
+    body.sidebar-collapsed .desktop-sidebar .sidebar-item {
+      justify-content: center !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+    body.sidebar-collapsed .app-main-layout {
+      padding-left: 76px !important;
+    }
+    @media (min-width: 1024px) {
+      .app-main-layout {
+        padding-left: 260px;
+      }
+    }
+    @media (max-width: 1023px) {
+      .app-main-layout {
+        padding-left: 0 !important;
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 10px;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- ═══════════════════ Desktop Left Navigation Sidebar ═══════════════════ -->
+  <aside id="app-desktop-sidebar" class="desktop-sidebar fixed top-0 left-0 bottom-0 z-40 bg-slate-900/95 border-r border-slate-800/80 backdrop-blur-xl flex flex-col justify-between hidden lg:flex shadow-2xl custom-scrollbar overflow-y-auto overflow-x-hidden select-none">
+    
+    <!-- Top Header & Brand -->
+    <div>
+      <div class="h-16 px-4 flex items-center justify-between border-b border-slate-800/80 shrink-0">
+        <a href="index.html" class="flex items-center gap-3 min-w-0 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white text-lg shadow-md shadow-teal-500/25 shrink-0 group-hover:scale-105 transition-transform">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <div class="sidebar-label min-w-0">
+            <div class="text-xs font-black text-white truncate leading-tight tracking-wide">PHRAO DISTRICT</div>
+            <div class="text-[10px] text-teal-400 font-bold truncate">สกร.อำเภอพร้าว</div>
+          </div>
+        </a>
+        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition" title="ย่อ/ขยายเมนู">
+          <i class="fas fa-bars-staggered"></i>
+        </button>
+      </div>
+
+      <!-- Nav Links Menu -->
+      <div class="p-3 space-y-4">
+        
+        <!-- Group 1: การเรียนรู้ & หลักสูตร -->
+        <div>
+          <div class="sidebar-heading px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500">
+            หลักสูตรและการเรียนรู้
+          </div>
+          <nav class="space-y-1 mt-1">
+            <a href="learning.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm transition group" title="ศึกษาดูงานแหล่งเรียนรู้">
+              <div class="w-7 h-7 rounded-xl bg-teal-500/30 text-teal-300 flex items-center justify-center text-xs shrink-0">
+                <i class="fas fa-book-open"></i>
+              </div>
+              <span class="sidebar-label flex-1 truncate">ศึกษาดูงาน (ผู้เรียน)</span>
+              <span class="sidebar-badge px-2 py-0.5 rounded-full text-[9px] font-black bg-teal-500 text-slate-950">Active</span>
+            </a>
+
+            <a href="sources.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="จัดการหลักสูตรและแหล่งเรียนรู้">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-sky-500/20 text-slate-400 group-hover:text-sky-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <span class="sidebar-label truncate">หลักสูตร & แหล่งเรียนรู้</span>
+            </a>
+
+            <a href="map.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="แผนที่พิกัดแหล่งเรียนรู้">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-emerald-500/20 text-slate-400 group-hover:text-emerald-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-map-marked-alt"></i>
+              </div>
+              <span class="sidebar-label truncate">แผนที่พิกัด GPS</span>
+            </a>
+
+            <a href="scan.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="สแกน QR เช็กอิน">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-purple-500/20 text-slate-400 group-hover:text-purple-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-qrcode"></i>
+              </div>
+              <span class="sidebar-label truncate">สแกน QR เช็กอิน</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Group 2: ศูนย์จัดการระบบ (Admin Hub) -->
+        <div>
+          <div class="sidebar-heading px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500">
+            ระบบจัดการสถานศึกษา
+          </div>
+          <nav class="space-y-1 mt-1">
+            <a href="events-admin.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="กิจกรรมสถานศึกษา">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-emerald-500/20 text-slate-400 group-hover:text-emerald-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-bullhorn"></i>
+              </div>
+              <span class="sidebar-label truncate">กิจกรรม & QR เช็กอิน</span>
+            </a>
+
+            <a href="institutions.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="สถานศึกษา & หน่วยจัด">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-blue-500/20 text-slate-400 group-hover:text-blue-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-school"></i>
+              </div>
+              <span class="sidebar-label truncate">สถานศึกษา & หน่วยจัด</span>
+            </a>
+
+            <a href="users.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="จัดการผู้เรียน & สิทธิ์">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-indigo-500/20 text-slate-400 group-hover:text-indigo-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-users"></i>
+              </div>
+              <span class="sidebar-label truncate">จัดการผู้เรียน & สิทธิ์</span>
+            </a>
+
+            <a href="market-admin.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="ตลาดชุมชน">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-amber-500/20 text-slate-400 group-hover:text-amber-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-store"></i>
+              </div>
+              <span class="sidebar-label truncate">ตลาดชุมชน & คูปอง</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Group 3: บัญชีผู้ใช้ & หน้าหลัก -->
+        <div>
+          <div class="sidebar-heading px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500">
+            ทั่วไป
+          </div>
+          <nav class="space-y-1 mt-1">
+            <a href="index.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="หน้าหลักสำหรับผู้เรียน">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-amber-500/20 text-slate-400 group-hover:text-amber-400 flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-home"></i>
+              </div>
+              <span class="sidebar-label truncate">หน้าหลัก (ผู้เรียน)</span>
+            </a>
+
+            <a href="profile.html" class="sidebar-item flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition group" title="โปรไฟล์ผู้ใช้งาน">
+              <div class="w-7 h-7 rounded-xl bg-slate-800 group-hover:bg-slate-700 text-slate-400 group-hover:text-white flex items-center justify-center text-xs shrink-0 transition">
+                <i class="fas fa-user"></i>
+              </div>
+              <span class="sidebar-label truncate">โปรไฟล์ & ตั้งค่า</span>
+            </a>
+          </nav>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom User Profile Card -->
+    <div class="p-3 border-t border-slate-800/80 shrink-0">
+      <div class="p-2.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-inner" id="sidebar-user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="sidebar-user-info min-w-0">
+            <div class="text-xs font-bold text-white truncate" id="sidebar-user-name">ผู้เรียน สกร.</div>
+            <div class="text-[10px] text-teal-400 font-medium truncate" id="sidebar-user-role">Student Portal</div>
+          </div>
+        </div>
+        <button type="button" onclick="handleAppLogout()" class="w-7 h-7 rounded-lg bg-slate-700/60 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition shrink-0" title="ออกจากระบบ">
+          <i class="fas fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════════════ Main Application Wrapper ═══════════════════ -->
+  <div id="app-main-wrapper" class="app-main-layout w-full min-h-screen">
+
+  <!-- ═══════════════════ Top Header Bar ═══════════════════ -->
+  <header class="w-full sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <a href="index.html" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition active:scale-95">
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
+        <div>
+          <h1 class="text-xs sm:text-sm font-black text-white m-0 flex items-center gap-1.5">
+            <i class="fas fa-book-open text-sky-400"></i> คลังแหล่งเรียนรู้ชุมชน
+          </h1>
+          <p class="text-[10px] text-slate-400 m-0 hidden sm:block">ศึกษาดูงาน ทำแบบทดสอบ และรับใบประกาศนียบัตร</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select id="learning-institution-select" onchange="onLearningInstitutionChange(this.value)" class="text-xs bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+          <option value="INS_PHRAO" selected>🏫 สกร.พร้าว</option>
+          <option value="INS_MAERIM">🏫 สกร.แม่ริม</option>
+          <option value="ALL">🌍 ทุกอำเภอ</option>
+        </select>
+        <a href="scan.html" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1" title="สแกน QR Code">
+          <i class="fas fa-qrcode"></i> <span class="hidden sm:inline">สแกน</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ Main Content Container ═══════════════════ -->
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 pb-28 md:pb-10">
+    
+    <!-- View 1: Sources Directory (Catalog) & Activities Digital Hub -->
+    <div id="sources-directory-view" class="space-y-4">
+      
+      <!-- 🌟 Hub Mode Switcher: Sources vs Online Activities -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 bg-slate-900/90 rounded-3xl border border-slate-800 shadow-xl">
+        <div class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 flex-1 sm:flex-initial">
+          <button type="button" id="tab-btn-sources" onclick="switchLearningHubTab('sources')" class="flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md">
+            <i class="fas fa-landmark text-sky-200"></i> แหล่งเรียนรู้ชุมชน
+          </button>
+          <button type="button" id="tab-btn-activities" onclick="switchLearningHubTab('activities')" class="flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white">
+            <i class="fas fa-book-open-reader text-purple-400"></i> คลังกิจกรรม & สื่อออนไลน์
+          </button>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 pr-2 text-xs text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>คลังการเรียนรู้ดิจิทัลตลอดชีวิต</span>
+        </div>
+      </div>
+
+      <!-- Sources Filter Bar Card (Active for Sources Tab) -->
+      <div id="sources-filter-bar" class="p-3.5 sm:p-4 rounded-3xl bg-slate-900/80 border border-slate-700/80 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 justify-between shadow-lg">
+        <div class="relative flex-1">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="sources-search-input" onkeyup="filterLearningSources()" placeholder="ค้นหาชื่อแหล่งเรียนรู้ องค์ความรู้ หรือปราชญ์..." class="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-sky-500">
+        </div>
+        
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <select id="sources-tambon-filter" onchange="filterLearningSources()" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-sky-500 cursor-pointer">
+            <option value="">ทุกตำบล / ศศช.</option>
+          </select>
+          <select id="sources-type-filter" onchange="filterLearningSources()" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-sky-500 cursor-pointer">
+            <option value="">ทุกประเภท</option>
+            <option value="สถานที่">📍 สถานที่</option>
+            <option value="บุคคล">👤 บุคคล/ปราชญ์</option>
+            <option value="สื่อ">📱 สื่อ/นวัตกรรม</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Activities Filter Bar Card (Active for Activities Tab) -->
+      <div id="activities-filter-bar" class="p-3.5 sm:p-4 rounded-3xl bg-slate-900/80 border border-purple-500/30 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 justify-between shadow-lg" style="display: none;">
+        <div class="relative flex-1">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
+          <input type="text" id="activities-search-input" onkeyup="filterOnlineActivities()" placeholder="ค้นหาชื่อกิจกรรม ใบความรู้ หรือหัวข้อการเรียนรู้..." class="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500">
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <select id="activities-tambon-filter" onchange="filterOnlineActivities()" class="text-xs bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-purple-500 cursor-pointer">
+            <option value="">ทุกตำบล / ศศช.</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sources Count & Tag -->
+      <div id="sources-count-row" class="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
+        <span>รายการแหล่งเรียนรู้ (<span id="sources-matched-count" class="text-amber-400">0</span> แห่ง)</span>
+        <a href="map.html" class="text-sky-400 hover:text-sky-300 flex items-center gap-1">
+          <i class="fas fa-map-marked-alt"></i> ดูบนแผนที่ GPS
+        </a>
+      </div>
+
+      <!-- Activities Count & Tag -->
+      <div id="activities-count-row" class="flex items-center justify-between text-xs font-bold text-slate-400 px-1" style="display: none;">
+        <span>คลังกิจกรรมและบทเรียนออนไลน์ (<span id="activities-matched-count" class="text-purple-400">0</span> กิจกรรม)</span>
+        <span class="text-teal-400 flex items-center gap-1">
+          <i class="fas fa-graduation-cap"></i> เรียนได้ทุกที่ ทุกเวลา (24/7)
+        </span>
+      </div>
+
+      <!-- Sources Grid -->
+      <div id="learning-sources-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Activities Grid -->
+      <div id="online-activities-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style="display: none;">
+        <!-- Rendered via JS -->
+      </div>
+
+    </div>
+
+    <!-- View 2: Source Detail & Learning Bases View -->
+    <div id="source-detail-view" class="space-y-6" style="display:none;">
+      
+      <!-- Back to List Button -->
+      <button type="button" onclick="showSourcesDirectoryView()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95 flex items-center gap-1.5">
+        <i class="fas fa-arrow-left"></i> กลับสู่รายการแหล่งเรียนรู้
+      </button>
+
+      <!-- Source Detail Header Card -->
+      <div class="rounded-3xl bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-2xl">
+        <div class="h-48 sm:h-64 w-full bg-slate-800 relative">
+          <img id="detail-cover-img" src="assets/loft-logo.svg" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          
+          <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 flex-wrap">
+            <div class="space-y-1">
+              <span id="detail-grade-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                ⭐ ได้รับการรับรองมาตรฐาน สกร.
+              </span>
+              <h2 id="detail-source-title" class="text-xl sm:text-2xl font-black text-white m-0">ชื่อแหล่งเรียนรู้</h2>
+              <p id="detail-source-tambon" class="text-xs text-sky-400 m-0 font-medium">📍 ตำบล...</p>
+            </div>
+
+            <!-- Quiz & Cert Trigger Buttons -->
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openPreTestModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-bold transition active:scale-95 flex items-center gap-1.5">
+                <i class="fas fa-clipboard-question text-sky-400"></i> ทำแบบทดสอบก่อนเรียน
+              </button>
+              <button type="button" onclick="openPostTestModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/30 transition active:scale-95 flex items-center gap-1.5">
+                <i class="fas fa-award"></i> ทดสอบหลังเรียน & รับใบประกาศ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description & Facilities Tab Body -->
+        <div class="p-5 sm:p-6 space-y-4 text-xs">
+          <div class="space-y-2">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fas fa-align-left text-amber-400"></i> ประวัติและความเป็นมา / วัตถุประสงค์
+            </h4>
+            <p id="detail-source-history" class="text-slate-300 leading-relaxed m-0">-</p>
+          </div>
+
+          <div class="space-y-2">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fas fa-book-open-reader text-sky-400"></i> องค์ความรู้หลัก
+            </h4>
+            <p id="detail-source-result" class="text-slate-300 leading-relaxed m-0">-</p>
+          </div>
+
+          <!-- Facilities Grid -->
+          <div class="pt-3 border-t border-slate-800">
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">สิ่งอำนวยความสะดวก & ข้อมูลการเดินทาง</h5>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="detail-facilities-grid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ Learning Bases Showcase ═══════════════════ -->
+      <section class="space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-white m-0 flex items-center gap-2">
+              <i class="fas fa-layer-group text-teal-400"></i> ฐานการเรียนรู้ประจำแหล่ง (<span id="detail-bases-count">0</span> ฐาน)
+            </h3>
+            <p class="text-[11px] text-slate-400 m-0">ศึกษาเนื้อหาและชมวิดีโอประจำแต่ละฐานการเรียนรู้</p>
+          </div>
+        </div>
+
+        <div id="detail-bases-container" class="space-y-3">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════ Base Detail Modal ═══════════════════ -->
+  <div id="base-detail-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700 sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-pop">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm font-black border border-teal-500/30">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div>
+            <h4 id="base-modal-title" class="text-sm font-black text-white m-0">ฐานการเรียนรู้</h4>
+            <p class="text-[10px] text-slate-400 m-0">เนื้อหาและข้อมูลประจำฐาน</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBaseModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <!-- Body -->
+      <div id="base-modal-body" class="overflow-y-auto flex-1 custom-scrollbar">
+        <!-- Rendered by JS -->
+      </div>
+      <!-- Footer -->
+      <div class="px-5 py-4 border-t border-slate-800 shrink-0 flex gap-2">
+        <button type="button" id="base-modal-pretest-btn" onclick="openBasePreTest()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-bold transition active:scale-95 flex items-center justify-center gap-1.5">
+          <i class="fas fa-clipboard-question text-sky-400"></i> ทำแบบทดสอบก่อนเรียน
+        </button>
+        <button type="button" id="base-modal-posttest-btn" onclick="openBasePostTest()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-1.5">
+          <i class="fas fa-award"></i> ทดสอบหลังเรียน
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Quiz Interactive Modal ═══════════════════ -->
+  <div id="quiz-interactive-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-pop">
+      
+      <!-- Quiz Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-black">
+            <i class="fas fa-question"></i>
+          </div>
+          <div>
+            <h4 id="quiz-modal-title" class="text-sm font-black text-white m-0">แบบทดสอบประเมินความรู้</h4>
+            <p id="quiz-modal-subtitle" class="text-[10px] text-slate-400 m-0">ตอบคำถามให้ครบทุกข้อเพื่อประเมินผล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeQuizModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Quiz Questions (Scrollable) -->
+      <div id="quiz-questions-body" class="overflow-y-auto flex-1 my-3 space-y-4 pr-1 text-xs custom-scrollbar">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Quiz Footer -->
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 shrink-0">
+        <span class="text-[11px] text-slate-400 font-bold" id="quiz-answered-count">ตอบแล้ว 0 ข้อ</span>
+        <button type="button" id="btn-submit-quiz" onclick="submitQuizAnswersAction()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/20 transition active:scale-95">
+          <i class="fas fa-paper-plane mr-1"></i> ส่งคำตอบประเมินผล
+        </button>
+      </div>
+
+    </div>
+  </div> <!-- End #quiz-interactive-modal -->
+
+  <!-- ═══════════════════ Online Activity Classroom & Digital Hub Modal ═══════════════════ -->
+  <div id="modal-online-activity-classroom" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border border-purple-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] flex flex-col space-y-4">
+      
+      <!-- Header -->
+      <div class="pb-3 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30 shrink-0">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                🌐 ศึกษาออนไลน์ตลอด 24 ชม.
+              </span>
+              <span id="classroom-act-tambon-badge" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                ต.เมือง
+              </span>
+            </div>
+            <h3 class="text-sm sm:text-base font-black text-white m-0 truncate mt-0.5" id="classroom-act-title">
+              ชื่อกิจกรรมการเรียนรู้
+            </h3>
+          </div>
+        </div>
+        <button type="button" onclick="closeOnlineActivityClassroom()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition shrink-0">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Body Content (Scrollable) -->
+      <div class="overflow-y-auto flex-1 space-y-4 pr-1 text-xs custom-scrollbar">
+        
+        <!-- Video Player Box -->
+        <div id="classroom-act-video-box" class="space-y-1.5" style="display:none;">
+          <div class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fab fa-youtube text-rose-400"></i> คลิปวิดีโอบรรยาย & การเรียนรู้
+          </div>
+          <div class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-inner" id="classroom-act-video-player">
+          </div>
+        </div>
+
+        <!-- Description / Instructions -->
+        <div class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-1.5">
+          <div class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fas fa-circle-info text-sky-400"></i> คำชี้แจง & ข้อมูลกิจกรรม
+          </div>
+          <p class="text-slate-300 leading-relaxed m-0 text-xs" id="classroom-act-desc">
+            คำอธิบายกิจกรรม
+          </p>
+        </div>
+
+        <!-- Learning Materials & Handouts Box -->
+        <div id="classroom-act-pdf-box" class="space-y-1.5" style="display:none;">
+          <div class="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
+            <i class="fas fa-file-pdf text-rose-400"></i> เอกสารประกอบการเรียนรู้ & ใบความรู้ (ดาวน์โหลด)
+          </div>
+          <div id="classroom-act-pdf-list" class="space-y-1.5">
+            <!-- Dynamic PDF List -->
+          </div>
+        </div>
+
+        <!-- External Links Box -->
+        <div id="classroom-act-links-box" class="space-y-1.5" style="display:none;">
+          <div class="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+            <i class="fas fa-link text-amber-400"></i> ลิงก์แหล่งเรียนรู้เพิ่มเติม (Canva / Drive)
+          </div>
+          <div id="classroom-act-links-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- Dynamic Links -->
+          </div>
+        </div>
+
+        <!-- Points & Certificate Notice Banner -->
+        <div class="p-3.5 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-900 rounded-2xl border border-purple-500/40 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-base shrink-0 border border-purple-500/30">
+              <i class="fas fa-award"></i>
+            </div>
+            <div>
+              <div class="font-bold text-white text-xs">ทำแบบทดสอบเพื่อรับแต้ม & เกียรติบัตร</div>
+              <div class="text-[10px] text-purple-300" id="classroom-act-points-text">ผ่านเกณฑ์ 80% รับเกียรติบัตรและแต้มสะสมทันที</div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-black shrink-0" id="classroom-act-points-badge">
+            🪙 +20 แต้ม
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+        <button type="button" onclick="closeOnlineActivityClassroom()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+          ปิดหน้าต่าง
+        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <a id="classroom-survey-btn" href="#" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-amber-500/30 transition flex items-center justify-center gap-1.5">
+            <i class="fas fa-star text-xs"></i> <span>ประเมิน (+10 แต้ม)</span>
+          </a>
+          <a id="classroom-quiz-btn" href="#" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white font-black text-xs shadow-lg shadow-purple-900/50 transition active:scale-95 flex items-center justify-center gap-1.5">
+            <i class="fas fa-clipboard-question"></i> <span>เริ่มทำแบบทดสอบ ✨</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  </div> <!-- End #app-main-wrapper -->
+
+  <!-- ═══════════════════ Admin Hub Navigation Modal / Drawer ═══════════════════ -->
+  <div id="admin-nav-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-md" style="display:none;">
+    <div class="w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700 sm:rounded-3xl rounded-t-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <i class="fas fa-toolbox"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white m-0">ศูนย์จัดการระบบ (Admin Hub)</h3>
+            <p class="text-[10px] text-slate-400 m-0">เลือกระบบงานที่ต้องการเข้าจัดการข้อมูล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminNavModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto custom-scrollbar p-1">
+        <a href="sources.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">แหล่งเรียนรู้ ม.6</span>
+          <span class="text-[10px] text-slate-400">จัดการข้อมูลและปราชญ์</span>
+        </a>
+
+        <a href="bases.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-sky-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-sky-400">ฐานเรียนรู้ย่อย</span>
+          <span class="text-[10px] text-slate-400">ฐานกิจกรรมในแหล่ง</span>
+        </a>
+
+        <a href="activities-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-indigo-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-indigo-400">กิจกรรม & ป้าย QR</span>
+          <span class="text-[10px] text-slate-400">QR เช็กอินแต้ม, ข้อสอบ & เกียรติบัตร</span>
+        </a>
+
+        <a href="quizzes.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-emerald-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-emerald-400">ข้อสอบ & เกณฑ์</span>
+          <span class="text-[10px] text-slate-400">คลังข้อสอบ Pre/Post และเกณฑ์ผ่าน</span>
+        </a>
+
+        <a href="cert-editor.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-award"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">ออกแบบเกียรติบัตร</span>
+          <span class="text-[10px] text-slate-400">Live Designer & ปรับแต่งเทมเพลต</span>
+        </a>
+
+        <a href="users.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-blue-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-blue-400">จัดการผู้เรียน</span>
+          <span class="text-[10px] text-slate-400">สมาชิก, รูปโปรไฟล์, สิทธิ์</span>
+        </a>
+
+        <a href="approvals.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-purple-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-stamp"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-purple-400">ตรวจอนุมัติ</span>
+          <span class="text-[10px] text-slate-400">ID Plan และผลงานผู้เรียน</span>
+        </a>
+
+        <a href="market-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-amber-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-store"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-amber-400">ตลาด & คูปอง</span>
+          <span class="text-[10px] text-slate-400">สินค้า OTOP และส่วนลด</span>
+        </a>
+
+        <a href="stats.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">สถิติภาพรวม</span>
+          <span class="text-[10px] text-slate-400">รายงานสรุปผู้บริหาร</span>
+        </a>
+
+        <a href="institutions.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-school"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-teal-400">สถานศึกษา</span>
+          <span class="text-[10px] text-slate-400">เครือข่าย สกร.อำเภอ</span>
+        </a>
+
+        <a href="upskill-admin.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-rose-500/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-video"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-rose-400">วิดีโออัพสกิล</span>
+          <span class="text-[10px] text-slate-400">จัดการสื่อและคลิปเรียนรู้</span>
+        </a>
+
+        <a href="settings.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-400/50 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-slate-700/60 text-slate-300 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-cog"></i>
+          </div>
+          <span class="text-xs font-bold text-white group-hover:text-slate-300">ตั้งค่าระบบ</span>
+          <span class="text-[10px] text-slate-400">Gemini AI Key & กลาง</span>
+        </a>
+
+        <a href="scan.html" class="p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500 flex flex-col gap-1 transition group">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <span class="text-xs font-bold text-amber-300 group-hover:text-white">สแกน QR เช็กอิน</span>
+          <span class="text-[10px] text-amber-400">เช็กอินสถานที่จริง</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Clean Mobile Bottom Navigation Bar (จอสมาร์ตโฟน) ═══════════════════ -->
+  <nav id="app-mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 w-full bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 lg:hidden flex items-center justify-around py-2 px-1 text-[10px] font-bold text-slate-400 shrink-0 z-40 shadow-2xl" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));">
+    <a href="index.html" class="flex flex-col items-center gap-1 hover:text-slate-200 transition">
+      <i class="fas fa-home text-base"></i>
+      <span>หน้าแรก</span>
+    </a>
+    <a href="map.html" class="flex flex-col items-center gap-1 hover:text-slate-200 transition">
+      <i class="fas fa-map-marked-alt text-base"></i>
+      <span>แผนที่</span>
+    </a>
+    <a href="learning.html" class="flex flex-col items-center gap-1 text-teal-400">
+      <i class="fas fa-book-open text-base"></i>
+      <span>แหล่งเรียนรู้</span>
+    </a>
+    <a href="scan.html" class="flex flex-col items-center gap-1 hover:text-slate-200 transition">
+      <i class="fas fa-qrcode text-base"></i>
+      <span>สแกน</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center gap-1 hover:text-slate-200 transition">
+      <i class="fas fa-user text-base"></i>
+      <span>โปรไฟล์</span>
+    </a>
+  </nav>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260822-user-learning-v2"></script>
+  <script src="js/core/auth.js?v=20260822-user-learning-v2"></script>
+
+  <script>
+    let allLearningSources = [];
+    let allOnlineActivities = [];
+    let currentHubTab = 'sources';
+    let currentDetailSource = null;
+    let currentQuizType = 'post';
+    let currentQuizData = [];
+    let currentInstitution = localStorage.getItem('nfe_selected_institution') || 'INS_PHRAO';
+
+    function switchLearningHubTab(tab) {
+      currentHubTab = tab;
+      const btnSources = document.getElementById('tab-btn-sources');
+      const btnActivities = document.getElementById('tab-btn-activities');
+      const filterSources = document.getElementById('sources-filter-bar');
+      const filterActivities = document.getElementById('activities-filter-bar');
+      const countSources = document.getElementById('sources-count-row');
+      const countActivities = document.getElementById('activities-count-row');
+      const gridSources = document.getElementById('learning-sources-grid');
+      const gridActivities = document.getElementById('online-activities-grid');
+
+      if (tab === 'sources') {
+        btnSources.className = 'flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md';
+        btnActivities.className = 'flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white';
+        if (filterSources) filterSources.style.display = 'flex';
+        if (filterActivities) filterActivities.style.display = 'none';
+        if (countSources) countSources.style.display = 'flex';
+        if (countActivities) countActivities.style.display = 'none';
+        if (gridSources) gridSources.style.display = 'grid';
+        if (gridActivities) gridActivities.style.display = 'none';
+      } else {
+        btnActivities.className = 'flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md';
+        btnSources.className = 'flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white';
+        if (filterSources) filterSources.style.display = 'none';
+        if (filterActivities) filterActivities.style.display = 'flex';
+        if (countSources) countSources.style.display = 'none';
+        if (countActivities) countActivities.style.display = 'flex';
+        if (gridSources) gridSources.style.display = 'none';
+        if (gridActivities) gridActivities.style.display = 'grid';
+
+        if (allOnlineActivities.length === 0) {
+          loadOnlineActivities();
+        }
+      }
+    }
+
+    function loadOnlineActivities() {
+      const grid = document.getElementById('online-activities-grid');
+      if (grid) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-12 text-slate-400 text-xs"><i class="fas fa-spinner fa-spin text-lg text-purple-400 mb-2 block"></i>กำลังโหลดคลังกิจกรรมและบทเรียนออนไลน์...</div>';
+      }
+
+      apiGet('getActivities', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          let list = [];
+          if (res && Array.isArray(res.activities)) {
+            list = res.activities;
+          } else if (res && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (Array.isArray(res)) {
+            list = res;
+          }
+
+          allOnlineActivities = list;
+          populateActivityTambonFilter();
+          filterOnlineActivities();
+        })
+        .catch(err => {
+          console.error("Failed to load activities:", err);
+          if (grid) {
+            grid.innerHTML = '<div class="col-span-3 text-center py-12 text-rose-400 text-xs">เกิดข้อผิดพลาดในการโหลดคลังกิจกรรมออนไลน์</div>';
+          }
+        });
+    }
+
+    function populateActivityTambonFilter() {
+      const sel = document.getElementById('activities-tambon-filter');
+      if (!sel) return;
+      const tambons = [...new Set(allOnlineActivities.map(a => a.tambon).filter(Boolean))].sort();
+      let html = '<option value="">📍 ทุกตำบล / ศศช. (ทั้งหมด)</option>';
+      tambons.forEach(t => {
+        html += `<option value="${escapeHtml(t)}">📍 ${escapeHtml(t)}</option>`;
+      });
+      sel.innerHTML = html;
+    }
+
+    function filterOnlineActivities() {
+      const tambon = (document.getElementById('activities-tambon-filter')?.value || '').trim();
+      const search = (document.getElementById('activities-search-input')?.value || '').trim().toLowerCase();
+
+      const filtered = allOnlineActivities.filter(a => {
+        const t = (a.tambon || '').trim();
+        const name = (a.name || a.activityName || '').toLowerCase();
+        const desc = (a.description || a.onlineDescription || '').toLowerCase();
+        const loc = (a.location || '').toLowerCase();
+
+        if (tambon && t !== tambon) return false;
+        if (search && !name.includes(search) && !desc.includes(search) && !loc.includes(search) && !t.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      const countEl = document.getElementById('activities-matched-count');
+      if (countEl) countEl.innerText = filtered.length;
+      renderActivitiesGrid(filtered);
+    }
+
+    function renderActivitiesGrid(activities) {
+      const grid = document.getElementById('online-activities-grid');
+      if (!grid) return;
+
+      if (!activities || activities.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-3 text-center py-14 p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-800 text-slate-500 mx-auto flex items-center justify-center text-xl">
+              <i class="fas fa-box-open"></i>
+            </div>
+            <div class="text-xs font-bold text-slate-300">ไม่พบบทเรียนกิจกรรมตามเงื่อนไขที่เลือก</div>
+            <p class="text-[11px] text-slate-500">ลองเปลี่ยนตัวกรองตำบล หรือค้นหาด้วยคำอื่น</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = activities.map(act => {
+        const actId = act.id || act.activityId || '';
+        const name = act.name || act.activityName || 'กิจกรรมการเรียนรู้';
+        const cover = act.coverImage || act.imageUrl || 'assets/loft-logo.svg';
+        const tambon = act.tambon || '';
+        const desc = act.description || act.onlineDescription || '';
+        const materials = act.learningMaterials || [];
+        const links = act.externalLinks || [];
+        const hasVideo = !!act.videoUrl;
+        const quizCount = Array.isArray(act.quizzes) ? act.quizzes.length : (act.quizzesCount || 0);
+
+        const points = act.checkInPoints || act.points || 20;
+
+        return `
+          <div class="group rounded-3xl bg-slate-900/85 border border-purple-500/30 hover:border-purple-400/60 overflow-hidden transition duration-300 flex flex-col shadow-xl hover:shadow-purple-500/10">
+            <!-- Cover -->
+            <div class="h-44 w-full bg-slate-800 relative overflow-hidden cursor-pointer" onclick="openOnlineActivityClassroom('${encodeURIComponent(actId)}')">
+              <img src="${escapeHtml(cover)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null; this.src='assets/loft-logo.svg';">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30"></div>
+              
+              <!-- Badges -->
+              <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-500/90 text-slate-950 shadow">
+                  <i class="fas fa-globe mr-1"></i>เรียนออนไลน์ได้ตลอดเวลา
+                </span>
+                ${tambon ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-950/85 text-slate-200 border border-slate-700">ต.${escapeHtml(tambon)}</span>` : ''}
+              </div>
+
+              <!-- Media Highlights -->
+              <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-bold text-slate-200">
+                <div class="flex items-center gap-1.5">
+                  ${hasVideo ? '<span class="px-2 py-0.5 rounded-lg bg-rose-600/90 text-white backdrop-blur-md flex items-center gap-1"><i class="fab fa-youtube"></i> มีวิดีโอ</span>' : ''}
+                  ${materials.length > 0 ? `<span class="px-2 py-0.5 rounded-lg bg-indigo-600/90 text-white backdrop-blur-md flex items-center gap-1"><i class="fas fa-file-pdf"></i> ${materials.length} เอกสาร</span>` : ''}
+                  ${links.length > 0 ? `<span class="px-2 py-0.5 rounded-lg bg-amber-600/90 text-white backdrop-blur-md flex items-center gap-1"><i class="fas fa-link"></i> ${links.length} ลิงก์</span>` : ''}
+                </div>
+                ${quizCount > 0 ? '<span class="px-2 py-0.5 rounded-lg bg-purple-600/90 text-white backdrop-blur-md"><i class="fas fa-award mr-1"></i>มีเกียรติบัตร</span>' : ''}
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition line-clamp-2 leading-snug cursor-pointer" onclick="openOnlineActivityClassroom('${encodeURIComponent(actId)}')">${escapeHtml(name)}</h4>
+                ${desc ? `<p class="text-[11px] text-slate-400 m-0 mt-1.5 line-clamp-2 leading-relaxed">${escapeHtml(desc)}</p>` : ''}
+              </div>
+
+              <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                <div class="text-[11px] text-purple-300 font-bold flex items-center gap-1">
+                  <i class="fas fa-coins text-amber-400"></i> +${points} แต้ม & เกียรติบัตร
+                </div>
+                <button type="button" onclick="openOnlineActivityClassroom('${encodeURIComponent(actId)}')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white text-xs font-black shadow-md transition active:scale-95 flex items-center gap-1 cursor-pointer">
+                  <span>เข้าเรียน & สอบ</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getYouTubeEmbedUrl(url) {
+      if (!url) return '';
+      let videoId = '';
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split(/[?#]/)[0];
+      } else if (url.includes('youtube.com/watch')) {
+        const params = new URLSearchParams(url.split('?')[1] || '');
+        videoId = params.get('v') || '';
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('youtube.com/embed/')[1].split(/[?#]/)[0];
+      }
+      return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : '';
+    }
+
+    function openOnlineActivityClassroom(actId) {
+      const decodedId = decodeURIComponent(actId);
+      const act = allOnlineActivities.find(a => String(a.id || a.activityId) === String(actId) || String(a.id || a.activityId) === String(decodedId));
+      if (!act) {
+        window.location.href = `scan.html?act=${encodeURIComponent(actId)}`;
+        return;
+      }
+
+      const modal = document.getElementById('modal-online-activity-classroom');
+      const titleEl = document.getElementById('classroom-act-title');
+      const tambonBadge = document.getElementById('classroom-act-tambon-badge');
+      const descEl = document.getElementById('classroom-act-desc');
+      const videoBox = document.getElementById('classroom-act-video-box');
+      const videoPlayer = document.getElementById('classroom-act-video-player');
+      const pdfBox = document.getElementById('classroom-act-pdf-box');
+      const pdfList = document.getElementById('classroom-act-pdf-list');
+      const linksBox = document.getElementById('classroom-act-links-box');
+      const linksList = document.getElementById('classroom-act-links-list');
+      const ptsBadge = document.getElementById('classroom-act-points-badge');
+      const ptsText = document.getElementById('classroom-act-points-text');
+      const quizBtn = document.getElementById('classroom-quiz-btn');
+      const surveyBtn = document.getElementById('classroom-survey-btn');
+
+      const actName = act.name || act.activityName || 'กิจกรรมการเรียนรู้';
+      const tambon = act.tambon || '';
+      const desc = act.description || act.onlineDescription || 'กิจกรรมส่งเสริมการเรียนรู้ดิจิทัลและพัฒนาทักษะชีวิต';
+      const points = act.checkInPoints || act.points || 20;
+      const passScore = act.quizPassScore || 80;
+
+      if (titleEl) titleEl.innerText = actName;
+      if (tambonBadge) {
+        tambonBadge.innerText = tambon ? `ต.${tambon}` : 'สกร.อำเภอพร้าว';
+      }
+      if (descEl) descEl.innerText = desc;
+      if (ptsBadge) ptsBadge.innerText = `🪙 รับแต้มสูงสุด +${points} แต้ม`;
+      if (ptsText) ptsText.innerText = `ผ่านเกณฑ์ ${passScore}% รับเกียรติบัตรและแต้มสะสมทันที`;
+
+      // Video
+      if (act.videoUrl && act.videoUrl.trim()) {
+        const embed = getYouTubeEmbedUrl(act.videoUrl.trim());
+        if (embed) {
+          videoPlayer.innerHTML = `<iframe src="${embed}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          videoBox.style.display = 'block';
+        } else {
+          videoPlayer.innerHTML = `<a href="${escapeHtml(act.videoUrl.trim())}" target="_blank" rel="noopener" class="flex items-center justify-center w-full h-full text-rose-400 hover:text-rose-300 font-bold text-xs gap-2 bg-slate-900 p-6"><i class="fas fa-play-circle text-2xl"></i> คลิกเพื่อรับชมวิดีโอบรรยาย</a>`;
+          videoBox.style.display = 'block';
+        }
+      } else {
+        if (videoBox) videoBox.style.display = 'none';
+        if (videoPlayer) videoPlayer.innerHTML = '';
+      }
+
+      // PDFs
+      const materials = act.learningMaterials || [];
+      if (Array.isArray(materials) && materials.length > 0) {
+        pdfList.innerHTML = materials.map((m, idx) => {
+          const title = m.title || `เอกสารประกอบที่ ${idx + 1}`;
+          const url = m.url || '#';
+          return `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <i class="fas fa-file-pdf text-rose-400 text-base shrink-0"></i>
+                <span class="font-bold text-slate-200 truncate">${escapeHtml(title)}</span>
+              </div>
+              <a href="${escapeHtml(url)}" target="_blank" rel="noopener" download class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 text-[11px] font-bold shrink-0 transition flex items-center gap-1.5 border border-indigo-500/40">
+                <i class="fas fa-arrow-down-to-bracket"></i> เปิดอ่าน
+              </a>
+            </div>
+          `;
+        }).join('');
+        pdfBox.style.display = 'block';
+      } else {
+        if (pdfBox) pdfBox.style.display = 'none';
+        if (pdfList) pdfList.innerHTML = '';
+      }
+
+      // External links
+      const links = act.externalLinks || [];
+      if (Array.isArray(links) && links.length > 0) {
+        linksList.innerHTML = links.map((l, idx) => {
+          const label = l.label || l.title || `ลิงก์ที่ ${idx + 1}`;
+          const url = l.url || '#';
+          return `
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/40 text-xs transition group">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <i class="fas fa-arrow-up-right-from-square text-amber-400 text-xs shrink-0"></i>
+                <span class="font-bold text-slate-200 group-hover:text-amber-300 truncate">${escapeHtml(label)}</span>
+              </div>
+              <i class="fas fa-chevron-right text-[10px] text-slate-500 group-hover:text-amber-400"></i>
+            </a>
+          `;
+        }).join('');
+        linksBox.style.display = 'block';
+      } else {
+        if (linksBox) linksBox.style.display = 'none';
+        if (linksList) linksList.innerHTML = '';
+      }
+
+      // Buttons
+      if (quizBtn) {
+        quizBtn.href = `scan.html?act=${encodeURIComponent(act.id || act.activityId)}&mode=quiz_direct`;
+      }
+      if (surveyBtn) {
+        surveyBtn.href = `scan.html?act=${encodeURIComponent(act.id || act.activityId)}&mode=survey_direct`;
+      }
+
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeOnlineActivityClassroom() {
+      const modal = document.getElementById('modal-online-activity-classroom');
+      if (modal) modal.style.display = 'none';
+      const videoPlayer = document.getElementById('classroom-act-video-player');
+      if (videoPlayer) videoPlayer.innerHTML = '';
+    }
+
+    function openAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeAdminNavModal() {
+      const m = document.getElementById('admin-nav-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-100 border border-slate-700');
+      t.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold pointer-events-auto transition duration-300 ${bg}`;
+      t.innerHTML = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function onLearningInstitutionChange(instId) {
+      currentInstitution = instId;
+      localStorage.setItem('nfe_selected_institution', instId);
+      loadLearningSources();
+      if (currentHubTab === 'activities') {
+        loadOnlineActivities();
+      }
+    }
+
+    function loadLearningSources() {
+      const grid = document.getElementById('learning-sources-grid');
+      if (grid) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-12 text-slate-400 text-xs"><i class="fas fa-spinner fa-spin text-lg text-sky-400 mb-2 block"></i>กำลังโหลดข้อมูลแหล่งเรียนรู้...</div>';
+      }
+
+      apiGet('getSources', withAuthParams({ institutionId: currentInstitution }))
+        .then(res => {
+          let list = [];
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (res && Array.isArray(res.sources)) {
+            list = res.sources;
+          } else if (res && Array.isArray(res.data)) {
+            list = res.data;
+          }
+          
+          allLearningSources = list;
+          populateTambonFilter();
+          filterLearningSources();
+
+          const params = new URLSearchParams(window.location.search);
+          const srcId = params.get('source');
+          if (srcId) {
+            openSourceDetail(srcId);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to load learning sources:", err);
+          if (grid) {
+            grid.innerHTML = '<div class="col-span-3 text-center py-12 text-rose-400 text-xs">เกิดข้อผิดพลาดในการโหลดข้อมูลแหล่งเรียนรู้</div>';
+          }
+        });
+    }
+
+    function populateTambonFilter() {
+      const sel = document.getElementById('sources-tambon-filter');
+      if (!sel) return;
+      const tambons = [...new Set(allLearningSources.map(s => s.TambonName || s.tambon).filter(Boolean))].sort();
+      let html = '<option value="">📍 ทุกตำบล / ศศช. (ทั้งหมด)</option>';
+      tambons.forEach(t => {
+        html += `<option value="${escapeHtml(t)}">📍 ${escapeHtml(t)}</option>`;
+      });
+      sel.innerHTML = html;
+    }
+
+    function filterLearningSources() {
+      const tambon = (document.getElementById('sources-tambon-filter')?.value || '').trim();
+      const type = (document.getElementById('sources-type-filter')?.value || '').trim();
+      const search = (document.getElementById('sources-search-input')?.value || '').trim().toLowerCase();
+
+      const filtered = allLearningSources.filter(s => {
+        const t = (s.TambonName || s.tambon || '').trim();
+        const typ = (s.sourceType || s.subjectCategory || (s.info && s.info.source_type) || '').trim();
+        const name = (s.SourceName || s.name || '').toLowerCase();
+        const content = (((s.info && s.info.history) || '') + ' ' + ((s.info && s.info.result) || '')).toLowerCase();
+
+        if (tambon && t !== tambon) return false;
+        if (type && typ !== type && typ.indexOf(type) === -1) return false;
+        if (search && !name.includes(search) && !content.includes(search) && !t.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      const countEl = document.getElementById('sources-matched-count');
+      if (countEl) countEl.innerText = filtered.length;
+      renderSourcesGrid(filtered);
+    }
+
+    function renderSourcesGrid(sources) {
+      const grid = document.getElementById('learning-sources-grid');
+      if (!grid) return;
+
+      if (!sources || sources.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-3 text-center py-14 p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-800 text-slate-500 mx-auto flex items-center justify-center text-xl">
+              <i class="fas fa-box-open"></i>
+            </div>
+            <div class="text-xs font-bold text-slate-300">ไม่พบแหล่งเรียนรู้ตามเงื่อนไขที่เลือก</div>
+            <p class="text-[11px] text-slate-500">ลองเปลี่ยนตัวกรองตำบล หรือเลือกอำเภอทั้งหมด</p>
+            <button type="button" onclick="resetLearningFilters()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition">
+              ล้างตัวกรองทั้งหมด
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = sources.map(s => {
+        const cover = s.CoverImageURL || s.cover_image || s.CoverImage || 'assets/loft-logo.svg';
+        const coverPos = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
+        const name = s.SourceName || s.name || 'แหล่งเรียนรู้';
+        const tambon = s.TambonName || s.tambon || '';
+        const grade = (s.evaluation && s.evaluation.grade) || (s.info && s.info.evaluation && s.info.evaluation.grade) || 'มาตรฐาน สกร.';
+        const basesCount = Array.isArray(s.bases) ? s.bases.length : 0;
+        const credits = s.creditHours || s.credit_hours || 1;
+        const srcId = s.SourceID || s.id || '';
+
+        return `
+          <div onclick="openSourceDetail('${escapeJS(srcId)}')" class="group rounded-3xl bg-slate-900/85 border border-slate-700/80 hover:border-sky-500/60 overflow-hidden cursor-pointer transition duration-300 flex flex-col shadow-xl hover:shadow-sky-500/10 active:scale-98">
+            <div class="h-44 w-full bg-slate-800 relative overflow-hidden">
+              <img src="${escapeHtml(cover)}" style="object-position: ${escapeHtml(coverPos)};" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null; this.src='assets/loft-logo.svg';">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
+              <div class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-950/85 text-amber-300 backdrop-blur-md border border-amber-500/40 shadow">
+                ⭐ ${escapeHtml(grade)}
+              </div>
+              <div class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-600/90 text-white backdrop-blur-md shadow">
+                ${basesCount} ฐานเรียนรู้
+              </div>
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h4 class="text-sm font-bold text-white group-hover:text-sky-400 transition line-clamp-1">${escapeHtml(name)}</h4>
+                <p class="text-[11px] text-slate-400 m-0 mt-1">📍 ${escapeHtml(tambon)}</p>
+              </div>
+              <div class="flex items-center justify-between pt-2.5 border-t border-slate-800 text-[11px] text-slate-400 font-bold">
+                <span>⏱️ ${credits} ชม. กพช.</span>
+                <span class="text-sky-400 group-hover:translate-x-1 transition font-black">เข้าศึกษาดูงาน →</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function resetLearningFilters() {
+      const tambonEl = document.getElementById('sources-tambon-filter');
+      if (tambonEl) tambonEl.value = '';
+      const typeEl = document.getElementById('sources-type-filter');
+      if (typeEl) typeEl.value = '';
+      const searchEl = document.getElementById('sources-search-input');
+      if (searchEl) searchEl.value = '';
+      filterLearningSources();
+    }
+
+    function openSourceDetail(sourceId) {
+      const s = allLearningSources.find(item => String(item.SourceID || item.id) === String(sourceId));
+      if (!s) return;
+
+      currentDetailSource = s;
+
+      const coverImgEl = document.getElementById('detail-cover-img');
+      coverImgEl.src = s.CoverImageURL || s.cover_image || 'assets/loft-logo.svg';
+      coverImgEl.style.objectPosition = s.coverPosition || s.cover_position || s.info?.cover_position || '50% 50%';
+      document.getElementById('detail-source-title').innerText = s.SourceName || s.name || '';
+      document.getElementById('detail-source-tambon').innerText = '📍 ตำบล' + (s.TambonName || s.tambon || '');
+
+      const grade = (s.evaluation && s.evaluation.grade) || (s.info && s.info.evaluation && s.info.evaluation.grade) || 'มาตรฐาน สกร.';
+      document.getElementById('detail-grade-badge').innerText = `⭐ ${grade}`;
+
+      document.getElementById('detail-source-history').innerText = (s.info && s.info.history) || 'ไม่มีข้อมูลประวัติ';
+      document.getElementById('detail-source-result').innerText = (s.info && s.info.result) || 'ไม่มีข้อมูลองค์ความรู้หลัก';
+
+      const fac = s.facilities || (s.info && s.info.facilities) || {};
+      const facGrid = document.getElementById('detail-facilities-grid');
+      facGrid.innerHTML = `
+        <div class="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block">👥 รองรับได้</span>
+          <strong class="text-xs text-white">${fac.capacity_people || '-'} คน</strong>
+        </div>
+        <div class="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block">🚗 ที่จอดรถ</span>
+          <strong class="text-xs text-white">${fac.parking_spaces || '-'} คัน</strong>
+        </div>
+        <div class="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block">🚻 ห้องน้ำ</span>
+          <strong class="text-xs text-white">${fac.restrooms || '-'} ห้อง</strong>
+        </div>
+        <div class="p-2.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 text-center">
+          <span class="text-[10px] text-slate-400 block">🪑 โต๊ะ/เก้าอี้</span>
+          <strong class="text-xs text-white">${fac.tables_chairs || '-'} ชุด</strong>
+        </div>
+      `;
+
+      const bases = Array.isArray(s.bases) ? s.bases : [];
+      document.getElementById('detail-bases-count').innerText = bases.length;
+
+      const basesContainer = document.getElementById('detail-bases-container');
+      if (bases.length === 0) {
+        basesContainer.innerHTML = '<div class="p-6 rounded-2xl bg-slate-900/50 text-center text-slate-500 text-xs">ยังไม่มีฐานการเรียนรู้ย่อย</div>';
+      } else {
+        basesContainer.innerHTML = bases.map((b, i) => {
+          const bId    = b.baseId || b.id || '';
+          const bTitle = b.baseName || b.name || `ฐานการเรียนรู้ที่ ${i+1}`;
+          const bDesc  = b.description || '';
+          const bVideo = b.video_url || b.videoUrl || '';
+          const bCover = b.cover_image || b.coverImage || '';
+          const bExt   = b.external || (b.info && b.info.external) || '';
+
+          return `
+            <div class="rounded-3xl bg-slate-900/80 border border-slate-700/80 overflow-hidden">
+              ${bCover ? `<div class="h-28 w-full bg-slate-800 overflow-hidden">
+                <img src="${escapeHtml(bCover)}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+              </div>` : ''}
+              <div class="p-4 space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-black text-xs shrink-0">${i+1}</span>
+                  <h4 class="text-sm font-bold text-white m-0 flex-1">${escapeHtml(bTitle)}</h4>
+                </div>
+                ${bDesc ? `<p class="text-xs text-slate-300 leading-relaxed m-0">${escapeHtml(bDesc)}</p>` : ''}
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button type="button"
+                    onclick="openBaseQuizModal('${escapeJS(bId)}', '${escapeJS(bTitle)}')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600/20 hover:bg-teal-600/30 text-teal-300 border border-teal-500/30 text-xs font-bold transition active:scale-95">
+                    <i class="fas fa-layer-group"></i> เข้าฐานการเรียนรู้
+                  </button>
+                  ${bVideo ? `
+                  <a href="${escapeHtml(bVideo)}" target="_blank" rel="noopener"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition active:scale-95">
+                    <i class="fab fa-youtube text-rose-500"></i> ชมวิดีโอประจำฐาน
+                  </a>` : ''}
+                  ${bExt ? `
+                  <a href="${escapeHtml(bExt)}" target="_blank" rel="noopener"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 text-xs font-bold transition active:scale-95">
+                    <i class="fas fa-external-link-alt"></i> แหล่งข้อมูลเพิ่มเติม
+                  </a>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('sources-directory-view').style.display = 'none';
+      document.getElementById('source-detail-view').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSourcesDirectoryView() {
+      document.getElementById('source-detail-view').style.display = 'none';
+      document.getElementById('sources-directory-view').style.display = 'block';
+    }
+
+    // ─── Base Modal ──────────────────────────────────────────────
+    let _currentBaseId   = null;
+    let _currentBaseData = null;
+
+    function openBaseQuizModal(baseId, baseTitle) {
+      _currentBaseId = baseId;
+      // Find base data from currentDetailSource
+      const bases = (currentDetailSource && Array.isArray(currentDetailSource.bases)) ? currentDetailSource.bases : [];
+      _currentBaseData = bases.find(b => String(b.baseId || b.id) === String(baseId)) || null;
+
+      document.getElementById('base-modal-title').innerText = baseTitle || 'ฐานการเรียนรู้';
+
+      const body = document.getElementById('base-modal-body');
+      if (_currentBaseData) {
+        const info = _currentBaseData.info || {};
+        const desc = _currentBaseData.description || info.result || '';
+        const history = info.history || '';
+        const video = _currentBaseData.video_url || _currentBaseData.videoUrl || '';
+        const ext = _currentBaseData.external || info.external || '';
+
+        body.innerHTML = `
+          <div class="p-5 space-y-4 text-xs">
+            ${history ? `<div class="space-y-1.5">
+              <h5 class="font-bold text-white flex items-center gap-2"><i class="fas fa-book-open text-amber-400"></i> ประวัติ / วัตถุประสงค์</h5>
+              <p class="text-slate-300 leading-relaxed">${escapeHtml(history)}</p>
+            </div>` : ''}
+            ${desc ? `<div class="space-y-1.5">
+              <h5 class="font-bold text-white flex items-center gap-2"><i class="fas fa-lightbulb text-teal-400"></i> เนื้อหาองค์ความรู้</h5>
+              <p class="text-slate-300 leading-relaxed">${escapeHtml(desc)}</p>
+            </div>` : `<p class="text-slate-500 text-center py-4">ไม่มีเนื้อหาเพิ่มเติมสำหรับฐานนี้</p>`}
+            ${video ? `<div class="pt-2">
+              <a href="${escapeHtml(video)}" target="_blank" rel="noopener"
+                class="flex items-center gap-2 p-3 rounded-2xl bg-rose-900/30 border border-rose-500/30 hover:bg-rose-900/50 transition">
+                <i class="fab fa-youtube text-rose-400 text-lg"></i>
+                <div>
+                  <div class="font-bold text-rose-300">ชมวิดีโอประจำฐาน</div>
+                  <div class="text-rose-400/70 text-[10px] truncate">${escapeHtml(video)}</div>
+                </div>
+                <i class="fas fa-external-link-alt text-rose-400 ml-auto"></i>
+              </a>
+            </div>` : ''}
+            ${ext ? `<div>
+              <a href="${escapeHtml(ext)}" target="_blank" rel="noopener"
+                class="flex items-center gap-2 p-3 rounded-2xl bg-sky-900/30 border border-sky-500/30 hover:bg-sky-900/50 transition">
+                <i class="fas fa-external-link-alt text-sky-400"></i>
+                <div class="font-bold text-sky-300 text-xs">แหล่งข้อมูลอ้างอิงเพิ่มเติม</div>
+                <i class="fas fa-chevron-right text-sky-400 ml-auto text-[10px]"></i>
+              </a>
+            </div>` : ''}
+          </div>
+        `;
+      } else {
+        body.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">ไม่พบข้อมูลฐานการเรียนรู้</div>';
+      }
+
+      document.getElementById('base-detail-modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeBaseModal() {
+      document.getElementById('base-detail-modal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function openBasePreTest() {
+      closeBaseModal();
+      currentQuizType = 'pre';
+      loadQuizQuestions(_currentBaseId);
+    }
+
+    function openBasePostTest() {
+      closeBaseModal();
+      currentQuizType = 'post';
+      loadQuizQuestions(_currentBaseId);
+    }
+
+    // ─── Source-level quiz (no base) ─────────────────────────────
+    function openPreTestModal() {
+      _currentBaseId = null;
+      currentQuizType = 'pre';
+      loadQuizQuestions(null);
+    }
+    function openPostTestModal() {
+      _currentBaseId = null;
+      currentQuizType = 'post';
+      loadQuizQuestions(null);
+    }
+
+    function loadQuizQuestions(baseId) {
+      if (!currentDetailSource) return;
+      const srcId = currentDetailSource.SourceID || currentDetailSource.id;
+
+      const params = { sourceId: srcId, type: currentQuizType };
+      if (baseId) params.baseId = baseId;
+
+      apiGet('getQuizzes', withAuthParams(params))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.quizzes) && res.quizzes.length > 0) {
+            currentQuizData = res.quizzes;
+            renderQuizQuestions();
+            const typeLabel = currentQuizType === 'pre'
+              ? '📝 แบบทดสอบก่อนเรียน (Pre-test)'
+              : '🏆 แบบทดสอบหลังเรียน (Post-test)';
+            document.getElementById('quiz-modal-title').innerText = typeLabel;
+            document.getElementById('quiz-interactive-modal').style.display = 'flex';
+          } else {
+            const typeLabel = currentQuizType === 'pre' ? 'ก่อนเรียน' : 'หลังเรียน';
+            showToast(`ยังไม่มีชุดข้อสอบ${typeLabel}สำหรับฐานนี้`, 'warning');
+          }
+        })
+        .catch(() => showToast('เกิดข้อผิดพลาดในการโหลดข้อสอบ', 'error'));
+    }
+
+    function renderQuizQuestions() {
+      const body = document.getElementById('quiz-questions-body');
+      const choiceKeys = ['A', 'B', 'C', 'D'];
+      body.innerHTML = currentQuizData.map((q, i) => {
+        const choices = q.choices || [q.choice_a, q.choice_b, q.choice_c, q.choice_d].filter(Boolean);
+        return `
+          <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-2.5">
+            <h5 class="text-xs font-bold text-white m-0 leading-relaxed">ข้อ ${i+1}. ${escapeHtml(q.question)}</h5>
+            <div class="space-y-1.5 pt-1">
+              ${choices.map((c, cIdx) => {
+                const val = choiceKeys[cIdx] || String(cIdx + 1);
+                return `
+                <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-slate-900 border border-slate-700/60 hover:border-amber-500/50 cursor-pointer transition">
+                  <input type="radio" name="quiz_q_${q.id}" value="${val}" class="text-amber-500 focus:ring-0 w-4 h-4">
+                  <span class="text-slate-300 text-xs leading-snug"><b class="text-amber-400 mr-1.5">${val}.</b>${escapeHtml(c)}</span>
+                </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeQuizModal() {
+      document.getElementById('quiz-interactive-modal').style.display = 'none';
+    }
+
+    function submitQuizAnswersAction() {
+      if (!currentQuizData || currentQuizData.length === 0) return;
+      const answers = {};
+      let answeredCount = 0;
+
+      currentQuizData.forEach((q) => {
+        const radios = document.getElementsByName(`quiz_q_${q.id}`);
+        for (let r of radios) {
+          if (r.checked) {
+            answers[q.id] = r.value;
+            answeredCount++;
+            break;
+          }
+        }
+      });
+
+      const doSubmit = () => {
+        const srcId = currentDetailSource ? (currentDetailSource.SourceID || currentDetailSource.id) : '';
+        const btn = document.getElementById('btn-submit-quiz');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังตรวจคำตอบ...';
+        }
+
+        apiPost('submitQuiz', withAuthParams({
+          sourceId: srcId,
+          baseId: _currentBaseId || undefined,
+          mode: currentQuizType,
+          quizType: currentQuizType,
+          answers: answers
+        }))
+        .then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ส่งคำตอบ';
+          }
+          closeQuizModal();
+
+          if (res && res.status === 'success') {
+            const score = res.score ?? 0;
+            const passed = res.passed || res.quizStatus === 'Pass';
+            const points = res.pointsEarned || 0;
+
+            if (currentQuizType === 'pre') {
+              showToast(`📝 ผลการทดสอบก่อนเรียน: ${score}% (${res.correct}/${res.total} ข้อ)`, 'info');
+            } else {
+              if (passed) {
+                showToast(`🎉 ยินดีด้วยครับ! คุณสอบผ่านได้ ${score}% (+${points} แต้ม)`, 'success');
+                setTimeout(() => {
+                  showCustomConfirm({
+                    title: '🎉 ยินดีด้วยครับ! คุณสอบผ่านเกณฑ์',
+                    message: `คุณสอบผ่านได้คะแนน ${score}%\nระบบได้ออกใบประกาศนียบัตรให้คุณเรียบร้อยแล้ว\n\nต้องการไปที่หน้า "ใบประกาศนียบัตรของฉัน" เพื่อดูหรือพิมพ์ PDF เลยหรือไม่?`,
+                    type: 'info',
+                    icon: 'fa-certificate',
+                    confirmText: 'ดูใบประกาศนียบัตร',
+                    cancelText: 'ไว้ทีหลัง'
+                  }, () => {
+                    window.location.href = 'profile.html?tab=certs';
+                  });
+                }, 400);
+              } else {
+                showToast(`❌ คุณได้คะแนน ${score}% (เกณฑ์ผ่าน 80%) ลองทบทวนเนื้อหาแล้วทำใหม่อีกครั้ง`, 'error');
+              }
+            }
+          } else {
+            showToast((res && res.message) || 'ส่งข้อสอบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+          }
+        })
+        .catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ส่งคำตอบ';
+          }
+          console.error('Quiz submit error:', err);
+          showToast('เกิดข้อผิดพลาดในการส่งข้อสอบ', 'error');
+        });
+      };
+
+      if (answeredCount < currentQuizData.length) {
+        showCustomConfirm({
+          title: 'ยังตอบคำถามไม่ครบ',
+          message: `คุณตอบคำถามไปแล้ว ${answeredCount}/${currentQuizData.length} ข้อ ยืนยันที่จะส่งคำตอบหรือไม่?`,
+          type: 'warning',
+          confirmText: 'ยืนยันส่งคำตอบ',
+          cancelText: 'กลับไปทำต่อ'
+        }, doSubmit);
+      } else {
+        doSubmit();
+      }
+    }
+
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    // ─── Responsive Desktop Sidebar & Device Detection ───────────
+    function initResponsiveNav() {
+      const isCollapsed = localStorage.getItem('phrao_sidebar_collapsed') === 'true';
+      if (isCollapsed) {
+        document.body.classList.add('sidebar-collapsed');
+      }
+
+      try {
+        const userName = localStorage.getItem('userName') || (typeof getUserName === 'function' ? getUserName() : 'ผู้เรียน สกร.');
+        const userRole = localStorage.getItem('userRole') || (typeof getUserRole === 'function' ? getUserRole() : 'student');
+        const nameEl = document.getElementById('sidebar-user-name');
+        const roleEl = document.getElementById('sidebar-user-role');
+        if (nameEl) nameEl.innerText = userName;
+        if (roleEl) {
+          roleEl.innerText = (userRole === 'admin' ? '🛡️ ผู้ดูแลระบบ' : (userRole === 'teacher' ? '👨‍🏫 คุณครู' : '👤 ผู้เรียน'));
+        }
+      } catch (err) {}
+
+      window.addEventListener('resize', handleScreenResize);
+      handleScreenResize();
+    }
+
+    function toggleDesktopSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+      const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+      localStorage.setItem('phrao_sidebar_collapsed', isCollapsed);
+    }
+
+    function handleScreenResize() {
+      const isDesktop = window.innerWidth >= 1024;
+      const sidebar = document.getElementById('app-desktop-sidebar');
+      const bottomNav = document.getElementById('app-mobile-bottom-nav');
+      if (sidebar) sidebar.style.display = isDesktop ? 'flex' : 'none';
+      if (bottomNav) bottomNav.style.display = isDesktop ? 'none' : 'flex';
+    }
+
+    function handleAppLogout() {
+      if (typeof logout === 'function') {
+        logout();
+      } else if (typeof showCustomConfirm === 'function') {
+        showCustomConfirm({
+          title: 'ออกจากระบบ',
+          message: 'คุณต้องการออกจากระบบ ใช่หรือไม่?',
+          type: 'logout'
+        }, () => {
+          if (typeof logoutNoConfirm === 'function') {
+            logoutNoConfirm();
+          } else {
+            if (typeof clearAllAuthData === 'function') clearAllAuthData();
+            window.location.href = 'profile.html';
+          }
+        });
+      } else {
+        if (typeof logoutNoConfirm === 'function') logoutNoConfirm();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initResponsiveNav();
+      const sel = document.getElementById('learning-institution-select');
+      if (sel) sel.value = currentInstitution;
+      loadLearningSources();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

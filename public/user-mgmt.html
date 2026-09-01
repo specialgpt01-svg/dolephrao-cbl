@@ -1,0 +1,125 @@
+    <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)] bg-[var(--card)] rounded-2xl mb-4 shadow-sm">
+      <div>
+        <h3 class="text-base font-bold flex items-center gap-2 m-0 text-[var(--primary)]">
+          <i id="user-mgmt-workspace-icon" class="fas fa-users-cog"></i> <span id="user-mgmt-workspace-title">จัดการสมาชิก</span>
+        </h3>
+        <p id="user-mgmt-workspace-description" class="text-xs text-muted" style="margin:2px 0 0;">ค้นหา แก้ไขสิทธิ์ และจัดการบัญชีสมาชิก</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="admin-add-user-btn"
+          class="flex items-center"
+          style="display:none; gap:6px; padding:7px 16px; font-size:0.72rem; font-weight:800; border-radius:9999px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(16,185,129,0.35); transition:opacity 0.18s ease; letter-spacing:0.02em;"
+          onmouseenter="this.style.opacity='0.82'" onmouseleave="this.style.opacity='1'"
+          onclick="openAdminAddUserModal()">
+          <i class="fas fa-user-plus" style="font-size:0.7rem;"></i>
+          <span id="admin-add-user-btn-label">เพิ่มสมาชิกใหม่</span>
+        </button>
+        <span style="font-size:0.7rem; font-weight:700; padding:5px 12px; border-radius:9999px; border:1.5px solid var(--card-border); background:var(--glass); color:var(--text-soft); letter-spacing:0.02em; display:inline-flex; align-items:center; gap:5px;" id="user-mgmt-tambon-badge"><i class="fas fa-map-marker-alt" style="font-size:0.65rem; color:var(--primary);"></i>ตำบล…</span>
+        <button class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-full border border-[var(--card-border)] bg-transparent text-[var(--text)] hover:bg-[var(--bg2)] cursor-pointer transition-all active:scale-95" onclick="showPage('manage-page')">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </div>
+
+    <div class="user-mgmt-workspace px-4 mt-4 pb-4">
+      <!-- Stats Cards Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5" id="user-mgmt-stats-row">
+        <div class="mgmt-stat-card stat-total">
+          <p class="stat-title"><i class="fas fa-users"></i> สมาชิกทั้งหมด</p>
+          <div class="stat-val" id="user-stat-total">0</div>
+        </div>
+        <div class="mgmt-stat-card stat-pending">
+          <p class="stat-title"><i class="fas fa-clock"></i> รออนุมัติรูป</p>
+          <div class="stat-val" id="user-stat-pending">0</div>
+        </div>
+        <div class="mgmt-stat-card stat-approved">
+          <p class="stat-title"><i class="fas fa-check-circle"></i> อนุมัติแล้ว</p>
+          <div class="stat-val" id="user-stat-approved">0</div>
+        </div>
+        <div class="mgmt-stat-card stat-rejected">
+          <p class="stat-title"><i class="fas fa-times-circle"></i> ไม่อนุมัติ</p>
+          <div class="stat-val" id="user-stat-rejected">0</div>
+        </div>
+      </div>
+
+      <!-- Professional Search & Filter Toolbar -->
+      <div class="mgmt-toolbar-card">
+        <div class="flex flex-col md:flex-row gap-3 mb-3">
+          <div class="input-group mb-0 flex-1">
+            <i class="fas fa-search"></i>
+            <input type="text" id="user-mgmt-search" placeholder="ค้นหาชื่อ หรือ เบอร์โทรศัพท์..." onkeyup="filterUserMgmtList()">
+          </div>
+          <div id="admin-institution-filter-container" class="flex-shrink-0" style="display:none; min-width: 220px;">
+            <div class="input-group mb-0 relative">
+              <i class="fas fa-university"></i>
+              <select id="user-mgmt-institution-filter" onchange="onUserMgmtInstitutionFilterChange()" class="mgmt-select-dropdown"
+                      style="padding-left:44px; padding-top:0; padding-bottom:0; line-height:50px; background:var(--bg2); color:var(--text); border:1.5px solid var(--input-border); border-radius:var(--r-btn); height: 50px; width: 100%;">
+                <option value="INS_PHRAO" selected>🏫 ศกร.ระดับอำเภอพร้าว</option>
+                <option value="INS_MAERIM">🏫 ศกร.ระดับอำเภอแม่ริม</option>
+              </select>
+            </div>
+          </div>
+          <div id="admin-user-filter-container" class="flex-shrink-0" style="display:none; min-width: 240px;">
+            <div class="input-group mb-0 relative">
+              <i class="fas fa-map-marker-alt"></i>
+              <select id="user-mgmt-tambon-filter" onchange="onUserMgmtTambonFilterChange()" class="mgmt-select-dropdown"
+                      style="padding-left:44px; padding-top:0; padding-bottom:0; line-height:50px; background:var(--bg2); color:var(--text); border:1.5px solid var(--input-border); border-radius:var(--r-btn); height: 50px; width: 100%;">
+                <option value="" selected>🔍 -- กรุณาเลือกตัวกรองพื้นที่เพื่อดึงข้อมูล --</option>
+                <option value="ทั้งหมด">🌍 ทุกพื้นที่ (ทั้งหมด)</option>
+                <option value="ศกร.ระดับตำบลเวียง">ศกร.ระดับตำบลเวียง</option>
+                <option value="ศกร.ระดับตำบลทุ่งหลวง">ศกร.ระดับตำบลทุ่งหลวง</option>
+                <option value="ศกร.ระดับตำบลป่าตุ้ม">ศกร.ระดับตำบลป่าตุ้ม</option>
+                <option value="ศกร.ระดับตำบลป่าไหน่">ศกร.ระดับตำบลป่าไหน่</option>
+                <option value="ศกร.ระดับตำบลสันทราย">ศกร.ระดับตำบลสันทราย</option>
+                <option value="ศกร.ระดับตำบลบ้านโป่ง">ศกร.ระดับตำบลบ้านโป่ง</option>
+                <option value="ศกร.ระดับตำบลน้ำแพร่">ศกร.ระดับตำบลน้ำแพร่</option>
+                <option value="ศกร.ระดับตำบลเขื่อนผาก">ศกร.ระดับตำบลเขื่อนผาก</option>
+                <option value="ศกร.ระดับตำบลแม่แวน">ศกร.ระดับตำบลแม่แวน</option>
+                <option value="ศกร.ระดับตำบลแม่ปั๋ง">ศกร.ระดับตำบลแม่ปั๋ง</option>
+                <option value="ศกร.ระดับตำบลโหล่งขอด">ศกร.ระดับตำบลโหล่งขอด</option>
+                <option value="ศศช.บ้านอาบอลาชา">ศศช.บ้านอาบอลาชา</option>
+                <option value="ศศช.บ้านอาบอเน">ศศช.บ้านอาบอเน</option>
+                <option value="ศศช.บ้านอาแย">ศศช.บ้านอาแย</option>
+                <option value="ศศช.บ้านป่าหญ้าไทร">ศศช.บ้านป่าหญ้าไทร</option>
+                <option value="ศศช.บ้านขอนม่วง">ศศช.บ้านขอนม่วง</option>
+                <option value="ศศช.บ้านแม่งัดน้อย">ศศช.บ้านแม่งัดน้อย</option>
+                <option value="ศศช.บ้านห้วยทรายขาว">ศศช.บ้านห้วยทรายขาว</option>
+                <option value="ศศช.บ้านห้วยกันใจ">ศศช.บ้านห้วยกันใจ</option>
+                <option value="ศศช.บ้านปางตอย">ศศช.บ้านปางตอย</option>
+                <option value="ศศช.บ้านปางฟาน">ศศช.บ้านปางฟาน</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Filter Tabs (แยกประเภทสมาชิก) -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="user-role-tabs-wrapper" style="border-top: 1px dashed var(--card-border); padding-top: 10px;">
+          <button type="button" class="btn-role-tab active" id="role-tab-all" onclick="setUserRoleFilter('all')">
+            <i class="fas fa-users mr-1"></i>สมาชิกทั้งหมด (<span id="role-count-all">0</span>)
+          </button>
+          <button type="button" class="btn-role-tab" id="role-tab-user" onclick="setUserRoleFilter('user')">
+            <i class="fas fa-user-graduate mr-1"></i>ผู้เรียน / ผู้ใช้ทั่วไป (<span id="role-count-user">0</span>)
+          </button>
+          <button type="button" class="btn-role-tab" id="role-tab-teacher" onclick="setUserRoleFilter('teacher')">
+            <i class="fas fa-chalkboard-teacher mr-1"></i>ครูประจำตำบล (<span id="role-count-teacher">0</span>)
+          </button>
+          <button type="button" class="btn-role-tab" id="role-tab-admin" onclick="setUserRoleFilter('admin')">
+            <i class="fas fa-user-shield mr-1"></i>ผู้ดูแลระบบ (<span id="role-count-admin">0</span>)
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--card-border)] rounded-[20px] p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[var(--card-border)] border-dashed">
+          <h4 class="font-extrabold text-base m-0 text-[var(--text)]" id="user-mgmt-title">รายชื่อสมาชิก</h4>
+          <span class="px-3 py-1 rounded-full bg-[var(--primary-glow)] text-[var(--primary)] text-xs font-bold" id="user-mgmt-count">0 คน</span>
+        </div>
+        <div id="user-mgmt-list" class="user-mgmt-grid">
+          <div class="text-center text-muted py-12"><i class="fas fa-spinner fa-spin mr-2"></i>กำลังโหลด...</div>
+        </div>
+      </div>
+    </div>
+
+  
+  <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js"></script>

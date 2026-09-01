@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚙️ ตั้งค่าระบบและข้อมูลผู้บริหาร — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .custom-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center text-white text-xl shadow-md shadow-slate-700/30 shrink-0 border border-slate-600">
+          <i class="fas fa-sliders"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              ตั้งค่าระบบและข้อมูลผู้บริหาร
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-slate-700 text-slate-300 border border-slate-600">
+              System Settings
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            ข้อมูลผู้บริหารประจำสถานศึกษา ลายเซ็นต์ออกเกียรติบัตร และการเชื่อมต่อ AI
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="saveSettings()" id="save-btn-top" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/30 transition-all active:scale-95">
+          <i class="fas fa-save"></i> บันทึกการตั้งค่า
+        </button>
+        <button type="button" onclick="loadSettings(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Institution Context Switcher -->
+    <div class="p-4 sm:p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-base shrink-0">
+            <i class="fas fa-university"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-white m-0">สถานศึกษาที่ต้องการกำหนดค่า</h3>
+            <p class="text-[11px] text-slate-400 m-0">เลือกว่าจะแก้ไขข้อมูลผู้บริหารและลายเซ็นต์ของสถานศึกษาใด</p>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-72">
+          <select id="setting-institution-selector" onchange="loadSettings()" class="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-bold">
+            <option value="INS_PHRAO">🏫 สกร.ระดับอำเภอพร้าว (INS_PHRAO)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Settings Form -->
+    <div class="space-y-6">
+
+      <!-- Section 1: Executive & Director Info -->
+      <section class="custom-card p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div>
+              <h2 class="text-sm sm:text-base font-bold text-white m-0">ข้อมูลผู้บริหารประจำสถานศึกษา</h2>
+              <p class="text-[11px] text-slate-400 m-0">ใช้สำหรับแสดงชื่อและตำแหน่งในใบประกาศเกียรติบัตรและเอกสารทางการ</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5">ชื่อ-นามสกุลผู้บริหาร <span class="text-rose-400">*</span></label>
+            <input type="text" id="director-name" placeholder="เช่น นายประวิตร ประธรรมโย" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5">ตำแหน่งผู้บริหาร <span class="text-rose-400">*</span></label>
+            <input type="text" id="director-title" placeholder="เช่น ผู้อำนวยการศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Signature -->
+      <section class="custom-card p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm">
+              <i class="fas fa-file-signature"></i>
+            </div>
+            <div>
+              <h2 class="text-sm sm:text-base font-bold text-white m-0">รูปลายเซ็นต์ดิจิทัล (Digital Signature)</h2>
+              <p class="text-[11px] text-slate-400 m-0">แนะนำให้ใช้ไฟล์ PNG พื้นหลังโปร่งใส (Transparent Background)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          <div class="md:col-span-2 space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">URL รูปลายเซ็นต์</label>
+              <input type="text" id="signature-url" oninput="updateSignaturePreview(this.value)" placeholder="https://... หรืออัปโหลดไฟล์ด้านล่าง" class="w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="file" id="sig-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleSigFileUpload(this)">
+              <button type="button" onclick="document.getElementById('sig-file-input').click()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold text-xs flex items-center gap-2 transition active:scale-95">
+                <i class="fas fa-cloud-arrow-up text-indigo-400"></i> อัปโหลดไฟล์รูปลายเซ็นต์
+              </button>
+              <span class="text-[11px] text-slate-500">รองรับ .png, .webp (ไม่เกิน 2MB)</span>
+            </div>
+          </div>
+
+          <!-- Preview Box -->
+          <div class="h-32 rounded-2xl bg-slate-900/90 border border-slate-700 flex flex-col items-center justify-center p-3 relative overflow-hidden">
+            <span class="text-[10px] text-slate-500 font-bold absolute top-2 left-3 uppercase tracking-wider">ตัวอย่างลายเซ็นต์</span>
+            <img id="signature-preview-img" src="" alt="ลายเซ็นต์" class="max-h-20 max-w-full object-contain" style="display:none;">
+            <div id="signature-preview-placeholder" class="text-center text-slate-600 text-xs">
+              <i class="fas fa-signature text-2xl mb-1 text-slate-700"></i>
+              <p class="m-0 text-[11px]">ยังไม่มีรูปลายเซ็นต์</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: AI & Gemini Integration -->
+      <section class="custom-card p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm">
+              <i class="fas fa-brain"></i>
+            </div>
+            <div>
+              <h2 class="text-sm sm:text-base font-bold text-white m-0">การเชื่อมต่อปัญญาประดิษฐ์ (AI Gemini Key)</h2>
+              <p class="text-[11px] text-slate-400 m-0">ใช้สำหรับระบบตรวจบันทึกอัจฉริยะ และการสังเคราะห์แผนการเรียนรู้อัตโนมัติ</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Google Gemini API Key</label>
+            <div class="relative">
+              <input type="password" id="gemini-key" placeholder="AIzaSy..." class="w-full pl-3.5 pr-24 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500">
+              <button type="button" onclick="togglePasswordVisibility('gemini-key', this)" class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-bold transition">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1 flex-wrap">
+            <button type="button" onclick="testGeminiConnection()" id="test-gemini-btn" class="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+              <i class="fas fa-bolt"></i> ทดสอบการเชื่อมต่อ API
+            </button>
+            <button type="button" onclick="saveGeminiKeyAction()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+              <i class="fas fa-key"></i> บันทึกเฉพาะ API Key
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Quick Navigation to Multi-Tenant -->
+      <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fas fa-sitemap"></i>
+          </div>
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-white m-0">ต้องการจัดการสถานศึกษาและหน่วยงานย่อย?</h4>
+            <p class="text-[11px] text-slate-400 m-0">ไปที่หน้าจัดการสถานศึกษา (Multi-Tenant Hub) เพื่อเพิ่มหรือปรับโครงสร้าง</p>
+          </div>
+        </div>
+
+        <button type="button" onclick="window.location.href='institutions.html'" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition shrink-0">
+          <i class="fas fa-arrow-right mr-1"></i> ไปหน้าจัดการสถานศึกษา
+        </button>
+      </div>
+
+      <!-- Bottom Save Bar -->
+      <div class="pt-4 flex items-center justify-end gap-3">
+        <button type="button" onclick="loadSettings(true)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+          ยกเลิก / รีเซ็ต
+        </button>
+        <button type="button" onclick="saveSettings()" id="save-btn-bottom" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition active:scale-95">
+          <i class="fas fa-save mr-1.5"></i> บันทึกการตั้งค่าทั้งหมด
+        </button>
+      </div>
+
+    </div>
+
+  </div> <!-- End Main Container -->
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-settings-v1"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-settings-v1"></script>
+
+  <script>
+    let allInstitutions = [];
+
+    // Toast Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-indigo-600 text-white border-indigo-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="fas fa-eye"></i>';
+      }
+    }
+
+    function updateSignaturePreview(url) {
+      const img = document.getElementById('signature-preview-img');
+      const placeholder = document.getElementById('signature-preview-placeholder');
+      if (url && url.trim() !== '') {
+        img.src = url.trim();
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+      } else {
+        img.src = '';
+        img.style.display = 'none';
+        placeholder.style.display = 'block';
+      }
+    }
+
+    function handleSigFileUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'signature');
+
+      const urlInput = document.getElementById('signature-url');
+      showToast('กำลังอัปโหลดไฟล์ลายเซ็นต์...', 'info');
+
+      fetch('/api/uploadImage', {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data && (data.status === 'success' || data.url)) {
+            const uploadedUrl = data.url || data.imageUrl || '';
+            urlInput.value = uploadedUrl;
+            updateSignaturePreview(uploadedUrl);
+            showToast('อัปโหลดลายเซ็นต์สำเร็จ', 'success');
+          } else {
+            showToast(data.message || 'อัปโหลดไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Upload signature error:', err);
+          showToast('เกิดข้อผิดพลาดในการอัปโหลดลายเซ็นต์', 'error');
+        });
+    }
+
+    // ─── Initialize ──────────────────────────────────────────────
+    function initData() {
+      loadInstitutionsDropdown();
+      loadSettings(true);
+    }
+
+    function loadInstitutionsDropdown() {
+      const instSelect = document.getElementById('setting-institution-selector');
+      apiGet('getInstitutions', withAuthParams({}))
+        .then(res => {
+          if (res && res.status === 'success' && Array.isArray(res.institutions)) {
+            allInstitutions = res.institutions;
+            let html = '';
+            allInstitutions.forEach(inst => {
+              html += `<option value="${escapeHtml(inst.id)}">🏫 ${escapeHtml(inst.name || inst.id)} (${escapeHtml(inst.id)})</option>`;
+            });
+            instSelect.innerHTML = html;
+
+            const userInst = (localStorage.getItem('userInstitution') || '').trim();
+            if (userInst && userInst !== 'ALL' && userInst !== 'ทั้งหมด') {
+              instSelect.value = userInst;
+            } else {
+              instSelect.value = 'INS_PHRAO';
+            }
+          }
+        })
+        .catch(err => console.error('Load institutions error:', err));
+    }
+
+    // ─── Load Settings ───────────────────────────────────────────
+    function loadSettings(force = false) {
+      const inst = (document.getElementById('setting-institution-selector')?.value || 'INS_PHRAO').trim();
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      apiGet('getGlobalSettings', withAuthParams({ institutionId: inst }))
+        .then(res => {
+          if (icon) icon.classList.remove('fa-spin');
+          if (res && res.status === 'success') {
+            const s = res.settings || {};
+            document.getElementById('director-name').value = s.directorName || '';
+            document.getElementById('director-title').value = s.directorTitle || '';
+            document.getElementById('signature-url').value = s.signatureUrl || '';
+            updateSignaturePreview(s.signatureUrl || '');
+          }
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Load settings error:', err);
+          showToast('เกิดข้อผิดพลาดในการโหลดการตั้งค่า', 'error');
+        });
+    }
+
+    // ─── Save Settings ───────────────────────────────────────────
+    function saveSettings() {
+      const inst = (document.getElementById('setting-institution-selector')?.value || 'INS_PHRAO').trim();
+      const directorName = document.getElementById('director-name').value.trim();
+      const directorTitle = document.getElementById('director-title').value.trim();
+      const signatureUrl = document.getElementById('signature-url').value.trim();
+
+      const btnTop = document.getElementById('save-btn-top');
+      const btnBottom = document.getElementById('save-btn-bottom');
+      if (btnTop) btnTop.disabled = true;
+      if (btnBottom) btnBottom.disabled = true;
+
+      const payload = {
+        institutionId: inst,
+        directorName: directorName,
+        directorTitle: directorTitle,
+        signatureUrl: signatureUrl
+      };
+
+      apiPost('saveGlobalSettings', withAuthParams(payload))
+        .then(res => {
+          if (btnTop) btnTop.disabled = false;
+          if (btnBottom) btnBottom.disabled = false;
+          if (res && res.status === 'success') {
+            showToast('บันทึกการตั้งค่าสถานศึกษาเรียบร้อยแล้ว', 'success');
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          if (btnTop) btnTop.disabled = false;
+          if (btnBottom) btnBottom.disabled = false;
+          console.error('Save settings error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกการตั้งค่า', 'error');
+        });
+    }
+
+    // ─── Gemini Key Actions ──────────────────────────────────────
+    function saveGeminiKeyAction() {
+      const key = document.getElementById('gemini-key').value.trim();
+      if (!key) {
+        showToast('กรุณาระบุ Gemini API Key', 'warning');
+        return;
+      }
+
+      apiPost('setGeminiKey', withAuthParams({ geminiKey: key }))
+        .then(res => {
+          if (res && res.status === 'success') {
+            showToast('บันทึก Gemini API Key สำเร็จ', 'success');
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Save gemini key error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึก API Key', 'error');
+        });
+    }
+
+    function testGeminiConnection() {
+      const btn = document.getElementById('test-gemini-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังทดสอบ...';
+
+      apiPost('testGeminiKey', withAuthParams({}))
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-bolt"></i> ทดสอบการเชื่อมต่อ API';
+          if (res && res.status === 'success') {
+            showToast('⚡ ทดสอบสำเร็จ! Gemini API Key ใช้งานได้สมบูรณ์', 'success');
+          } else {
+            showToast(res.message || 'ทดสอบไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-bolt"></i> ทดสอบการเชื่อมต่อ API';
+          console.error('Test gemini key error:', err);
+          showToast('เกิดข้อผิดพลาดในการทดสอบ API Key', 'error');
+        });
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      initData();
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>

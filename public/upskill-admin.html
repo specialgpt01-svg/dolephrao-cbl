@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 จัดการวิดีโอและหมวดหมู่อัพสกิล — Phrao Learning District</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --font-main: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      display: block !important;
+      width: 100% !important;
+      min-height: 100vh;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: var(--font-main);
+      background-color: #0b132b !important;
+      color: #f8fafc !important;
+      overflow-x: hidden;
+    }
+    .custom-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- ═══════════════════ Main Container ═══════════════════ -->
+  <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- Header Navigation -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 sm:p-5 mb-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-pink-600 flex items-center justify-center text-white text-xl shadow-md shadow-indigo-500/20 shrink-0">
+          <i class="fas fa-video"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-black text-white m-0 flex items-center gap-2">
+              จัดการสื่อการเรียนรู้อัพสกิล (Upskill Media)
+            </h1>
+            <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30">
+              Video & Microlearning
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 m-0">
+            วิดีโอพัฒนาทักษะ YouTube หมวดหมู่ และระบบสะสมเวลาเรียน
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap shrink-0">
+        <button type="button" onclick="openVideoEditorModal()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-md shadow-indigo-600/30 transition-all active:scale-95">
+          <i class="fas fa-plus"></i> เพิ่มวิดีโอ
+        </button>
+        <button type="button" onclick="openCategoryEditorModal()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-pink-600/30 hover:bg-pink-600/40 text-pink-300 border border-pink-500/30 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-tags"></i> เพิ่มหมวดหมู่
+        </button>
+        <button type="button" onclick="refreshCurrentTab(true)" class="flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-full bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95" title="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        </button>
+        <button type="button" onclick="goBackToHub()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition-all active:scale-95">
+          <i class="fas fa-arrow-left"></i> ศูนย์จัดการ
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-Tab Navigation Bar -->
+    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-800/80 border border-slate-700/70 mb-6 shadow-md max-w-md">
+      <button type="button" id="tab-btn-videos" onclick="switchSubTab('videos')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+        <i class="fas fa-video"></i> วิดีโออัพสกิล
+      </button>
+      <button type="button" id="tab-btn-categories" onclick="switchSubTab('categories')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white">
+        <i class="fas fa-tags"></i> หมวดหมู่อัพสกิล
+      </button>
+    </div>
+
+    <!-- ═══════════════════ TAB 1: VIDEOS ═══════════════════ -->
+    <section id="tab-section-videos">
+      <!-- Filter Bar -->
+      <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 mb-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+          <select id="filter-category" onchange="filterVideosList()" class="w-full px-3.5 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-bold">
+            <option value="ALL">📂 ทุกหมวดหมู่ (ทั้งหมด)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+          <div class="relative w-full">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="filter-search-video" onkeyup="filterVideosList()" placeholder="ค้นหาชื่อวิดีโอ หรือเนื้อหา..." class="w-full pl-9 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+        <span id="videos-count-badge" class="px-3 py-1.5 rounded-xl bg-slate-700/50 border border-slate-600 text-slate-300 font-bold text-xs shrink-0">
+          แสดง 0 วิดีโอ
+        </span>
+      </div>
+
+      <!-- Videos Grid -->
+      <div id="videos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="col-span-full text-center py-16 text-slate-400">
+          <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-indigo-500"></i>
+          <p class="text-sm font-semibold">กำลังโหลดวิดีโออัพสกิล...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ TAB 2: CATEGORIES ═══════════════════ -->
+    <section id="tab-section-categories" style="display: none;">
+      <!-- Categories Grid -->
+      <div id="categories-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="col-span-full text-center py-16 text-slate-400">
+          <i class="fas fa-circle-notch fa-spin text-3xl mb-3 text-pink-500"></i>
+          <p class="text-sm font-semibold">กำลังโหลดหมวดหมู่...</p>
+        </div>
+      </div>
+    </section>
+
+  </div> <!-- End Main Container -->
+
+  <!-- ═══════════════════ Modal: Add / Edit Video ═══════════════════ -->
+  <div id="modal-video-editor" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+            <i class="fas fa-video"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="video-modal-title">เพิ่มวิดีโออัพสกิลใหม่</h3>
+            <p class="text-[11px] text-slate-400 m-0">กำหนดลิงก์ YouTube หมวดหมู่ และคำอธิบาย</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeVideoEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="video-form" onsubmit="submitVideoForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="video-form-id">
+
+        <!-- Title -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อวิดีโอ <span class="text-rose-400">*</span></label>
+          <input type="text" id="video-form-title" required placeholder="เช่น การทำปุ๋ยหมักชีวภาพสูตรเข้มข้น" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <!-- Category & Order -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">หมวดหมู่อัพสกิล <span class="text-rose-400">*</span></label>
+            <select id="video-form-category" required class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 font-bold">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ลำดับการแสดงผล</label>
+            <input type="number" id="video-form-order" placeholder="เช่น 1, 2, 3" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Video URL -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1"><i class="fab fa-youtube text-rose-400 mr-1"></i>ลิงก์วิดีโอ YouTube <span class="text-rose-400">*</span></label>
+          <input type="text" id="video-form-url" required placeholder="https://www.youtube.com/watch?v=... หรือ https://youtu.be/..." class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" oninput="autoFetchThumbnail(this.value)">
+        </div>
+
+        <!-- Thumbnail URL -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">URL รูปภาพหน้าปก (Thumbnail)</label>
+          <input type="text" id="video-form-thumbnail" placeholder="https://img.youtube.com/vi/... หรือเว้นว่างให้ระบบดึงอัตโนมัติ" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียด / สรุปเนื้อหา</label>
+          <textarea id="video-form-description" rows="3" placeholder="ระบุรายละเอียดสำคัญของวิดีโอนี้..." class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeVideoEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="video-form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold shadow-md shadow-indigo-600/30 transition">
+            💾 บันทึกวิดีโอ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Modal: Add / Edit Category ═══════════════════ -->
+  <div id="modal-category-editor" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="display: none;">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-5 sm:p-6 shadow-2xl animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-base">
+            <i class="fas fa-tags"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white m-0" id="category-modal-title">เพิ่มหมวดหมู่ใหม่</h3>
+            <p class="text-[11px] text-slate-400 m-0">กำหนดชื่อ ไอคอน และสีประจำหมวดหมู่</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCategoryEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <form id="category-form" onsubmit="submitCategoryForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="category-form-id">
+
+        <!-- Name -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อหมวดหมู่ <span class="text-rose-400">*</span></label>
+          <input type="text" id="category-form-name" required placeholder="เช่น ทักษะอาชีพและการแปรรูป" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-pink-500">
+        </div>
+
+        <!-- Icon & Color -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ไอคอน FontAwesome</label>
+            <input type="text" id="category-form-icon" placeholder="fa-video หรือ fa-seedling" value="fa-video" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-pink-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สีประจำหมวด</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="category-form-color-picker" value="#10b981" class="w-10 h-10 rounded-xl bg-transparent border-0 cursor-pointer p-0" onchange="document.getElementById('category-form-color').value = this.value">
+              <input type="text" id="category-form-color" value="#10b981" class="flex-1 px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white font-mono uppercase focus:outline-none focus:border-pink-500" onchange="document.getElementById('category-form-color-picker').value = this.value">
+            </div>
+          </div>
+        </div>
+
+        <!-- Order -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ลำดับการแสดงผล</label>
+          <input type="number" id="category-form-order" placeholder="เช่น 1, 2, 3" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeCategoryEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="category-form-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold shadow-md shadow-pink-600/30 transition">
+            💾 บันทึกหมวดหมู่
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Custom Toast Container ═══════════════════ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core Scripts -->
+  <script src="js/core/api.js?v=20260819-standalone-upskill-v1"></script>
+  <script src="js/core/auth.js?v=20260819-standalone-upskill-v1"></script>
+
+  <script>
+    let allCategories = [];
+    let allVideos = [];
+    let currentActiveSubTab = 'videos';
+
+    // Toast Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        info: 'bg-indigo-600 text-white border-indigo-500'
+      };
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold pointer-events-auto transition-all transform duration-300 translate-y-2 opacity-0 ${bgMap[type] || bgMap.info}`;
+      toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.info}"></i> <span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+    function escapeJS(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function goBackToHub() {
+      if (document.referrer && (document.referrer.includes(window.location.host))) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // ─── Sub-Tab Switcher ────────────────────────────────────────
+    function switchSubTab(tabName) {
+      currentActiveSubTab = tabName;
+      const btnVideos = document.getElementById('tab-btn-videos');
+      const btnCategories = document.getElementById('tab-btn-categories');
+      const secVideos = document.getElementById('tab-section-videos');
+      const secCategories = document.getElementById('tab-section-categories');
+
+      if (tabName === 'videos') {
+        btnVideos.className = 'flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md';
+        btnCategories.className = 'flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white';
+        secVideos.style.display = 'block';
+        secCategories.style.display = 'none';
+      } else {
+        btnCategories.className = 'flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md';
+        btnVideos.className = 'flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white';
+        secCategories.style.display = 'block';
+        secVideos.style.display = 'none';
+      }
+    }
+
+    function refreshCurrentTab(force = false) {
+      loadCategories(force);
+      loadVideos(force);
+    }
+
+    // ─── Load Categories ─────────────────────────────────────────
+    function loadCategories(force = false) {
+      const container = document.getElementById('categories-container');
+      const filterSelect = document.getElementById('filter-category');
+      const modalSelect = document.getElementById('video-form-category');
+
+      apiGet('listUpskillCategories', withAuthParams({}))
+        .then(res => {
+          let list = [];
+          if (res && res.status === 'success' && Array.isArray(res.categories)) {
+            list = res.categories;
+          } else if (res && Array.isArray(res.data)) {
+            list = res.data;
+          }
+
+          allCategories = list;
+
+          // Populate selects
+          let filterHtml = '<option value="ALL">📂 ทุกหมวดหมู่ (ทั้งหมด)</option>';
+          let modalHtml = '<option value="">— เลือกหมวดหมู่ —</option>';
+
+          allCategories.forEach(cat => {
+            filterHtml += `<option value="${escapeHtml(cat.id)}">${escapeHtml(cat.label || cat.name)}</option>`;
+            modalHtml += `<option value="${escapeHtml(cat.id)}">${escapeHtml(cat.label || cat.name)}</option>`;
+          });
+
+          if (filterSelect) filterSelect.innerHTML = filterHtml;
+          if (modalSelect) modalSelect.innerHTML = modalHtml;
+
+          renderCategories(allCategories);
+        })
+        .catch(err => {
+          console.error('Load categories error:', err);
+          container.innerHTML = `
+            <div class="col-span-full text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดหมวดหมู่</h4>
+            </div>
+          `;
+        });
+    }
+
+    function renderCategories(list) {
+      const container = document.getElementById('categories-container');
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-tags text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ยังไม่มีหมวดหมู่อัพสกิล</h4>
+            <button onclick="openCategoryEditorModal()" class="mt-4 px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-xl transition">
+              <i class="fas fa-plus mr-1"></i> เพิ่มหมวดหมู่แรก
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach(cat => {
+        const id = cat.id || '';
+        const name = cat.label || cat.name || '';
+        const icon = cat.icon || 'fa-video';
+        const color = cat.color || '#10b981';
+        const order = cat.order || 0;
+
+        // Count videos in this category
+        const videoCount = allVideos.filter(v => String(v.category) === String(id)).length;
+
+        html += `
+          <div class="custom-card p-5 flex flex-col justify-between" data-cat-id="${escapeHtml(id)}">
+            <div class="flex items-start gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 shadow-md" style="background:${escapeHtml(color)};">
+                <i class="fas ${escapeHtml(icon)}"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm sm:text-base font-bold text-white leading-snug m-0 truncate" title="${escapeHtml(name)}">
+                  ${escapeHtml(name)}
+                </h3>
+                <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-400">
+                  <span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300">
+                    <i class="fas fa-video mr-1 text-pink-400"></i>${videoCount} วิดีโอ
+                  </span>
+                  <span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300">
+                    ลำดับ ${order}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-700/60 mt-4 flex items-center justify-end gap-2">
+              <button type="button" onclick="openCategoryEditorModal('${escapeJS(id)}')" class="px-3 py-1.5 rounded-xl bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 text-xs font-bold border border-pink-500/30 transition active:scale-95 flex items-center gap-1">
+                <i class="fas fa-edit"></i> แก้ไข
+              </button>
+              <button type="button" onclick="deleteCategoryAction('${escapeJS(id)}', '${escapeJS(name)}')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/20 transition active:scale-95" title="ลบหมวดหมู่นี้">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Load Videos ─────────────────────────────────────────────
+    function loadVideos(force = false) {
+      const container = document.getElementById('videos-container');
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      apiGet('listUpskillVideos', withAuthParams({}))
+        .then(res => {
+          if (icon) icon.classList.remove('fa-spin');
+          let list = [];
+          if (res && res.status === 'success' && Array.isArray(res.videos)) {
+            list = res.videos;
+          } else if (res && Array.isArray(res.data)) {
+            list = res.data;
+          }
+
+          allVideos = list;
+          filterVideosList();
+          // Update category cards with video counts
+          if (allCategories.length) renderCategories(allCategories);
+        })
+        .catch(err => {
+          if (icon) icon.classList.remove('fa-spin');
+          console.error('Load videos error:', err);
+          container.innerHTML = `
+            <div class="col-span-full text-center py-16 text-rose-400 bg-rose-950/20 rounded-3xl border border-rose-900/50">
+              <i class="fas fa-triangle-exclamation text-4xl mb-3 text-rose-500"></i>
+              <h4 class="text-base font-bold text-rose-300">เกิดข้อผิดพลาดในการโหลดวิดีโอ</h4>
+            </div>
+          `;
+        });
+    }
+
+    function filterVideosList() {
+      const catFilter = (document.getElementById('filter-category')?.value || 'ALL').trim();
+      const q = (document.getElementById('filter-search-video')?.value || '').trim().toLowerCase();
+
+      let filtered = allVideos;
+
+      if (catFilter && catFilter !== 'ALL') {
+        filtered = filtered.filter(v => String(v.category) === String(catFilter));
+      }
+
+      if (q) {
+        filtered = filtered.filter(v => {
+          const t = String(v.title || '').toLowerCase();
+          const d = String(v.description || '').toLowerCase();
+          return t.includes(q) || d.includes(q);
+        });
+      }
+
+      renderVideos(filtered);
+    }
+
+    function renderVideos(list) {
+      const container = document.getElementById('videos-container');
+      const badge = document.getElementById('videos-count-badge');
+      if (badge) badge.innerText = `แสดง ${list.length} จาก ${allVideos.length} วิดีโอ`;
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-16 text-slate-400 bg-slate-800/30 rounded-3xl border border-slate-700/50">
+            <i class="fas fa-video text-3xl mb-3 text-slate-500"></i>
+            <h4 class="text-sm font-bold text-slate-300">ไม่พบวิดีโอในหมวดหมู่นี้</h4>
+            <button onclick="openVideoEditorModal()" class="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-pink-600 text-white text-xs font-bold rounded-xl transition">
+              <i class="fas fa-plus mr-1"></i> เพิ่มวิดีโอใหม่
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach(video => {
+        const id = video.id || '';
+        const title = video.title || '(ไม่มีชื่อวิดีโอ)';
+        const desc = video.description || '';
+        const url = video.url || '';
+        let thumb = video.thumbnail || '';
+        
+        // Auto fallback YouTube thumbnail
+        if (!thumb && url) {
+          const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          if (match && match[1]) thumb = `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+        }
+
+        const catObj = allCategories.find(c => String(c.id) === String(video.category));
+        const catName = catObj ? (catObj.label || catObj.name) : 'ทั่วไป';
+        const catColor = catObj ? (catObj.color || '#6366f1') : '#6366f1';
+
+        html += `
+          <div class="custom-card flex flex-col overflow-hidden" data-video-id="${escapeHtml(id)}">
+            
+            <!-- Video Thumbnail -->
+            <div class="relative h-44 bg-slate-800 bg-cover bg-center" style="${thumb ? `background-image:url('${escapeHtml(thumb)}');` : ''}">
+              ${!thumb ? '<div class="w-full h-full flex items-center justify-center text-slate-600 text-3xl"><i class="fas fa-video"></i></div>' : ''}
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/40"></div>
+              
+              <!-- Badges -->
+              <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black text-white shadow-md" style="background:${escapeHtml(catColor)};">
+                  ${escapeHtml(catName)}
+                </span>
+                ${url ? `<a href="${escapeHtml(url)}" target="_blank" class="w-8 h-8 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg transition active:scale-95" title="เปิดดูบน YouTube"><i class="fab fa-youtube"></i></a>` : ''}
+              </div>
+            </div>
+
+            <!-- Video Body -->
+            <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-white leading-snug m-0 line-clamp-2" title="${escapeHtml(title)}">
+                  ${escapeHtml(title)}
+                </h3>
+                ${desc ? `<p class="text-xs text-slate-400 mt-2 line-clamp-2 m-0">${escapeHtml(desc)}</p>` : ''}
+              </div>
+
+              <!-- Actions -->
+              <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-400 font-mono">
+                  ลำดับ: ${video.order || 0}
+                </span>
+
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="openVideoEditorModal('${escapeJS(id)}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs font-bold border border-indigo-500/30 transition active:scale-95 flex items-center gap-1">
+                    <i class="fas fa-edit"></i> แก้ไข
+                  </button>
+                  <button type="button" onclick="deleteVideoAction('${escapeJS(id)}', '${escapeJS(title)}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/20 transition active:scale-95" title="ลบวิดีโอนี้">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ─── Video Modals & CRUD ─────────────────────────────────────
+    function openVideoEditorModal(videoId = '') {
+      const form = document.getElementById('video-form');
+      form.reset();
+
+      const titleEl = document.getElementById('video-modal-title');
+      const submitBtn = document.getElementById('video-form-submit-btn');
+      const idInput = document.getElementById('video-form-id');
+      const titleInput = document.getElementById('video-form-title');
+      const catInput = document.getElementById('video-form-category');
+      const orderInput = document.getElementById('video-form-order');
+      const urlInput = document.getElementById('video-form-url');
+      const thumbInput = document.getElementById('video-form-thumbnail');
+      const descInput = document.getElementById('video-form-description');
+
+      if (videoId) {
+        const item = allVideos.find(v => String(v.id) === String(videoId));
+        if (item) {
+          titleEl.innerText = '✏️ แก้ไขวิดีโออัพสกิล';
+          submitBtn.innerText = '💾 บันทึกการแก้ไข';
+          idInput.value = item.id;
+          titleInput.value = item.title || '';
+          catInput.value = item.category || '';
+          orderInput.value = item.order != null ? item.order : '';
+          urlInput.value = item.url || '';
+          thumbInput.value = item.thumbnail || '';
+          descInput.value = item.description || '';
+        }
+      } else {
+        titleEl.innerText = '🎬 เพิ่มวิดีโออัพสกิลใหม่';
+        submitBtn.innerText = '💾 สร้างวิดีโอ';
+        idInput.value = '';
+        orderInput.value = allVideos.length + 1;
+      }
+
+      document.getElementById('modal-video-editor').style.display = 'flex';
+      titleInput.focus();
+    }
+
+    function closeVideoEditorModal() {
+      document.getElementById('modal-video-editor').style.display = 'none';
+    }
+
+    function autoFetchThumbnail(url) {
+      const thumbInput = document.getElementById('video-form-thumbnail');
+      if (thumbInput.value.trim() !== '') return;
+
+      const match = (url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      if (match && match[1]) {
+        thumbInput.value = `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+      }
+    }
+
+    function submitVideoForm(e) {
+      e.preventDefault();
+      const rawId = document.getElementById('video-form-id').value.trim();
+      const title = document.getElementById('video-form-title').value.trim();
+      const category = document.getElementById('video-form-category').value.trim();
+      const order = document.getElementById('video-form-order').value.trim();
+      const url = document.getElementById('video-form-url').value.trim();
+      const thumbnail = document.getElementById('video-form-thumbnail').value.trim();
+      const description = document.getElementById('video-form-description').value.trim();
+
+      if (!title || !category || !url) {
+        showToast('กรุณากรอกชื่อวิดีโอ หมวดหมู่ และลิงก์ YouTube', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('video-form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        id: rawId || undefined,
+        videoId: rawId || undefined,
+        title: title,
+        category: category,
+        categoryId: category,
+        order: order || 999,
+        url: url,
+        videoUrl: url,
+        thumbnail: thumbnail,
+        thumbnailUrl: thumbnail,
+        description: description,
+        isActive: true
+      };
+
+      apiPost('saveUpskillVideo', withAuthParams(payload))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกวิดีโอ';
+          if (res && res.status === 'success') {
+            showToast(rawId ? 'แก้ไขวิดีโอเรียบร้อย' : 'เพิ่มวิดีโอใหม่สำเร็จ', 'success');
+            closeVideoEditorModal();
+            loadVideos(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกวิดีโอ';
+          console.error('Save video error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกวิดีโอ', 'error');
+        });
+    }
+
+    function deleteVideoAction(videoId, videoTitle) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบวิดีโอ',
+        message: `ต้องการลบวิดีโอ "${videoTitle}" ใช่หรือไม่?`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        apiPost('deleteUpskillVideo', withAuthParams({ id: videoId, videoId: videoId }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`ลบวิดีโอ "${videoTitle}" เรียบร้อยแล้ว`, 'success');
+              loadVideos(true);
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Delete video error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบวิดีโอ', 'error');
+          });
+      });
+    }
+
+    // ─── Category Modals & CRUD ──────────────────────────────────
+    function openCategoryEditorModal(catId = '') {
+      const form = document.getElementById('category-form');
+      form.reset();
+
+      const titleEl = document.getElementById('category-modal-title');
+      const submitBtn = document.getElementById('category-form-submit-btn');
+      const idInput = document.getElementById('category-form-id');
+      const nameInput = document.getElementById('category-form-name');
+      const iconInput = document.getElementById('category-form-icon');
+      const colorInput = document.getElementById('category-form-color');
+      const pickerInput = document.getElementById('category-form-color-picker');
+      const orderInput = document.getElementById('category-form-order');
+
+      if (catId) {
+        const item = allCategories.find(c => String(c.id) === String(catId));
+        if (item) {
+          titleEl.innerText = '✏️ แก้ไขหมวดหมู่';
+          submitBtn.innerText = '💾 บันทึกการแก้ไข';
+          idInput.value = item.id;
+          nameInput.value = item.label || item.name || '';
+          iconInput.value = item.icon || 'fa-video';
+          const col = item.color || '#10b981';
+          colorInput.value = col;
+          pickerInput.value = col;
+          orderInput.value = item.order != null ? item.order : '';
+        }
+      } else {
+        titleEl.innerText = '🏷️ เพิ่มหมวดหมู่ใหม่';
+        submitBtn.innerText = '💾 สร้างหมวดหมู่';
+        idInput.value = '';
+        iconInput.value = 'fa-video';
+        colorInput.value = '#10b981';
+        pickerInput.value = '#10b981';
+        orderInput.value = allCategories.length + 1;
+      }
+
+      document.getElementById('modal-category-editor').style.display = 'flex';
+      nameInput.focus();
+    }
+
+    function closeCategoryEditorModal() {
+      document.getElementById('modal-category-editor').style.display = 'none';
+    }
+
+    function submitCategoryForm(e) {
+      e.preventDefault();
+      const rawId = document.getElementById('category-form-id').value.trim();
+      const name = document.getElementById('category-form-name').value.trim();
+      const icon = document.getElementById('category-form-icon').value.trim();
+      const color = document.getElementById('category-form-color').value.trim();
+      const order = document.getElementById('category-form-order').value.trim();
+
+      if (!name) {
+        showToast('กรุณาระบุชื่อหมวดหมู่', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('category-form-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> กำลังบันทึก...';
+
+      const payload = {
+        id: rawId || undefined,
+        categoryId: rawId || undefined,
+        name: name,
+        label: name,
+        icon: icon || 'fa-video',
+        color: color || '#10b981',
+        order: order || 999,
+        isActive: true
+      };
+
+      apiPost('saveUpskillCategory', withAuthParams(payload))
+        .then(res => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกหมวดหมู่';
+          if (res && res.status === 'success') {
+            showToast(rawId ? 'แก้ไขหมวดหมู่เรียบร้อย' : 'เพิ่มหมวดหมู่ใหม่สำเร็จ', 'success');
+            closeCategoryEditorModal();
+            loadCategories(true);
+          } else {
+            showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+          }
+        })
+        .catch(err => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = '💾 บันทึกหมวดหมู่';
+          console.error('Save category error:', err);
+          showToast('เกิดข้อผิดพลาดในการบันทึกหมวดหมู่', 'error');
+        });
+    }
+
+    function deleteCategoryAction(catId, catName) {
+      showCustomConfirm({
+        title: 'ยืนยันการลบหมวดหมู่',
+        message: `ต้องการลบหมวดหมู่ "${catName}" ใช่หรือไม่?`,
+        type: 'danger',
+        confirmText: 'ยืนยันการลบ'
+      }, () => {
+        apiPost('deleteUpskillCategory', withAuthParams({ id: catId, categoryId: catId }))
+          .then(res => {
+            if (res && res.status === 'success') {
+              showToast(`ลบหมวดหมู่ "${catName}" เรียบร้อยแล้ว`, 'success');
+              loadCategories(true);
+            } else {
+              showToast(res.message || 'ลบไม่สำเร็จ', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Delete category error:', err);
+            showToast('เกิดข้อผิดพลาดในการลบหมวดหมู่', 'error');
+          });
+      });
+    }
+
+    // ─── On Load ────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCategories(true);
+      loadVideos(true);
+    });
+  </script>
+    <!-- Global Responsive Navigation Engine -->
+  <script src="js/core/nav.js?v=20260830-nav-v3"></script>
+</body>
+</html>
