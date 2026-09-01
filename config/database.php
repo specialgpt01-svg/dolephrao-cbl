@@ -48,9 +48,20 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'database' => env('DB_DATABASE', 'doleph_db_loft_learn'),
+            'username' => env('DB_USERNAME', 'doleph_db_loft_learn'),
+            'password' => (function() {
+                $pwd = env('DB_PASSWORD', 'XBh^fn6#qHu5dZ1v');
+                if (is_string($pwd)) {
+                    $trimmed = trim($pwd);
+                    if ((str_starts_with($trimmed, '"') && str_ends_with($trimmed, '"')) ||
+                        (str_starts_with($trimmed, "'") && str_ends_with($trimmed, "'"))) {
+                        return substr($trimmed, 1, -1);
+                    }
+                    return $trimmed;
+                }
+                return $pwd;
+            })(),
             'unix_socket' => env('DB_SOCKET', (function() {
                 $candidates = ['/var/run/mysqld/mysqld.sock', '/var/lib/mysql/mysql.sock', '/tmp/mysql.sock'];
                 foreach ($candidates as $sock) {

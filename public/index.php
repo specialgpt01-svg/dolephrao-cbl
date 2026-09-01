@@ -11,6 +11,11 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 
 require __DIR__.'/../vendor/autoload.php';
 
+// Clear stale cached config on shared hosting so fresh settings are always used
+if (file_exists($cachedConfig = __DIR__.'/../bootstrap/cache/config.php')) {
+    @unlink($cachedConfig);
+}
+
 // Normalize subfolder SCRIPT_NAME and PHP_SELF for Plesk & Shared Hosting
 foreach (['SCRIPT_NAME', 'PHP_SELF'] as $serverKey) {
     if (isset($_SERVER[$serverKey]) && strpos($_SERVER[$serverKey], '/public/index.php') !== false) {
