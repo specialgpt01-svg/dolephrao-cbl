@@ -168,7 +168,54 @@ class CouponController extends Controller
             $value = is_array($decoded) ? $decoded : [$trimmed];
         }
         if (!is_array($value)) $value = [$value];
-        return array_values(array_filter(array_map(fn ($item) => trim((string) $item), $value)));
+        $cleaned = [];
+        foreach ($value as $item) {
+            $s = trim((string) $item);
+            if ($s !== '') {
+                $saved = $this->saveBase64ImageFile($s, 'product');
+                $cleaned[] = $saved;
+            }
+        }
+        return array_values(array_filter($cleaned));
+    }
+
+    private function saveBase64ImageFile(?string $dataUrl, string $prefix = 'product'): string
+    {
+        if (!$dataUrl || !is_string($dataUrl)) {
+            return '';
+        }
+
+        $dataUrl = trim($dataUrl);
+        if (!preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches)) {
+            return $dataUrl;
+        }
+
+        $extension = strtolower($matches[1]);
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
+        }
+
+        $base64Data = substr($dataUrl, strpos($dataUrl, ',') + 1);
+        $decoded = base64_decode($base64Data);
+        if ($decoded === false) {
+            return $dataUrl;
+        }
+
+        $year = date('Y');
+        $month = date('m');
+        $relativeDir = "uploads/images/{$year}/{$month}";
+        $fullDir = storage_path("app/public/{$relativeDir}");
+
+        if (!is_dir($fullDir)) {
+            mkdir($fullDir, 0755, true);
+        }
+
+        $filename = "{$prefix}_" . round(microtime(true) * 1000) . "_{$year}{$month}." . $extension;
+        $fullPath = "{$fullDir}/{$filename}";
+
+        file_put_contents($fullPath, $decoded);
+
+        return "/storage/{$relativeDir}/{$filename}";
     }
 
     public function redeemCoupon(Request $request): JsonResponse

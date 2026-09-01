@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Style\Font;
@@ -226,6 +227,25 @@ class ActivityController extends Controller
         ]);
     }
 
+    private function saveBase64ImageFile(?string $dataUrl, string $prefix = 'act'): string
+    {
+        if (!$dataUrl) return '';
+        $dataUrl = trim($dataUrl);
+        if (preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches)) {
+            $ext = strtolower($matches[1]);
+            if ($ext === 'jpeg') $ext = 'jpg';
+            $data = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1));
+            if ($data && strlen($data) <= 12 * 1024 * 1024) {
+                $dir = 'uploads/images/' . date('Y/m');
+                $filename = $prefix . '_' . time() . '_' . Str::random(8) . '.' . $ext;
+                $path = $dir . '/' . $filename;
+                Storage::disk('public')->put($path, $data);
+                return '/storage/' . $path;
+            }
+        }
+        return $dataUrl;
+    }
+
     /** saveFeaturedActivity */
     public function saveFeaturedActivity(Request $request): JsonResponse
     {
@@ -242,12 +262,14 @@ class ActivityController extends Controller
             $featuredId = (string) \Illuminate\Support\Str::uuid();
         }
 
+        $imageUrl = $this->saveBase64ImageFile($request->input('imageUrl') ?? $request->input('image') ?? '', 'act_feat');
+
         \App\Models\HomeFeatured::updateOrCreate(
             ['featured_id' => $featuredId],
             [
                 'institution_id' => $instId,
                 'title'         => trim($request->input('title') ?? ''),
-                'image_url'     => trim($request->input('imageUrl') ?? $request->input('image') ?? ''),
+                'image_url'     => $imageUrl,
                 'location_name' => trim($request->input('locationName') ?? $request->input('location') ?? ''),
                 'map_link'      => trim($request->input('mapLink') ?? ''),
                 'start_date'    => trim($request->input('startDate') ?? ''),
@@ -257,7 +279,7 @@ class ActivityController extends Controller
             ]
         );
 
-        return response()->json(['status' => 'success', 'featuredId' => $featuredId]);
+        return response()->json(['status' => 'success', 'featuredId' => $featuredId, 'imageUrl' => $imageUrl]);
     }
 
     /** saveQuarterActivity */
@@ -276,6 +298,8 @@ class ActivityController extends Controller
             $id = (string) \Illuminate\Support\Str::uuid();
         }
 
+        $imageUrl = $this->saveBase64ImageFile($request->input('imageUrl') ?? $request->input('coverImage') ?? '', 'act_q');
+
         $descData = [
             'description'  => trim($request->input('description') ?? ''),
             'activityDate' => trim($request->input('activityDate') ?? ''),
@@ -290,7 +314,7 @@ class ActivityController extends Controller
             'institution_id'     => $instId,
             'activity_name'      => trim($request->input('activityName') ?? ''),
             'description'        => json_encode($descData, JSON_UNESCAPED_UNICODE),
-            'image_url'          => $request->input('imageUrl') ?? '',
+            'image_url'          => $imageUrl,
             'location_name'      => $request->input('locationName') ?? '',
             'tambon'             => $request->input('areaCode') ?? $request->input('tambon') ?? '',
             'quarter'            => (int) ($request->input('quarter') ?? 1),
@@ -304,7 +328,7 @@ class ActivityController extends Controller
             'online_description' => trim($request->input('onlineDescription') ?? ''),
         ]);
 
-        return response()->json(['status' => 'success', 'activityId' => $id]);
+        return response()->json(['status' => 'success', 'activityId' => $id, 'imageUrl' => $imageUrl]);
     }
 
     /** syncExternalQuarterActivity — API Webhook รับข้อมูลกิจกรรมจากระบบภายนอก */
