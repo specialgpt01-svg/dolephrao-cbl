@@ -8,7 +8,6 @@ functions/.env
 functions/.env.*
 !functions/.env.example
 /.env
-/vendor/
 /node_modules/
 /firestore-export/
 /storage/backups/*.sql
