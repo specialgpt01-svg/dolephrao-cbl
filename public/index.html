@@ -922,7 +922,8 @@
         : (user ? (user.score != null ? user.score : (user.points != null ? user.points : 0)) : 0);
 
       const fullName = (user && (user.fullName || user.fullname || user.full_name || user.name || user.displayName)) || localStorage.getItem('userName') || (user && user.username) || userPhone || 'ผู้เรียน';
-      const avatarUrl = (user && (user.profileImage || user.profile_image || user.image || user.avatar || user.photoURL)) || localStorage.getItem('userAvatar') || '';
+      const rawAvatarUrl = (user && (user.profileImage || user.profile_image || user.image || user.avatar || user.photoURL)) || localStorage.getItem('userAvatar') || '';
+      const avatarUrl = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatarUrl) : rawAvatarUrl;
       const role = String((user && user.role) || localStorage.getItem('userRole') || 'user').toLowerCase();
 
       if (token && role !== 'guest') {
@@ -1431,7 +1432,8 @@
         const rawTambon = u.tambon || '';
         const tambon = rawTambon ? (rawTambon.startsWith('ต.') || rawTambon.startsWith('ตำบล') || rawTambon.startsWith('ศกร.') ? rawTambon : 'ต.' + rawTambon) : '';
         const score = Number(u.score || u.points || 0);
-        const avatar = u.profileImage || u.profile_image || u.avatar || u.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true`;
+        const rawAvatar = u.profileImage || u.profile_image || u.avatar || u.image || '';
+        const avatar = rawAvatar && typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatar) : (rawAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true`);
         const phone = u.phone || u.username || '';
 
         html += `
@@ -1462,7 +1464,8 @@
           const rawTambon = u.tambon || '';
           const tambon = rawTambon ? (rawTambon.startsWith('ต.') || rawTambon.startsWith('ตำบล') || rawTambon.startsWith('ศกร.') ? rawTambon : 'ต.' + rawTambon) : '';
           const score = Number(u.score || u.points || 0);
-          const avatar = u.profileImage || u.profile_image || u.avatar || u.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=38bdf8&bold=true`;
+          const rawAvatar = u.profileImage || u.profile_image || u.avatar || u.image || '';
+          const avatar = rawAvatar && typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatar) : (rawAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=38bdf8&bold=true`);
           const phone = u.phone || u.username || '';
 
           html += `

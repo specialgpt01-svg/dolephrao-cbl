@@ -1039,7 +1039,8 @@
         }
         const p = res.profile || {};
         const s = res.summary || {};
-        const profileImage = p.profileImage || p.profileimage || p.image || '';
+        const rawProfileImage = p.profileImage || p.profileimage || p.image || '';
+        const profileImage = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawProfileImage) : rawProfileImage;
         const profileName = p.fullName || p.fullname || p.name || p.username || '-';
         const profileScore = p.score || p.totalScore || p.totalscore || 0;
         let html = '<div class="admin-learner-profile-head">';
@@ -1944,12 +1945,7 @@
       const statusColor = isPending ? 'var(--gold)' : (u.imageStatus === 'Rejected' ? '#ef4444' : '#10b981');
       const statusBorderColor = isPending ? 'rgba(245,158,11,0.3)' : (u.imageStatus === 'Rejected' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)');
       const placeholderImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
-      const rawImg = (function(url) {
-        if (!url) return '';
-        const val = String(url).trim();
-        if (val.startsWith('storage/') || val.startsWith('uploads/')) return '/' + val;
-        return val;
-      })(u.profileImage);
+      const rawImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(u.profileImage || '') : (u.profileImage || '');
       const imgUrl = isLoftAssetUrl(rawImg) ? rawImg : placeholderImg;
       const userScore = u.score != null ? u.score : 0;
       const roleValue = String(u.role || 'user').toLowerCase();
@@ -2537,7 +2533,9 @@
     const score = Number(localStorage.getItem("userScore") || (p ? p.score : 0));
     const nfe = data && data.nfe ? data.nfe : { totalHours: 0, remainingThisYear: 50 };
     const couponCount = data ? Number(data.couponCount || 0) : 0;
-    const avatarStyle = p && p.image ? "background-image:url('" + escapeHtml(p.image) + "')" : "";
+    const rawAvatarUrl = p && (p.image || p.profileImage) ? (p.image || p.profileImage) : '';
+    const avatarUrl = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatarUrl) : rawAvatarUrl;
+    const avatarStyle = avatarUrl ? "background-image:url('" + escapeHtml(avatarUrl) + "')" : "";
 
     const cosmetics = (p && p.cosmetics) ? p.cosmetics : { equipped: {} };
     const eq = cosmetics.equipped || {};

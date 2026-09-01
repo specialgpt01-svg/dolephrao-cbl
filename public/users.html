@@ -900,7 +900,7 @@
         const role = String(u.role || 'user').toLowerCase();
         const score = u.score != null ? u.score : 0;
         const imgStatus = u.imageStatus || 'None';
-        const profileImg = u.profileImage ? (u.profileImage.startsWith('http') || u.profileImage.startsWith('/') ? u.profileImage : '/' + u.profileImage) : '';
+        const profileImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(u.profileImage || '') : (u.profileImage || '');
 
         const roleBadgeMap = {
           admin: '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/30"><i class="fas fa-shield-halved mr-1"></i>Admin</span>',

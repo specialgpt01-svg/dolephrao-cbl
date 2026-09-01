@@ -1043,7 +1043,8 @@
       const instName = (u.institutionId === 'INS_MAERIM' || u.institution_id === 'INS_MAERIM') ? 'สกร.อำเภอแม่ริม' : 'สกร.อำเภอพร้าว';
       const score = u.score != null ? u.score : (u.points != null ? u.points : 0);
       const hours = u.nfeHours || u.nfe_hours || u.totalNFEHours || 0;
-      const avatar = u.profileImage || u.profile_image || u.image || u.avatar || u.photoURL || '';
+      const rawAvatar = u.profileImage || u.profile_image || u.image || u.avatar || u.photoURL || '';
+      const avatar = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatar) : rawAvatar;
 
       // Apply equipped cosmetics
       const cosmetics = (u && u.cosmetics) || { equipped: {} };
@@ -1208,7 +1209,8 @@
       const previewMeta = document.getElementById('cosmetics-preview-meta');
 
       const uName = (userProfileData && (userProfileData.fullName || userProfileData.name || userProfileData.username)) || 'ผู้เรียน';
-      const uAvatar = (userProfileData && (userProfileData.profileImage || userProfileData.profile_image || userProfileData.avatar)) || '';
+      const rawUAvatar = (userProfileData && (userProfileData.profileImage || userProfileData.profile_image || userProfileData.avatar)) || '';
+      const uAvatar = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawUAvatar) : rawUAvatar;
 
       if (previewAvatarWrap) {
         const frameClass = getCosmeticCss(eq.frame) || '';

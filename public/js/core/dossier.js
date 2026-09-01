@@ -284,7 +284,7 @@
         this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true`;
       };
       if (rawAvatar && String(rawAvatar).trim() !== '') {
-        avatarImg.src = rawAvatar;
+        avatarImg.src = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawAvatar) : rawAvatar;
       } else {
         avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fbbf24&bold=true`;
       }

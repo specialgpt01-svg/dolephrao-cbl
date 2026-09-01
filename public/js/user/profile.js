@@ -229,7 +229,8 @@ window.toggleProfileSection = toggleProfileSection;
         applyCosmeticsToElement(pAvatar, pNameEl, me.cosmetics);
       }
       
-      const imgUrl = me.profileImage || me.profileimage || "";
+      const rawImgUrl = me.profileImage || me.profileimage || "";
+      const imgUrl = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImgUrl) : rawImgUrl;
       const imgStatus = String(me.imageStatus || me.imagestatus || "Approved");
       const profileImg = document.getElementById('profile-preview');
       const adjustBtn = document.getElementById('btn-adjust-profile');
