@@ -23,13 +23,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Self-healing schema upgrade for users profile_image column on shared hosting
+        // Self-healing schema upgrade for columns on shared hosting environments
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE `users` MODIFY COLUMN `profile_image` LONGTEXT NULL");
             }
+            if (\Illuminate\Support\Facades\Schema::hasTable('learning_sources')) {
+                \Illuminate\Support\Facades\DB::statement("ALTER TABLE `learning_sources` MODIFY COLUMN `cover_image` LONGTEXT NULL");
+                \Illuminate\Support\Facades\DB::statement("ALTER TABLE `learning_sources` MODIFY COLUMN `qr_image` LONGTEXT NULL");
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('activities')) {
+                \Illuminate\Support\Facades\DB::statement("ALTER TABLE `activities` MODIFY COLUMN `image_url` LONGTEXT NULL");
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('coupons')) {
+                \Illuminate\Support\Facades\DB::statement("ALTER TABLE `coupons` MODIFY COLUMN `image` LONGTEXT NULL");
+            }
         } catch (\Throwable $e) {
-            // Silently ignore if not MySQL or already modified
+            // Silently ignore if already modified or not supported
         }
     }
 }

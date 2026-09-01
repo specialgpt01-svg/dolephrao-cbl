@@ -1723,6 +1723,10 @@
               userProfileData.profile_image = newImg;
               userProfileData.avatar = newImg;
               userProfileData.image = newImg;
+              try {
+                localStorage.setItem('userData', JSON.stringify(userProfileData));
+                localStorage.setItem('nfe_user', JSON.stringify(userProfileData));
+              } catch(e) {}
             }
             localStorage.setItem('userAvatar', newImg);
             const resolvedImg = typeof getValidImageUrl === 'function' ? getValidImageUrl(newImg) : newImg;
@@ -2009,17 +2013,38 @@
       const wasModalHidden = !modal || modal.style.display === 'none' || (window.getComputedStyle && window.getComputedStyle(modal).display === 'none');
 
       try {
-        if (wasModalHidden && modal) {
-          modal.style.visibility = 'hidden';
+        // Open preview modal cleanly so container queries and CSS calculate exact dimensions
+        if (modal) {
           modal.style.display = 'flex';
-          modal.style.opacity = '0';
-          modal.style.pointerEvents = 'none';
+          modal.style.visibility = 'visible';
+          modal.style.opacity = '1';
+          modal.style.pointerEvents = 'auto';
         }
-        if (loader) loader.style.display = 'none';
-        if (liveStage) liveStage.style.display = 'flex';
+        if (loader) loader.style.display = 'flex';
+        if (liveStage) liveStage.style.display = 'none';
 
         // Prepare stage with latest cert & template data
         const stageData = await prepareCertLiveStage(certId, sourceId, activityId);
+
+        // Update modal title & subtitle & actions
+        const titleEl = document.getElementById('cert-preview-title');
+        const subtitleEl = document.getElementById('cert-preview-subtitle');
+        const pngBtn = document.getElementById('cert-preview-png-btn');
+        const regenBtn = document.getElementById('cert-preview-regen-btn');
+
+        if (titleEl) titleEl.innerText = stageData.courseTitle || 'ใบประกาศนียบัตร';
+        if (subtitleEl) subtitleEl.innerText = `เลขที่อ้างอิง: ${stageData.referenceNo}`;
+        if (pngBtn) pngBtn.onclick = () => downloadCertificatePNG(certId, sourceId, activityId);
+        if (regenBtn) regenBtn.onclick = () => reGenerateCertificate(certId, sourceId, activityId, 'cert-preview-regen-btn');
+
+        // Show live stage
+        if (loader) loader.style.display = 'none';
+        if (liveStage) liveStage.style.display = 'flex';
+
+        // Wait for web fonts (Prompt, Sarabun) to be fully ready
+        if (document.fonts && document.fonts.ready) {
+          try { await document.fonts.ready; } catch(e) {}
+        }
 
         // Wait for background image and signature images to fully decode
         const bgImg = document.getElementById('cert-live-bg-img');
@@ -2035,8 +2060,8 @@
           await Promise.all(imgPromises);
         }
 
-        // Allow micro-layout calculation
-        await new Promise(r => setTimeout(r, 200));
+        // Allow micro-layout calculation and container query font calculation
+        await new Promise(r => setTimeout(r, 300));
 
         const card = document.getElementById('cert-live-card');
         if (!card) throw new Error('ไม่พบองค์ประกอบใบเกียรติบัตร');
@@ -2051,12 +2076,13 @@
         });
 
         const imageUri = canvas.toDataURL('image/png');
-        if (!imageUri || imageUri === 'data:,' || imageUri.length < 100) {
+        if (!imageUri || imageUri === 'data:,' || imageUri.length < 1000) {
           throw new Error('รูปภาพที่ได้มีขนาดว่างเปล่า กรุณาลองใหม่อีกครั้ง');
         }
 
         const safeTitle = (stageData.courseTitle || 'เกียรติบัตร').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
-        const safeName = (userProfileData?.name || userProfileData?.fullName || userProfileData?.full_name || 'ผู้เรียน').replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+        const userName = (userProfileData?.name || userProfileData?.fullName || userProfileData?.full_name || localStorage.getItem('userName') || 'ผู้เรียน').trim();
+        const safeName = userName.replace(/[^a-zA-Z0-9ก-๙]/g, '_');
         const safeCertNo = (stageData.referenceNo || 'CERT').replace(/[^a-zA-Z0-9_-]/g, '');
 
         const link = document.createElement('a');
@@ -2071,12 +2097,6 @@
         console.error('PNG download error:', err);
         showToast('❌ เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ: ' + (err.message || ''), 'error');
       } finally {
-        if (wasModalHidden && modal) {
-          modal.style.display = 'none';
-          modal.style.visibility = '';
-          modal.style.opacity = '';
-          modal.style.pointerEvents = '';
-        }
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = originalContent;

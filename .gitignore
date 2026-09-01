@@ -17,3 +17,4 @@ functions/.env.*
 _backup_today_*/
 ข้อมูลผู้เรียน/
 /public/storage
+/scratch/

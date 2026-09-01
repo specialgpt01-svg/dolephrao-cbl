@@ -1159,22 +1159,40 @@ class UserController extends Controller
         if (empty($dataUrl)) return '';
         $dataUrl = trim($dataUrl);
 
-        if (preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches)) {
-            $ext = strtolower($matches[1]);
-            if ($ext === 'jpeg') $ext = 'jpg';
-            if (!in_array($ext, ['jpg', 'png', 'gif', 'webp', 'svg'])) $ext = 'jpg';
+        // Check if already a clean relative URL or full HTTP URL (and not base64)
+        if ((str_starts_with($dataUrl, '/storage/') || str_starts_with($dataUrl, 'storage/') || str_starts_with($dataUrl, 'http://') || str_starts_with($dataUrl, 'https://')) && !str_contains($dataUrl, ';base64,')) {
+            return str_starts_with($dataUrl, 'storage/') ? '/' . $dataUrl : $dataUrl;
+        }
 
-            $data = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1));
-            if ($data && strlen($data) <= 15 * 1024 * 1024) {
-                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.' . $ext;
+        // Match data:image/*;base64,... with support for svg+xml, webp, jpeg, charset, etc.
+        if (preg_match('/^data:image\/([a-zA-Z0-9\+\-\.]+)(?:;[^;]+)*;base64,(.*)$/is', $dataUrl, $matches)) {
+            $rawExt = strtolower($matches[1]);
+            $base64Data = str_replace([' ', "\r", "\n"], ['+', '', ''], $matches[2]);
+
+            $ext = 'jpg';
+            if (str_contains($rawExt, 'png')) {
+                $ext = 'png';
+            } elseif (str_contains($rawExt, 'webp')) {
+                $ext = 'webp';
+            } elseif (str_contains($rawExt, 'gif')) {
+                $ext = 'gif';
+            } elseif (str_contains($rawExt, 'svg')) {
+                $ext = 'svg';
+            }
+
+            $data = base64_decode($base64Data);
+            if ($data !== false && strlen($data) > 0 && strlen($data) <= 25 * 1024 * 1024) {
+                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.' . $ext;
                 $dir = 'uploads/images/' . date('Y/m');
                 \Illuminate\Support\Facades\Storage::disk('public')->put($dir . '/' . $filename, $data);
                 return '/storage/' . $dir . '/' . $filename;
             }
-        } elseif (strlen($dataUrl) > 1000 && !str_starts_with($dataUrl, 'http') && !str_starts_with($dataUrl, '/storage/')) {
-            $data = base64_decode($dataUrl);
-            if ($data && strlen($data) <= 15 * 1024 * 1024) {
-                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.jpg';
+        } elseif (strlen($dataUrl) > 200 && !str_starts_with($dataUrl, 'http') && !str_starts_with($dataUrl, '/storage/')) {
+            // Raw base64 string without data: prefix
+            $cleanBase64 = str_replace([' ', "\r", "\n"], ['+', '', ''], $dataUrl);
+            $data = base64_decode($cleanBase64);
+            if ($data !== false && strlen($data) > 0 && strlen($data) <= 25 * 1024 * 1024) {
+                $filename = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.jpg';
                 $dir = 'uploads/images/' . date('Y/m');
                 \Illuminate\Support\Facades\Storage::disk('public')->put($dir . '/' . $filename, $data);
                 return '/storage/' . $dir . '/' . $filename;
