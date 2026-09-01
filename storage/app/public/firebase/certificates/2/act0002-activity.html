@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certificate - นายสมชาย ใจดี</title>
+<style>
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Sarabun","Noto Sans Thai",Arial,sans-serif;background:#f3f4f6;color:#1e293b}
+.sheet{width:297mm;height:210mm;margin:0 auto;background:#f3f4f6;display:flex;align-items:center;justify-content:center;padding:12mm}
+.frame{
+  width:100%;
+  height:100%;
+  border:2.4mm solid #0f7a59;
+  padding:12mm 15mm;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-evenly;
+  position:relative;
+  background:#fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.frame:before{content:"";position:absolute;inset:4mm;border:1px solid #d9a441;pointer-events:none}
+.org-title{font-size:26pt;font-weight:800;color:#0f7a59;letter-spacing:0.5px;margin-bottom:1.2em}
+.org-divider{width:50mm;height:0.8mm;background:#d9a441;margin:3mm auto 3mm}
+.sub{font-size:15pt;color:#475569;font-weight:500;margin-top:1mm}
+.name{font-size:34pt;font-weight:900;color:#0b5c46;border-bottom:1.5px solid #cbd5e1;display:inline-block;padding:0 14mm 2.5mm}
+.course-text{font-size:15pt;color:#475569;margin-bottom:1.2em}
+.source-highlight{font-weight:800;color:#0b5c46;font-size:22pt;line-height:1.2}
+.meta{font-size:12pt;color:#475569;background:#f8fafc;padding:1.8mm 6mm;border-radius:20px;display:inline-block;border:1px solid #e2e8f0}
+.sig-wrap{display:flex;flex-direction:column;align-items:center;gap:1px}
+.sig-img{max-height:25mm;max-width:60mm;object-fit:contain;margin-bottom:1mm}
+.director{font-weight:800;font-size:17px;color:#1e293b;margin-top:1.5mm}
+.director-title{font-size:15px;color:#475569;margin-top:2mm}
+.ref-no-fallback{position:absolute;bottom:8mm;left:8mm;font-size:9.5pt;color:#64748b;font-weight:normal}
+.actions{position:fixed;right:16px;top:16px}
+button{border:0;border-radius:8px;background:#0f7a59;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+@media print{body{background:#fff}.sheet{margin:0;padding:0;width:297mm;height:210mm}.actions{display:none}}
+</style>
+</head>
+<body>
+<div class="actions"><button onclick="window.print()">พิมพ์ใบเกียรติบัตร</button></div>
+<main class="sheet"><section class="frame">
+<div class="section-header">
+  <div class="org-title">ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว</div>
+  <div class="org-divider"></div>
+  <div class="sub">ขอมอบไว้เพื่อแสดงว่า</div>
+</div>
+<div class="section-recipient">
+  <div class="name">นายสมชาย ใจดี</div>
+</div>
+<div class="section-course">
+  <div class="course-text">ได้ผ่านการประเมินความรู้ตามเกณฑ์การเรียนรู้เรื่อง</div>
+  <div class="source-highlight">ทดลอง 2</div>
+</div>
+<div class="section-meta">
+  <div class="meta">คะแนนทดสอบ: <strong>10/10</strong> &nbsp;&bull;&nbsp; วันที่ออก: <strong>12 กรกฎาคม 2569</strong></div>
+</div>
+<div class="section-signature">
+  <div class="sig-wrap">
+    <img class="sig-img" src="/api?action=getFirebaseFile&amp;path=images%2Fglobalcertsignature%2F1%2F1780768517445-global_signature_1780768512325_-..png.png&amp;token=900c1c96e58803a5e6bb4ccc377c6131a4d2f1a292dcbed2" alt="ลายเซ็นต์">
+    <div class="director">นายประวิตร ประธรรมโย</div>
+    <div class="director-title">ผู้อำนวยการศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอพร้าว</div>
+  </div>
+</div>
+<div class="ref-no-fallback">เลขอ้างอิง: LOFT-25690712-8809</div>
+</section></main>
+</body>
+</html>

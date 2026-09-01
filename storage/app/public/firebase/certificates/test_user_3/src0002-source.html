@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certificate - กฤษดา รักดี</title>
+<style>
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Sarabun","Noto Sans Thai",Arial,sans-serif;background:#111827;color:#111}
+.actions{position:fixed;right:16px;top:16px;z-index:5}
+button{border:0;border-radius:8px;background:#0f7a59;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
+.sheet{width:297mm;height:210mm;margin:0 auto;position:relative;background:#fff;overflow:hidden}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.field{position:absolute;transform:translate(-50%,-50%);text-align:center;font-weight:800;line-height:1.16;color:#111827;text-shadow:0 1px 0 rgba(255,255,255,.35);white-space:normal;overflow-wrap:anywhere}
+.name{left:50%;top:40%;width:60%;font-size:40pt}
+.source-field{left:50%;top:52%;font-size:22pt;white-space:nowrap}
+.score{left:50%;top:64%;font-size:18pt;white-space:nowrap}
+.date{left:50%;top:74%;font-size:18pt;white-space:nowrap}
+.ref-no{left:10%;top:92%;font-size:12pt;white-space:nowrap;color:#6b7280;font-weight:normal}
+@media print{body{background:#fff}.sheet{margin:0}.actions{display:none}}
+</style>
+</head>
+<body>
+<div class="actions"><button onclick="window.print()">พิมพ์ใบเกียรติบัตร</button></div>
+<main class="sheet">
+<img class="bg" src="https://example.com/certificate-bg.jpg" alt="">
+<div class="field name">กฤษดา รักดี</div>
+<div class="field source-field">แหล่งเรียนรู้เกษตรทฤษฎีใหม่</div>
+<div class="field score">คะแนน 9/10</div>
+<div class="field date">06 มิถุนายน 2569</div>
+<div class="field ref-no">เลขอ้างอิง: LOFT-25690606-5952</div>
+<img class="signature-img" src="https://example.com/director-signature.png" style="position:absolute;left:75%;top:72.5%;width:18%;transform:translate(-50%,-50%);object-fit:contain;">
+<div class="field custom-field-0" style="left:50%;top:15%;font-size:18pt;color:#1e293b;white-space:nowrap;">กศน. อำเภอพร้าว จังหวัดเชียงใหม่</div>
+<div class="field custom-field-1" style="left:75%;top:80%;font-size:14pt;color:#475569;white-space:nowrap;">นายประยุทธ ประธรรมโย (ผู้ประเมิน)</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certificate - ณัฐพล ใฝ่ดี</title>
+<style>
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Sarabun","Noto Sans Thai",Arial,sans-serif;background:#111827;color:#111}
+.actions{position:fixed;right:16px;top:16px;z-index:5}
+button{border:0;border-radius:8px;background:#0f7a59;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
+.sheet{width:297mm;height:210mm;margin:0 auto;position:relative;background:#fff;overflow:hidden}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.field{position:absolute;transform:translate(-50%,-50%);text-align:center;font-weight:800;line-height:1.16;color:#111827;text-shadow:0 1px 0 rgba(255,255,255,.35);white-space:normal;overflow-wrap:anywhere}
+.name{left:45.5%;top:40.2%;width:65%;font-size:38pt}
+.source-field{left:45.5%;top:50%;font-size:24pt;white-space:nowrap}
+.score{left:45.5%;top:60.5%;font-size:18pt;white-space:nowrap}
+.date{left:45.5%;top:70.1%;font-size:18pt;white-space:nowrap}
+.ref-no{left:15%;top:90%;font-size:12pt;white-space:nowrap;color:#6b7280;font-weight:normal}
+@media print{body{background:#fff}.sheet{margin:0}.actions{display:none}}
+</style>
+</head>
+<body>
+<div class="actions"><button onclick="window.print()">พิมพ์ใบเกียรติบัตร</button></div>
+<main class="sheet">
+<img class="bg" src="https://example.com/certificate-bg.jpg" alt="">
+<div class="field name">ณัฐพล ใฝ่ดี</div>
+<div class="field source-field">แหล่งเรียนรู้เกษตรทฤษฎีใหม่</div>
+<div class="field score">คะแนน 8/10</div>
+<div class="field date">06 มิถุนายน 2569</div>
+<div class="field ref-no">เลขอ้างอิง: LOFT-25690606-3468</div>
+</main>
+</body>
+</html>

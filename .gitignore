@@ -12,7 +12,6 @@ functions/.env.*
 /firestore-export/
 /storage/backups/*.sql
 /storage/*.sql
-/storage/app/public/firebase/
 /storage/logs/*.log
 /bootstrap/cache/*.php
 _backup_today_*/
