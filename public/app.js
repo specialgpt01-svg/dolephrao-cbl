@@ -959,7 +959,8 @@
     let html = '';
     list.forEach(function(item) {
       const learnerId = item.username || item.phone || '';
-      const image = item.image || '';
+      const rawImg = item.image || item.profile_image || item.avatar || '';
+      const image = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : rawImg;
       const rawName = item.fullName || item.name || item.username || item.phone || '-';
       const displayName = (rawName === 'undefined' || !rawName) ? (item.username || item.phone || '-') : rawName;
       const activeClass = learnerId === activeAdminLearnerId ? ' active' : '';

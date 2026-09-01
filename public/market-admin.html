@@ -542,7 +542,8 @@
         const stock = p.stock != null ? p.stock : -1;
         const tambon = p.tambon || 'ไม่ระบุ';
         const district = p.district || 'อำเภอพร้าว';
-        const img = p.imageUrl || (Array.isArray(p.images) ? p.images[0] : '') || '';
+        const rawImg = p.imageUrl || p.image_url || p.image || (Array.isArray(p.images) ? p.images[0] : '') || '';
+        const img = typeof getValidImageUrl === 'function' ? getValidImageUrl(rawImg) : (rawImg || 'assets/loft-logo.svg');
 
         html += `
           <div class="custom-card p-4 sm:p-5 flex flex-col justify-between">
@@ -550,7 +551,7 @@
               <!-- Product Image Thumbnail -->
               <div class="w-full aspect-video rounded-2xl bg-slate-800 mb-3 overflow-hidden border border-slate-700 relative">
                 ${img 
-                  ? `<img src="${escapeHtml(img)}" class="w-full h-full object-cover">`
+                  ? `<img src="${escapeHtml(img)}" onerror="this.onerror=null; this.src='assets/loft-logo.svg'" class="w-full h-full object-cover">`
                   : `<div class="w-full h-full flex items-center justify-center text-slate-600 text-3xl"><i class="fas fa-image"></i></div>`
                 }
                 <div class="absolute top-2 right-2 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/80 text-amber-300 backdrop-blur-md border border-amber-500/30 shadow-md">
@@ -613,7 +614,7 @@
           document.getElementById('product-form-stock').value = item.stock != null ? item.stock : 10;
           document.getElementById('product-form-district').value = item.district || 'อำเภอพร้าว';
           document.getElementById('product-form-tambon').value = item.tambon || '';
-          document.getElementById('product-form-image').value = item.imageUrl || '';
+          document.getElementById('product-form-image').value = item.imageUrl || item.image_url || item.image || (Array.isArray(item.images) ? item.images[0] : '') || '';
           document.getElementById('product-form-contact').value = item.contact || '';
           document.getElementById('product-form-desc').value = item.description || '';
         }
